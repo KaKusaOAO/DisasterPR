@@ -30,6 +30,7 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddSingleton<Server>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,25 +44,23 @@ public class Startup
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.UseWebSockets();
+        app.UseRouting();
 
-        app.Use(async (context, next) =>
+        app.UseEndpoints(builder =>
         {
-            if (context.Request.Path == "/chat")
+            builder.Map("/gateway", async context =>
             {
-                if (context.WebSockets.IsWebSocketRequest)
-                {
-                    WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                    await Echo(context, webSocket);
-                }
-                else
+                if (!context.WebSockets.IsWebSocketRequest)
                 {
                     context.Response.StatusCode = 400;
+                    return;
                 }
-            }
-            else
-            {
-                await next();
-            }
+
+                var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                var connection = new ServerToPlayerConnection(webSocket);
+                var server = Server.Instance;
+                server.Players.Add(connection.Player);
+            });
         });
     }
 

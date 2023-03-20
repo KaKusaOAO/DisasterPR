@@ -8,11 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="KaLib" Version="1.0.34" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="IO" />
+      <ProjectReference Include="..\DisasterPR\DisasterPR.csproj" />
     </ItemGroup>
 
 </Project>
