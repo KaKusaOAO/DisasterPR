@@ -15,8 +15,11 @@ public class ConnectionProtocol
         )
     );
 
-    public static readonly ConnectionProtocol Login = new(PacketState.Play, Protocol()
-        .AddFlow(PacketFlow.Clientbound, new PacketSet())
+    public static readonly ConnectionProtocol Login = new(PacketState.Login, Protocol()
+        .AddFlow(PacketFlow.Clientbound, new PacketSet()
+            .AddPacket<ClientboundDisconnectPacket>()
+            .AddPacket<ClientboundAckPacket>()
+        )
         .AddFlow(PacketFlow.Serverbound, new PacketSet()
             .AddPacket<ServerboundLoginPacket>()
         )
@@ -24,12 +27,15 @@ public class ConnectionProtocol
     
     public static readonly ConnectionProtocol Play = new(PacketState.Play, Protocol()
         .AddFlow(PacketFlow.Clientbound, new PacketSet()
+            .AddPacket<ClientboundHeartbeatPacket>()
             .AddPacket<ClientboundChatPacket>()
             .AddPacket<ClientboundSessionStartPacket>()
             .AddPacket<ClientboundAddPlayerPacket>()
             .AddPacket<ClientboundRemovePlayerPacket>()
+            .AddPacket<ClientboundJoinedRoomPacket>()
         )
         .AddFlow(PacketFlow.Serverbound, new PacketSet()
+            .AddPacket<ServerboundHeartbeatPacket>()
             .AddPacket<ServerboundChatPacket>()
             .AddPacket<ServerboundHostRoomPacket>()
             .AddPacket<ServerboundJoinRoomPacket>()
@@ -77,9 +83,19 @@ public class ConnectionProtocol
 
     public Type GetPacketTypeById(PacketFlow flow, int id) => _flows[flow].GetPacketTypeById(id);
 
+    private PacketSet GetPacketSetFromFlow(PacketFlow flow)
+    {
+        if (!_flows.ContainsKey(flow))
+        {
+            throw new KeyNotFoundException($"{flow} is not possible in state {PacketState}");
+        }
+
+        return _flows[flow];
+    }
+    
     public IPacket CreatePacket(PacketFlow flow, int id, MemoryStream stream)
-        => _flows[flow].CreatePacket(id, stream);
+        => GetPacketSetFromFlow(flow).CreatePacket(id, stream);
 
     public T CreatePacket<T>(PacketFlow flow, int id, MemoryStream stream) where T : IPacket
-        => _flows[flow].CreatePacket<T>(id, stream);
+        => GetPacketSetFromFlow(flow).CreatePacket<T>(id, stream);
 }

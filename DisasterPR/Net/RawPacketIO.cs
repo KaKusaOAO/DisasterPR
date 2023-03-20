@@ -1,14 +1,16 @@
 using System.Net.WebSockets;
 using DisasterPR.Extensions;
 using DisasterPR.Net.Packets;
+using KaLib.Utils;
 
 namespace DisasterPR.Net;
 
 public class RawPacketIO
 {
     public WebSocket WebSocket { get; }
-
     private MemoryStream _buffer = new();
+    private readonly SemaphoreSlim _writeLock = new(1, 1);
+    private readonly SemaphoreSlim _readLock = new(1, 1);
 
     public RawPacketIO(WebSocket webSocket)
     {
@@ -17,37 +19,47 @@ public class RawPacketIO
 
     public async Task<List<MemoryStream>> ReadRawPacketsAsync(CancellationToken token)
     {
-        var buffer = new byte[4096];
-        var result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
-        _buffer.Write(buffer, 0, result.Count);
-
-        var list = new List<MemoryStream>();
-        while (CanReadPacket())
+        try
         {
-            list.Add(ReadRawPacket());
+            await _readLock.WaitAsync(token);
+            var buffer = new byte[4096];
+            var result = await WebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), token);
+            _buffer.Write(buffer, 0, result.Count);
+            
+            if (WebSocket.CloseStatus.HasValue)
+            {
+                Logger.Info("CloseStatus value presents");
+                await WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", token);
+            }
+
+            var list = new List<MemoryStream>();
+            while (CanReadPacket())
+            {
+                list.Add(ReadRawPacket());
+            }
+
+            return list;
         }
-
-        return list;
-    }
-
-    public async Task<List<IPacket>> ReadPacketsAsync(ConnectionProtocol protocol, PacketFlow flow, CancellationToken token)
-    {
-        var streams = await ReadRawPacketsAsync(token);
-        return streams.Select(stream =>
+        finally
         {
-            var id = stream.ReadVarInt();
-            return protocol.CreatePacket(flow, id, stream);
-        }).ToList();
+            _readLock.Release();
+        }
     }
 
     public async Task SendRawPacketAsync(MemoryStream stream, CancellationToken token)
     {
-        var buffer = stream.GetBuffer();
-        var buf = new MemoryStream();
-        buf.WriteVarInt(buffer.Length);
-        buf.Write(buffer, 0, buffer.Length);
-        
-        await WebSocket.SendAsync(new ArraySegment<byte>(buf.GetBuffer()), WebSocketMessageType.Binary, false, token);
+        await Common.AcquireSemaphoreAsync(_writeLock, async () =>
+        {
+            var len = (int) stream.Position;
+            var buffer = stream.GetBuffer();
+            var buf = new MemoryStream();
+            buf.WriteVarInt(len);
+            buf.Write(buffer, 0, len);
+
+            if (WebSocket.CloseStatus.HasValue) return;
+            await WebSocket.SendAsync(new ArraySegment<byte>(buf.GetBuffer()), WebSocketMessageType.Binary, false,
+                token);
+        });
     }
 
     public async Task SendPacketAsync(ConnectionProtocol protocol, PacketFlow flow, IPacket packet, CancellationToken token)
@@ -62,23 +74,35 @@ public class RawPacketIO
 
     private bool CanReadPacket()
     {
-        var pos = _buffer.Position;
+        var total = _buffer.Position;
+        if (total == 0) return false;
+        _buffer.Position = 0;
+        
         var len = _buffer.ReadVarInt();
-        var result = _buffer.Length - _buffer.Position >= len;
-
-        _buffer.Position = pos;
+        if (_buffer.Position >= total) return false;
+        
+        var result = total >= len;
+        _buffer.Position = total;
         return result;
     }
 
     public MemoryStream ReadRawPacket()
     {
+        // Reset the cursor to 0
+        _buffer.Position = 0;
+        
+        // Read the packet length
         var len = _buffer.ReadVarInt();
 
+        // Read the packet content
         var buffer = new byte[len];
         _buffer.Read(buffer, 0, len);
 
+        // Write remaining to a new stream
         var newBuffer = new MemoryStream();
         _buffer.CopyTo(newBuffer);
+        
+        // Set our buffer to the new buffer
         newBuffer.Position = 0;
         _buffer = newBuffer;
         

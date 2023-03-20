@@ -4,5 +4,7 @@ public enum RoomDisconnectReason
 {
     Custom,
     NotFound,
-    RoomFull
+    RoomFull,
+    NoRoomLeft,
+    Kicked
 }

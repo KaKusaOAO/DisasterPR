@@ -17,7 +17,8 @@ public class ServerHandshakePacketHandler : IServerHandshakePacketHandler
     public async Task HandleHelloAsync(ServerboundHelloPacket packet)
     {
         await Task.Yield();
-        Logger.Info($"A client is connecting: {Connection.WebSocket}");
+        Logger.Verbose($"The client is using protocol version {packet.Version}");
+        Connection.ProtocolVersion = packet.Version;
         Connection.CurrentState = PacketState.Login;
     }
 }

@@ -5,5 +5,6 @@ public enum PlayerKickReason
     Custom,
     ClientTooOld,
     ServerTooOld,
-    InvalidName
+    InvalidName,
+    Disconnected
 }

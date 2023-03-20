@@ -1,4 +1,5 @@
 using DisasterPR.Net.Packets.Play;
+using KaLib.Utils;
 
 namespace DisasterPR.Server.Net.Packets.Play;
 
@@ -18,9 +19,48 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         throw new NotImplementedException();
     }
 
-    public Task HandleHostRoomAsync(ServerboundHostRoomPacket packet)
+    public async Task HandleHostRoomAsync(ServerboundHostRoomPacket packet)
     {
-        throw new NotImplementedException();
+        var server = Server.Instance;
+        var sessions = server.Sessions;
+
+        try
+        {
+            var roomId = ServerSession.CreateNewRoomId();
+            Logger.Verbose($"Created room #{roomId}");
+            
+            var session = new ServerSession
+            {
+                RoomId = roomId
+            };
+            session.Emptied += () =>
+            {
+                sessions.Remove(roomId);
+                Logger.Verbose($"Removed room #{roomId}");
+            };
+            
+            sessions.Add(roomId, session);
+            await JoinSessionAsync(session);
+        }
+        catch (IndexOutOfRangeException)
+        {
+            await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.NoRoomLeft);
+        }
+    }
+
+    private async Task JoinSessionAsync(ServerSession session)
+    {
+        await session.AcquireAsync(async () =>
+        {
+            if (session.Players.Count >= Constants.SessionMaxPlayers)
+            {
+                await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.RoomFull);
+                return;
+            }
+
+            await Connection.SendPacketAsync(new ClientboundJoinedRoomPacket(session));
+            await session.PlayerJoinAsync(Player);
+        });
     }
 
     public async Task HandleJoinRoomAsync(ServerboundJoinRoomPacket packet)
@@ -35,15 +75,8 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         }
 
         var session = sessions[id];
-        await session.AcquireAsync(async () =>
-        {
-            if (session.Players.Count >= Constants.SessionMaxPlayers)
-            {
-                await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.RoomFull);
-                return;
-            }
-
-            session.JoinPlayer(Player);
-        });
+        await JoinSessionAsync(session);
     }
+
+    public Task HandleHeartbeatAsync(ServerboundHeartbeatPacket packet) => Task.CompletedTask;
 }

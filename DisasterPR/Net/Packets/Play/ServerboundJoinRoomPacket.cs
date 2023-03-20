@@ -6,6 +6,11 @@ public class ServerboundJoinRoomPacket : IPacket<IServerPlayPacketHandler>
 {
     public int RoomId { get; set; }
 
+    public ServerboundJoinRoomPacket(int roomId)
+    {
+        RoomId = roomId;
+    }
+
     public ServerboundJoinRoomPacket(MemoryStream stream)
     {
         RoomId = stream.ReadVarInt();

@@ -13,7 +13,9 @@
 // the License.
 
 using System.Net.WebSockets;
+using DisasterPR.Server.Controllers;
 using Google.Apis.Auth.OAuth2;
+using KaLib.Utils;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace DisasterPR.Server;
@@ -30,6 +32,7 @@ public class Startup
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddControllers();
         services.AddSingleton<Server>();
     }
 
@@ -45,23 +48,7 @@ public class Startup
         app.UseStaticFiles();
         app.UseWebSockets();
         app.UseRouting();
-
-        app.UseEndpoints(builder =>
-        {
-            builder.Map("/gateway", async context =>
-            {
-                if (!context.WebSockets.IsWebSocketRequest)
-                {
-                    context.Response.StatusCode = 400;
-                    return;
-                }
-
-                var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                var connection = new ServerToPlayerConnection(webSocket);
-                var server = Server.Instance;
-                server.Players.Add(connection.Player);
-            });
-        });
+        app.UseEndpoints(builder => builder.MapControllers());
     }
 
     public static string GetProjectId()

@@ -1,4 +1,7 @@
-﻿using DisasterPR.Client.Events;
+﻿using DisasterPR.Events;
+using DisasterPR.Net.Packets;
+using DisasterPR.Net.Packets.Login;
+using KaLib.Utils;
 
 namespace DisasterPR.Client;
 
@@ -8,6 +11,7 @@ public class Game
     public static Game Instance => _instance ??= new Game();
 
     public event DisconnectedEventDelegate Disconnected;
+    public event PlayerChatEventDelegate PlayerChat;
 
     public LocalPlayer? Player { get; set; }
 
@@ -16,14 +20,30 @@ public class Game
         Player = new LocalPlayer(options.PlayerName);
     }
 
-    public async Task LoginAsync()
+    public async Task LoginPlayerAsync()
     {
         if (Player == null) return;
+        
         await Player.LoginAsync();
+        Logger.Verbose($"Player logged in as {Player.Name} ({Player.Id})");
     }
 
-    internal void InternalOnDisconnected(object sender, DisconnectedEventArgs args) => 
-        Disconnected?.Invoke(sender, args);
+    public async Task HostRoomAsync()
+    {
+        if (Player == null) return;
+        await Player.HostRoomAsync();
+    }
+    
+    public async Task JoinRoomAsync(int roomId)
+    {
+        if (Player == null) return;
+        await Player.JoinRoomAsync(roomId);
+        Logger.Verbose($"Joined room: #{Player.Session?.RoomId}");
+    }
+
+    internal void InternalOnDisconnected(DisconnectedEventArgs args) => Disconnected?.Invoke(args);
+
+    internal void InternalOnPlayerChat(PlayerChatEventArgs args) => PlayerChat?.Invoke(args);
 }
 
 public class GameOptions

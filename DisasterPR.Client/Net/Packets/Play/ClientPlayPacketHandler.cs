@@ -4,11 +4,12 @@ namespace DisasterPR.Client.Net.Packets.Play;
 
 public class ClientPlayPacketHandler : IClientPlayPacketHandler
 {
-    private PlayerToServerConnection _connection;
-    
+    public PlayerToServerConnection Connection { get; }
+    public LocalPlayer Player => Connection.Player;
+
     public ClientPlayPacketHandler(PlayerToServerConnection connection)
     {
-        _connection = connection;
+        Connection = connection;
     }
     
     public Task HandleAddPlayerAsync(ClientboundAddPlayerPacket packet)
@@ -33,6 +34,24 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
 
     public Task HandleRoomDisconnectedAsync(ClientboundRoomDisconnectedPacket packet)
     {
-        throw new NotImplementedException();
+        Player.Session = null;
+        return Task.CompletedTask;
+    }
+
+    public Task HandleHeartbeatAsync(ClientboundHeartbeatPacket packet) => Task.CompletedTask;
+    
+    public Task HandleJoinedRoomAsync(ClientboundJoinedRoomPacket packet)
+    {
+        var session = new LocalSession();
+        session.Players.AddRange(packet.Players.Select(p => new RemotePlayer(p)
+        {
+            Session = session
+        }));
+        
+        session.Players.Add(Player);
+        session.RoomId = packet.RoomId;
+        
+        Player.Session = session;
+        return Task.CompletedTask;
     }
 }

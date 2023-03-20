@@ -10,10 +10,12 @@ namespace DisasterPR.Server;
 public class ServerToPlayerConnection : AbstractPlayerConnection
 {
     public ServerPlayer Player { get; }
+    public ConnectionInfo ConnectionInfo { get; }
     public int ProtocolVersion { get; set; }
 
-    public ServerToPlayerConnection(WebSocket webSocket) : base(webSocket, PacketFlow.Serverbound)
+    public ServerToPlayerConnection(WebSocket webSocket, ConnectionInfo connection) : base(webSocket, PacketFlow.Serverbound)
     {
+        ConnectionInfo = connection;
         Player = new ServerPlayer(this);
         Handlers.Add(PacketState.Handshake, new ServerHandshakePacketHandler(this));
         Handlers.Add(PacketState.Login, new ServerLoginPacketHandler(this));

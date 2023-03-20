@@ -28,9 +28,12 @@ public class PlayerToServerConnection : AbstractPlayerConnection
         }
         
         var uri = Constants.ServerUri;
+        Logger.Info($"Connecting to server {uri}...");
         await ClientWebSocket.ConnectAsync(uri, token);
         IsConnected = true;
+
+        _ = RunEventLoopAsync();
     }
 
-    public async Task ConnectAsync() => await ConnectAsync(new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token);
+    public async Task ConnectAsync() => await ConnectAsync(new CancellationToken());
 }

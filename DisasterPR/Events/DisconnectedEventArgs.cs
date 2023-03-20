@@ -1,6 +1,6 @@
-namespace DisasterPR.Client.Events;
+namespace DisasterPR.Events;
 
-public delegate void DisconnectedEventDelegate(object sender, DisconnectedEventArgs args);
+public delegate Task DisconnectedEventDelegate(DisconnectedEventArgs args);
 
 public class DisconnectedEventArgs : EventArgs
 {

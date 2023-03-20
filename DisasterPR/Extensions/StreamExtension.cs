@@ -1,8 +1,9 @@
 using System.Text;
+using DisasterPR.Net.Packets;
 
 namespace DisasterPR.Extensions;
 
-internal static class StreamExtension
+public static class StreamExtension
 {
     private const byte SegmentBits = 0x7f;
     private const byte ContinueBit = 0x80;
@@ -15,7 +16,10 @@ internal static class StreamExtension
         
         while (true)
         {
-            b = (byte) stream.ReadByte();
+            var read = stream.ReadByte();
+            if (read == -1) throw new EndOfStreamException();
+
+            b = (byte) read;
             value |= (b & SegmentBits) << pos;
             if ((b & ContinueBit) == 0) break;
 
@@ -37,7 +41,10 @@ internal static class StreamExtension
         
         while (true)
         {
-            b = (byte) stream.ReadByte();
+            var read = stream.ReadByte();
+            if (read == -1) throw new EndOfStreamException();
+
+            b = (byte) read;
             value |= (long) (b & SegmentBits) << pos;
             if ((b & ContinueBit) == 0) break;
 
@@ -110,4 +117,50 @@ internal static class StreamExtension
     }
 
     public static void WriteUtf8String(this Stream stream, string str) => stream.WriteString(str, Encoding.UTF8);
+
+    public static Guid ReadGuid(this Stream stream)
+    {
+        var arr = stream.ReadByteArray();
+        return new Guid(arr);
+    }
+
+    public static void WriteGuid(this Stream stream, Guid guid)
+    {
+        var arr = guid.ToByteArray();
+        stream.WriteByteArray(arr);
+    }
+
+    public static List<T> ReadList<T>(this Stream stream, Func<Stream, T> reader)
+    {
+        var size = stream.ReadVarInt();
+        var result = new List<T>();
+        for (var i = 0; i < size; i++)
+        {
+            result.Add(reader(stream));
+        }
+
+        return result;
+    }
+    
+    public static void WriteList<T>(this Stream stream, List<T> list, Action<Stream, T> writer)
+    {
+        stream.WriteVarInt(list.Count);
+        foreach (var item in list)
+        {
+            writer(stream, item);
+        }
+    }
+
+    public static AddPlayerEntry ReadAddPlayerEntry(this Stream stream) =>
+        new()
+        {
+            Guid = stream.ReadGuid(),
+            Name = stream.ReadUtf8String()
+        };
+
+    public static void WriteAddPlayerEntry(this Stream stream, AddPlayerEntry entry)
+    {
+        stream.WriteGuid(entry.Guid);
+        stream.WriteUtf8String(entry.Name);
+    }
 }

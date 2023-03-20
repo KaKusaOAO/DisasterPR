@@ -1,12 +1,15 @@
+using DisasterPR.Net.Packets;
+
 namespace DisasterPR.Client;
 
 public class RemotePlayer : AbstractClientPlayer
 {
-    public string Name { get; }
-    public ISession? Session { get; }
-    public int Score { get; set; }
+    public RemotePlayer(Guid guid, string name) : base(name)
+    {
+        Id = guid;
+    }
 
-    public RemotePlayer(string name) : base(name)
+    public RemotePlayer(AddPlayerEntry entry) : this(entry.Guid, entry.Name)
     {
         
     }
