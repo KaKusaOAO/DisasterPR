@@ -15,4 +15,9 @@ public abstract class Session<T> : ISession<T> where T : IPlayer
     private SemaphoreSlim _lock = new(1, 1);
 
     public Task AcquireAsync(Func<Task> func) => Common.AcquireSemaphoreAsync(_lock, func);
+
+    protected Session()
+    {
+        Options.EnabledCategories.Add(CardPack.Categories.First());
+    }
 }

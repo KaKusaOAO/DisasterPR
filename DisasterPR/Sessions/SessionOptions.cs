@@ -1,3 +1,4 @@
+using DisasterPR.Cards;
 using DisasterPR.Extensions;
 
 namespace DisasterPR.Sessions;
@@ -13,6 +14,8 @@ public class SessionOptions
     /// The countdown time set.
     /// </summary>
     public CountdownTimeSet CountdownTimeSet { get; set; } = CountdownTimeSet.Default;
+
+    public List<CardCategory> EnabledCategories { get; set; } = new();
 
     public void Serialize(Stream stream)
     {

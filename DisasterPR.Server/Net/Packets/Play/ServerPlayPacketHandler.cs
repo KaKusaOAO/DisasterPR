@@ -199,4 +199,20 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
 
         await state.RevealChosenWordEntryAsync(packet.Guid);
     }
+
+    public async Task HandleUpdateSessionOptionsPacket(ServerboundUpdateSessionOptionsPacket packet)
+    {
+        var session = Player.Session;
+        if (session == null) return;
+        await Task.Yield();
+        
+        var options = session.Options;
+        options.WinScore = packet.WinScore;
+        options.CountdownTimeSet = packet.CountdownTimeSet;
+        options.EnabledCategories = packet.EnabledCategories
+            .Select(g => session.CardPack.Categories.First(c => c.Guid == g)).ToList();
+
+        await Task.WhenAll(session.Players.Select(p =>
+            p.Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(session))));
+    }
 }

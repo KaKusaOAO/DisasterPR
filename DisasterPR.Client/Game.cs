@@ -11,13 +11,18 @@ public class Game
     public static Game Instance => _instance ??= new Game();
 
     public event DisconnectedEventDelegate Disconnected;
-    public event PlayerChatEventDelegate PlayerChat;
+    public event PlayerChatEventDelegate ReceivedPlayerChat;
 
     public LocalPlayer? Player { get; set; }
 
     public void Init(GameOptions options)
     {
         Player = new LocalPlayer(options.PlayerName);
+        Player.Connection.Disconnected += async e =>
+        {
+            await Task.Yield();
+            Disconnected?.Invoke(e);
+        };
     }
 
     public async Task LoginPlayerAsync()
@@ -43,7 +48,7 @@ public class Game
 
     internal void InternalOnDisconnected(DisconnectedEventArgs args) => Disconnected?.Invoke(args);
 
-    internal void InternalOnPlayerChat(PlayerChatEventArgs args) => PlayerChat?.Invoke(args);
+    internal void InternalOnPlayerChat(PlayerChatEventArgs args) => ReceivedPlayerChat?.Invoke(args);
 }
 
 public class GameOptions

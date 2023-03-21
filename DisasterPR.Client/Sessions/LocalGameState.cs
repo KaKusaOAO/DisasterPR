@@ -24,6 +24,9 @@ public class LocalGameState : IGameState
     public List<LocalChosenWordEntry> CurrentChosenWords { get; } = new();
     public LocalChosenWordEntry? FinalChosenWord { get; set; }
 
+    public event Action StateTransitioned;
+    public event Action CurrentPlayerUpdated;
+
     List<IChosenWordEntry> IGameState.CurrentChosenWords =>
         CurrentChosenWords.Select(n => (IChosenWordEntry) n).ToList();
     
@@ -95,6 +98,8 @@ public class LocalGameState : IGameState
         {
             WinnerPlayer = null;
         }
+        
+        StateTransitioned?.Invoke();
     }
     
     public async Task RevealChosenWordEntryAsync(Guid guid)
@@ -118,4 +123,6 @@ public class LocalGameState : IGameState
         if (CurrentState != StateOfGame.ChoosingFinal) return;
         await player!.Connection.SendPacketAsync(new ServerboundChooseFinalPacket(index));
     }
+
+    internal void OnCurrentPlayerUpdated() => CurrentPlayerUpdated?.Invoke();
 }

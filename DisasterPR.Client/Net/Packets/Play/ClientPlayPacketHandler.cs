@@ -1,4 +1,5 @@
 using DisasterPR.Client.Sessions;
+using DisasterPR.Events;
 using DisasterPR.Net.Packets.Play;
 using KaLib.Utils;
 using KaLib.Utils.Extensions;
@@ -22,8 +23,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         await Task.Yield();
 
         var player = new RemotePlayer(packet.PlayerId, packet.PlayerName);
-        Logger.Info($"Player {player.Name} ({player.Id}) has joined this session.");
-        session.Players.Add(player);
+        await session.PlayerJoinAsync(player);
     }
 
     public async Task HandleRemovePlayerAsync(ClientboundRemovePlayerPacket packet)
@@ -35,8 +35,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         var removal = session.Players.Where(p => p.Id == packet.PlayerId).ToList();
         foreach (var player in removal)
         {
-            Logger.Info($"Player {player.Name} ({player.Id}) has left this session.");
-            session.Players.Remove(player);
+            await session.PlayerLeaveAsync(player);
         }
     }
 
@@ -54,12 +53,18 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         if (session == null) return;
         await Task.Yield();
 
-        session.LocalGameState.CurrentPlayerIndex = packet.Index;
+        var state = session.LocalGameState;
+        state.CurrentPlayerIndex = packet.Index;
+        state.OnCurrentPlayerUpdated();
     }
 
-    public Task HandleChatAsync(ClientboundChatPacket packet)
+    public async Task HandleChatAsync(ClientboundChatPacket packet)
     {
-        throw new NotImplementedException();
+        Game.Instance.InternalOnPlayerChat(new PlayerChatEventArgs
+        {
+            PlayerName = packet.Player,
+            Content = packet.Content
+        });  
     }
 
     public Task HandleRoomDisconnectedAsync(ClientboundRoomDisconnectedPacket packet)
@@ -148,7 +153,11 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         if (session == null) return;
         await Task.Yield();
 
-        session.Options = packet.Options;
+        var options = session.Options;
+        options.WinScore = packet.WinScore;
+        options.CountdownTimeSet = packet.CountdownTimeSet;
+        options.EnabledCategories = packet.EnabledCategories
+            .Select(g => session.CardPack.Categories.First(c => c.Guid == g)).ToList();
     }
 
     public async Task HandleRevealChosenWordEntryAsync(ClientboundRevealChosenWordEntryPacket packet)
