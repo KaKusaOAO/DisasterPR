@@ -225,4 +225,17 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         await Player.Session!.PlayerLeaveAsync(Player);
         Player.Session = null;
     }
+
+    public async Task HandleRequestKickPlayerAsync(ServerboundRequestKickPlayerPacket packet)
+    {
+        var session = Player.Session;
+        if (session == null) return;
+        await Task.Yield();
+
+        if (Player != session.HostPlayer) return;
+        foreach (var p in session.Players.Where(p => p.Id == packet.PlayerId))
+        {
+            await session.KickPlayerAsync(p);
+        }
+    }
 }

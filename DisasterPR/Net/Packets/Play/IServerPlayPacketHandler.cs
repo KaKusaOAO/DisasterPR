@@ -13,4 +13,5 @@ public interface IServerPlayPacketHandler : IServerPacketHandler
     public Task HandleRevealChosenWordEntryAsync(ServerboundRevealChosenWordEntryPacket packet);
     public Task HandleUpdateSessionOptionsAsync(ServerboundUpdateSessionOptionsPacket packet);
     public Task HandleLeaveRoomAsync(ServerboundLeaveRoomPacket packet);
+    public Task HandleRequestKickPlayerAsync(ServerboundRequestKickPlayerPacket packet);
 }

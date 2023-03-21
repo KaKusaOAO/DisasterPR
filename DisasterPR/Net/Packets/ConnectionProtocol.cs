@@ -58,6 +58,7 @@ public class ConnectionProtocol
             .AddPacket(s => new ServerboundChooseFinalPacket(s))
             .AddPacket(s => new ServerboundRevealChosenWordEntryPacket(s))
             .AddPacket(s => new ServerboundUpdateSessionOptionsPacket(s))
+            .AddPacket(s => new ServerboundRequestKickPlayerPacket(s))
         )
     );
     
