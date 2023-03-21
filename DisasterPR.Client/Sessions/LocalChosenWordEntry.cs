@@ -16,7 +16,7 @@ public class LocalChosenWordEntry : IChosenWordEntry
     private List<WordCard> _words;
 
     public List<WordCard> Words => !_words.Any()
-        ? Enumerable.Repeat(new EmptyWordCard(), GameState.CurrentTopic.AnswerCount).ToList<WordCard>()
+        ? Enumerable.Repeat(EmptyWordCard.Instance, GameState.CurrentTopic.AnswerCount).ToList<WordCard>()
         : _words;
 
     public LocalChosenWordEntry(Guid id, LocalGameState state, AbstractClientPlayer player, List<WordCard> words)

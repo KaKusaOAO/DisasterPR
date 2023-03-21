@@ -15,7 +15,7 @@ public class ServerChosenWordEntry : IChosenWordEntry
     private List<WordCard> _words;
 
     public List<WordCard> Words => !_words.Any()
-        ? Enumerable.Repeat(new EmptyWordCard(), GameState.CurrentTopic.AnswerCount).ToList<WordCard>()
+        ? Enumerable.Repeat(EmptyWordCard.Instance, GameState.CurrentTopic.AnswerCount).ToList<WordCard>()
         : _words;
 
     public ServerChosenWordEntry(ServerGameState state, ServerPlayer player, List<WordCard> words)
