@@ -4,8 +4,16 @@ public class PacketSet
 {
     private Dictionary<int, Type> _packetMap = new();
     private Dictionary<Type, int> _packetIdMap = new();
+    private Dictionary<int, Func<MemoryStream, IPacket>> _deserializers = new();
 
     public PacketSet AddPacket<T>() where T : IPacket => AddPacket(typeof(T));
+
+    public PacketSet AddPacket<T>(Func<MemoryStream, T> deserializer) where T : IPacket
+    {
+        AddPacket<T>();
+        _deserializers.Add(_packetIdMap[typeof(T)], s => deserializer(s));
+        return this;
+    }
 
     public PacketSet AddPacket(Type type)
     {
@@ -32,6 +40,11 @@ public class PacketSet
     
     public Func<MemoryStream, IPacket> GetDeserializerById(int id)
     {
+        if (_deserializers.ContainsKey(id))
+        {
+            return _deserializers[id];
+        }
+        
         var type = GetPacketTypeById(id);
         var ctor = type.GetConstructor(new[] { typeof(MemoryStream) });
         if (ctor == null)
