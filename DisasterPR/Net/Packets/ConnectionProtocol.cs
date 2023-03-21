@@ -27,6 +27,7 @@ public class ConnectionProtocol
     
     public static readonly ConnectionProtocol Play = new(PacketState.Play, Protocol()
         .AddFlow(PacketFlow.Clientbound, new PacketSet()
+            .AddPacket<ClientboundRoomDisconnectedPacket>()
             .AddPacket<ClientboundHeartbeatPacket>()
             .AddPacket<ClientboundChatPacket>()
             .AddPacket<ClientboundAddPlayerPacket>()
