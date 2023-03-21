@@ -1,8 +1,8 @@
 namespace DisasterPR.Client;
 
-public static class Bootstrap
+public static class BootstrapClient
 {
-    static Bootstrap()
+    static BootstrapClient()
     {
         _ = Game.Instance;
     }

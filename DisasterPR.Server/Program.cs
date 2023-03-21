@@ -11,7 +11,7 @@ public static class Program
         Logger.Level = LogLevel.Verbose;
         Logger.Logged += Logger.LogToEmulatedTerminalAsync;
         Logger.RunThreaded();
-        
+
         BuildWebHost(args).Build().Run();
     }
 

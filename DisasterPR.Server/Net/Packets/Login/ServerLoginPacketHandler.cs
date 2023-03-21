@@ -35,6 +35,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
         }
 
         Player.Name = packet.PlayerName;
+        Logger.Verbose($"Player {Player.Name} ID is {Player.Id}");
         await Connection.SendPacketAsync(new ClientboundAckPacket(Player.Id));
         Connection.CurrentState = PacketState.Play;
     }

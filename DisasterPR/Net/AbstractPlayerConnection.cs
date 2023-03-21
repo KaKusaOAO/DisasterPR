@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.WebSockets;
 using DisasterPR.Events;
@@ -110,6 +111,9 @@ public abstract class AbstractPlayerConnection
                     var id = stream.ReadVarInt();
                     var protocol = ConnectionProtocol.OfState(CurrentState);
                     var packet = protocol.CreatePacket(ReceivingFlow, id, stream);
+
+                    var handler = Handlers[CurrentState];
+                    await packet.HandleAsync(handler);
                     
                     await _receivedPacketEvent.InvokeAsync(async e =>
                     {
@@ -118,12 +122,6 @@ public abstract class AbstractPlayerConnection
                             Packet = packet
                         });
                     });
-                    
-                    Logger.Verbose(TranslateText.Of("Received packet: %s")
-                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
-
-                    var handler = Handlers[CurrentState];
-                    await packet.HandleAsync(handler);
                 }
             }
             catch (Exception ex)
@@ -155,8 +153,6 @@ public abstract class AbstractPlayerConnection
         
         var protocol = ConnectionProtocol.OfState(CurrentState);
         await RawPacketIO.SendPacketAsync(protocol, ReceivingFlow.Opposite(), packet, token);
-        Logger.Verbose(TranslateText.Of("Sent packet: %s")
-            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
     }
 
     public async Task SendPacketAsync(IPacket packet) => await SendPacketAsync(packet, CancellationToken.None);

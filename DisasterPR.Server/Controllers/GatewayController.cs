@@ -16,7 +16,7 @@ public class GatewayController : ControllerBase
         }
 
         var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        var server = context.RequestServices.GetService<Server>()!;
+        var server = context.RequestServices.GetService<GameServer>()!;
         var info = context.Connection;
         var connection = new ServerToPlayerConnection(webSocket, info);
         server.Players.Add(connection.Player);

@@ -1,14 +1,16 @@
+using DisasterPR.Server.Sessions;
+
 namespace DisasterPR.Server;
 
-public class Server
+public class GameServer
 {
-    private static Server _instance;
+    private static GameServer _instance;
 
-    public static Server Instance => _instance;
+    public static GameServer Instance => _instance;
 
     public Random Random { get; } = new Random();
 
-    public Server()
+    public GameServer()
     {
         if (_instance != null)
         {
@@ -16,6 +18,8 @@ public class Server
         }
         
         _instance = this;
+        
+        _ = Bootstrap.BootAsync();
     }
     
     public List<ServerPlayer> Players { get; } = new();

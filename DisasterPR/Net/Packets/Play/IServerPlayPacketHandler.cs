@@ -6,4 +6,10 @@ public interface IServerPlayPacketHandler : IServerPacketHandler
     public Task HandleHostRoomAsync(ServerboundHostRoomPacket packet);
     public Task HandleJoinRoomAsync(ServerboundJoinRoomPacket packet);
     public Task HandleHeartbeatAsync(ServerboundHeartbeatPacket packet);
+    public Task HandleChooseTopicAsync(ServerboundChooseTopicPacket packet);
+    public Task HandleRequestRoomStartAsync(ServerboundRequestRoomStartPacket packet);
+    public Task HandleChooseWordAsync(ServerboundChooseWordPacket packet);
+    public Task HandleChooseFinalAsync(ServerboundChooseFinalPacket packet);
+    public Task HandleRevealChosenWordEntryAsync(ServerboundRevealChosenWordEntryPacket packet);
+    
 }

@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="KaLib" Version="1.0.34" />
+      <PackageReference Include="System.Text.Json" Version="7.0.2" />
     </ItemGroup>
 
 </Project>

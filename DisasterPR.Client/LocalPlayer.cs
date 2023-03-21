@@ -85,6 +85,6 @@ public class LocalPlayer : AbstractClientPlayer
         if (Session != null) return;
         await Connection.SendPacketAsync(new ServerboundJoinRoomPacket(roomId));
         await WaitForRoomCreationResponseAsync();
-        Logger.Verbose($"Hosted a room: #{Session?.RoomId}");
+        Logger.Verbose($"Joined a room: #{Session?.RoomId}");
     }
 }

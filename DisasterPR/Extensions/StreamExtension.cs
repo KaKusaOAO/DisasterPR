@@ -120,14 +120,15 @@ public static class StreamExtension
 
     public static Guid ReadGuid(this Stream stream)
     {
-        var arr = stream.ReadByteArray();
+        var arr = new byte[16];
+        stream.Read(arr, 0, arr.Length);
         return new Guid(arr);
     }
 
     public static void WriteGuid(this Stream stream, Guid guid)
     {
         var arr = guid.ToByteArray();
-        stream.WriteByteArray(arr);
+        stream.Write(arr, 0, arr.Length);
     }
 
     public static List<T> ReadList<T>(this Stream stream, Func<Stream, T> reader)
@@ -162,5 +163,17 @@ public static class StreamExtension
     {
         stream.WriteGuid(entry.Guid);
         stream.WriteUtf8String(entry.Name);
+    }
+
+    public static bool ReadBool(this Stream stream)
+    {
+        var b = stream.ReadByte();
+        if (b == -1) throw new EndOfStreamException();
+        return b > 0;
+    }
+
+    public static void WriteBool(this Stream stream, bool value)
+    {
+        stream.WriteByte((byte) (value ? 1 : 0));
     }
 }

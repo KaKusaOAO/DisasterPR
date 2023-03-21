@@ -1,11 +1,23 @@
 using DisasterPR.Events;
+using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
+using DisasterPR.Sessions;
 using KaLib.Utils;
 
-namespace DisasterPR.Server;
+namespace DisasterPR.Server.Sessions;
 
 public class ServerSession : Session<ServerPlayer>
 {
+    public bool IsValid { get; set; } = true;
+    
+    public ServerGameState ServerGameState { get; set; }
+
+    public override IGameState GameState
+    {
+        get => ServerGameState;
+        set => ServerGameState = (ServerGameState) value;
+    }
+
     private static int[] _roomIds = Enumerable.Range(1000, 9000).ToArray();
     private static int _occupiedRooms;
     private static SemaphoreSlim _lock = new(1, 1);
@@ -14,12 +26,8 @@ public class ServerSession : Session<ServerPlayer>
 
     static ServerSession()
     {
-        Logger.Info("Generating room IDs...");
-        for (var i = 0; i < _roomIds.Length; i++)
-        {
-            var j = Server.Instance.Random.Next(_roomIds.Length);
-            (_roomIds[i], _roomIds[j]) = (_roomIds[j], _roomIds[i]);
-        }
+        Logger.Info("Generating and shuffling room IDs...");
+        _roomIds.Shuffle();
     }
 
     public static int CreateNewRoomId()
@@ -40,6 +48,12 @@ public class ServerSession : Session<ServerPlayer>
             _lock.Release();
         }
     }
+
+    public ServerSession(int roomId)
+    {
+        RoomId = roomId;
+        GameState = new ServerGameState(this);
+    }
     
     private async Task OnPlayerDisconnectedAsync(DisconnectedEventArgs _)
     {
@@ -57,6 +71,8 @@ public class ServerSession : Session<ServerPlayer>
         
         player.Session = this;
         Players.Add(player);
+
+        _ = player.Connection.SendPacketAsync(new ClientboundSetCardPackPacket(CardPack));
     }
     
     public async Task KickPlayerAsync(ServerPlayer player)
@@ -66,6 +82,21 @@ public class ServerSession : Session<ServerPlayer>
     }
     
     public async Task PlayerLeaveAsync(ServerPlayer player)
+    {
+        var state = ServerGameState.CurrentState;
+        if (state != StateOfGame.Waiting && state != StateOfGame.WinResult)
+        {
+            await Task.WhenAll(Players.Select(p => 
+                p.Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(RoomDisconnectReason.SomeoneLeftWhileInGame))));
+            Players.Clear();
+            Emptied?.Invoke();
+            return;
+        }
+
+        await InternalPlayerLeaveAsync(player);
+    }
+
+    private async Task InternalPlayerLeaveAsync(ServerPlayer player)
     {
         player.Connection.Disconnected -= OnPlayerDisconnectedAsync;
         player.Session = null;
@@ -79,5 +110,10 @@ public class ServerSession : Session<ServerPlayer>
         }
         
         await Task.WhenAll(Players.Select(p => p.Connection.SendPacketAsync(new ClientboundRemovePlayerPacket(player))));
+    }
+
+    public void Invalidate()
+    {
+        IsValid = false;
     }
 }

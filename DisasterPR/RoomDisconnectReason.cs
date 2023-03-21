@@ -6,5 +6,8 @@ public enum RoomDisconnectReason
     NotFound,
     RoomFull,
     NoRoomLeft,
+    RoomPlaying,
+    GuidDuplicate,
+    SomeoneLeftWhileInGame,
     Kicked
 }

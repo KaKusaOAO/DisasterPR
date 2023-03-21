@@ -24,6 +24,8 @@ public class ClientboundRoomDisconnectedPacket : IPacket<IClientPlayPacketHandle
 
     public static ClientboundRoomDisconnectedPacket RoomFull => new(RoomDisconnectReason.RoomFull);
     public static ClientboundRoomDisconnectedPacket NoRoomLeft => new(RoomDisconnectReason.NoRoomLeft);
+    public static ClientboundRoomDisconnectedPacket RoomPlaying => new(RoomDisconnectReason.RoomPlaying);
+    public static ClientboundRoomDisconnectedPacket GuidDuplicate => new(RoomDisconnectReason.GuidDuplicate);
 
     public ClientboundRoomDisconnectedPacket(MemoryStream stream)
     {
