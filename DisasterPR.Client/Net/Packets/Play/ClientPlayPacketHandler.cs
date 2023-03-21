@@ -32,7 +32,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         if (session == null) return;
         await Task.Yield();
 
-        var removal = session.Players.Where(p => p.Id == packet.PlayerId);
+        var removal = session.Players.Where(p => p.Id == packet.PlayerId).ToList();
         foreach (var player in removal)
         {
             Logger.Info($"Player {player.Name} ({player.Id}) has left this session.");
