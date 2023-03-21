@@ -37,8 +37,13 @@ public class LocalPlayer : AbstractClientPlayer
         Connection.ReceivedPacket += OnConnectionOnReceivedPacket;
         await Connection.SendPacketAsync(new ServerboundLoginPacket(Name), token);
         
-        SpinWait.SpinUntil(() => received != null);
+        SpinWait.SpinUntil(() => received != null || token.IsCancellationRequested);
         Connection.ReceivedPacket -= OnConnectionOnReceivedPacket;
+
+        if (token.IsCancellationRequested)
+        {
+            throw new TaskCanceledException();
+        }
         
         if (received is ClientboundDisconnectPacket p)
         {
@@ -46,7 +51,7 @@ public class LocalPlayer : AbstractClientPlayer
         }
     }
 
-    private async Task WaitForRoomCreationResponseAsync()
+    private async Task WaitForRoomCreationResponseAsync(CancellationToken token)
     {
         await Task.Yield();
         
@@ -63,8 +68,13 @@ public class LocalPlayer : AbstractClientPlayer
 
         Connection.ReceivedPacket += OnConnectionOnReceivedPacket;
 
-        SpinWait.SpinUntil(() => received != null);
+        SpinWait.SpinUntil(() => received != null || token.IsCancellationRequested);
         Connection.ReceivedPacket -= OnConnectionOnReceivedPacket;
+
+        if (token.IsCancellationRequested)
+        {
+            throw new TaskCanceledException();
+        }
 
         if (received is ClientboundRoomDisconnectedPacket p)
         {
@@ -72,19 +82,28 @@ public class LocalPlayer : AbstractClientPlayer
         }
     }
 
-    public async Task HostRoomAsync()
+    public async Task HostRoomAsync(CancellationToken token)
     {
-        if (Session != null) return;
-        await Connection.SendPacketAsync(new ServerboundHostRoomPacket());
-        await WaitForRoomCreationResponseAsync();
+        if (Session != null)
+        {
+            Logger.Warn("Player is already in a session");
+            return;
+        }
+        
+        await Connection.SendPacketAsync(new ServerboundHostRoomPacket(), token);
+        await WaitForRoomCreationResponseAsync(token);
         Logger.Verbose($"Hosted a room: #{Session?.RoomId}");
     }
     
-    public async Task JoinRoomAsync(int roomId)
+    public async Task JoinRoomAsync(int roomId, CancellationToken token)
     {
-        if (Session != null) return;
-        await Connection.SendPacketAsync(new ServerboundJoinRoomPacket(roomId));
-        await WaitForRoomCreationResponseAsync();
+        if (Session != null)
+        {
+            Logger.Warn("Player is already in a session");
+            return;
+        }
+        await Connection.SendPacketAsync(new ServerboundJoinRoomPacket(roomId), token);
+        await WaitForRoomCreationResponseAsync(token);
         Logger.Verbose($"Joined a room: #{Session?.RoomId}");
     }
 }

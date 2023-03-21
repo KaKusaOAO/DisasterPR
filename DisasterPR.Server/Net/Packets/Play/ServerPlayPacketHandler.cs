@@ -200,7 +200,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         await state.RevealChosenWordEntryAsync(packet.Guid);
     }
 
-    public async Task HandleUpdateSessionOptionsPacket(ServerboundUpdateSessionOptionsPacket packet)
+    public async Task HandleUpdateSessionOptionsAsync(ServerboundUpdateSessionOptionsPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -214,5 +214,15 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
 
         await Task.WhenAll(session.Players.Select(p =>
             p.Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(session))));
+    }
+
+    public async Task HandleLeaveRoomAsync(ServerboundLeaveRoomPacket packet)
+    {
+        var session = Player.Session;
+        if (session == null) return;
+        await Task.Yield();
+
+        await Player.Session!.PlayerLeaveAsync(Player);
+        Player.Session = null;
     }
 }

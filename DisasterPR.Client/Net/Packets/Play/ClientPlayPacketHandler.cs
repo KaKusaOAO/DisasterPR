@@ -69,7 +69,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
 
     public Task HandleRoomDisconnectedAsync(ClientboundRoomDisconnectedPacket packet)
     {
-        Player.Session!.Invalidate();
+        Player.Session?.Invalidate();
         Player.Session = null;
         return Task.CompletedTask;
     }

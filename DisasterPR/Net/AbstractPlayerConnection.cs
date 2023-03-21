@@ -122,6 +122,9 @@ public abstract class AbstractPlayerConnection
                             Packet = packet
                         });
                     });
+                    
+                    Logger.Verbose(TranslateText.Of("Received packet: %s")
+                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
                 }
             }
             catch (Exception ex)
@@ -153,6 +156,9 @@ public abstract class AbstractPlayerConnection
         
         var protocol = ConnectionProtocol.OfState(CurrentState);
         await RawPacketIO.SendPacketAsync(protocol, ReceivingFlow.Opposite(), packet, token);
+        
+        Logger.Verbose(TranslateText.Of("Sent packet: %s")
+            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
     }
 
     public async Task SendPacketAsync(IPacket packet) => await SendPacketAsync(packet, CancellationToken.None);

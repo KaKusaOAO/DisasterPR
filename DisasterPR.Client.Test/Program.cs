@@ -11,6 +11,8 @@ using KaLib.Utils.Extensions;
 
 public static class Program
 {
+    private static CancellationToken CancelToken => new CancellationTokenSource(TimeSpan.FromSeconds(6)).Token;
+    
     public static async Task Main(string[] args)
     {
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
@@ -32,17 +34,17 @@ public static class Program
 
         try
         {
-            await game.LoginPlayerAsync();
+            await game.LoginPlayerAsync(CancelToken);
             
             var player = game.Player;
 
             if (Constants.EnableTestRoom)
             {
-                await game.JoinRoomAsync(Constants.TestRoomId);
+                await game.JoinRoomAsync(Constants.TestRoomId, CancelToken);
             }
             else
             {
-                await game.HostRoomAsync();
+                await game.HostRoomAsync(CancelToken);
             }
 
             var session = player!.Session!;

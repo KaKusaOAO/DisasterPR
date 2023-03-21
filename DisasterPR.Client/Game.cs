@@ -33,16 +33,16 @@ public class Game
         Logger.Verbose($"Player logged in as {Player.Name} ({Player.Id})");
     }
 
-    public async Task HostRoomAsync()
+    public async Task HostRoomAsync(CancellationToken token)
     {
         if (Player == null) return;
-        await Player.HostRoomAsync();
+        await Player.HostRoomAsync(token);
     }
     
-    public async Task JoinRoomAsync(int roomId)
+    public async Task JoinRoomAsync(int roomId, CancellationToken token)
     {
         if (Player == null) return;
-        await Player.JoinRoomAsync(roomId);
+        await Player.JoinRoomAsync(roomId, token);
         Logger.Verbose($"Joined room: #{Player.Session?.RoomId}");
     }
 

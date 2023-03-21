@@ -51,6 +51,7 @@ public class ConnectionProtocol
             .AddPacket<ServerboundChatPacket>()
             .AddPacket<ServerboundHostRoomPacket>()
             .AddPacket<ServerboundJoinRoomPacket>()
+            .AddPacket<ServerboundLeaveRoomPacket>()
             .AddPacket<ServerboundRequestRoomStartPacket>()
             .AddPacket<ServerboundChooseTopicPacket>()
             .AddPacket<ServerboundChooseWordPacket>()
