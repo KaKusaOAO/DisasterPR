@@ -18,10 +18,10 @@ public class LocalPlayer : AbstractClientPlayer
         Connection = new PlayerToServerConnection(this);
     }
 
-    public async Task LoginAsync()
+    public async Task LoginAsync(CancellationToken token)
     {
-        await Connection.ConnectAsync();
-        await Connection.SendPacketAsync(new ServerboundHelloPacket(Constants.ProtocolVersion));
+        await Connection.ConnectAsync(token);
+        await Connection.SendPacketAsync(new ServerboundHelloPacket(Constants.ProtocolVersion), token);
         Connection.CurrentState = PacketState.Login;
 
         var received = null as IPacket;
@@ -35,7 +35,7 @@ public class LocalPlayer : AbstractClientPlayer
             return Task.CompletedTask;
         }
         Connection.ReceivedPacket += OnConnectionOnReceivedPacket;
-        await Connection.SendPacketAsync(new ServerboundLoginPacket(Name));
+        await Connection.SendPacketAsync(new ServerboundLoginPacket(Name), token);
         
         SpinWait.SpinUntil(() => received != null);
         Connection.ReceivedPacket -= OnConnectionOnReceivedPacket;

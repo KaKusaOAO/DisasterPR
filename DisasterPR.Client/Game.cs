@@ -25,11 +25,11 @@ public class Game
         };
     }
 
-    public async Task LoginPlayerAsync()
+    public async Task LoginPlayerAsync(CancellationToken token)
     {
         if (Player == null) return;
         
-        await Player.LoginAsync();
+        await Player.LoginAsync(token);
         Logger.Verbose($"Player logged in as {Player.Name} ({Player.Id})");
     }
 
