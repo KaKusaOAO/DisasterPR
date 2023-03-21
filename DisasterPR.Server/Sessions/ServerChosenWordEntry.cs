@@ -12,12 +12,16 @@ public class ServerChosenWordEntry : IChosenWordEntry
 
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public List<WordCard> Words { get; }
+    private List<WordCard> _words;
+
+    public List<WordCard> Words => !_words.Any()
+        ? Enumerable.Repeat(new EmptyWordCard(), GameState.CurrentTopic.AnswerCount).ToList<WordCard>()
+        : _words;
 
     public ServerChosenWordEntry(ServerGameState state, ServerPlayer player, List<WordCard> words)
     {
         GameState = state;
         Player = player;
-        Words = words;
+        _words = words;
     }
 }

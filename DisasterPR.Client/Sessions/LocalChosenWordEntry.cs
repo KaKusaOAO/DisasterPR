@@ -13,13 +13,17 @@ public class LocalChosenWordEntry : IChosenWordEntry
     
     public Guid Id { get; }
 
-    public List<WordCard> Words { get; }
+    private List<WordCard> _words;
+
+    public List<WordCard> Words => !_words.Any()
+        ? Enumerable.Repeat(new EmptyWordCard(), GameState.CurrentTopic.AnswerCount).ToList<WordCard>()
+        : _words;
 
     public LocalChosenWordEntry(Guid id, LocalGameState state, AbstractClientPlayer player, List<WordCard> words)
     {
         Id = id;
         GameState = state;
         Player = player;
-        Words = words;
+        _words = words;
     }
 }
