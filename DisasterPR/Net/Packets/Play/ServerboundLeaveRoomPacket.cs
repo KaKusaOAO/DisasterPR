@@ -17,8 +17,5 @@ public class ServerboundLeaveRoomPacket : IPacket<IServerPlayPacketHandler>
         
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler)
-    {
-        throw new NotImplementedException();
-    }
+    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleLeaveRoomAsync(this);
 }
