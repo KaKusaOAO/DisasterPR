@@ -55,6 +55,7 @@ public class ConnectionProtocol
             .AddPacket<ServerboundChooseWordPacket>()
             .AddPacket<ServerboundChooseFinalPacket>()
             .AddPacket<ServerboundRevealChosenWordEntryPacket>()
+            .AddPacket<ServerboundUpdateSessionOptionsPacket>()
         )
     );
     
