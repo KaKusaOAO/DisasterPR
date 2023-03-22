@@ -56,6 +56,7 @@ public class ServerSession : Session<ServerPlayer>
     {
         RoomId = roomId;
         GameState = new ServerGameState(this);
+        Options.EnabledCategories.Add(CardPack.Categories.First());
     }
     
     private async Task OnPlayerDisconnectedAsync(DisconnectedEventArgs _)

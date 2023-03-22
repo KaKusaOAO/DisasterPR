@@ -18,6 +18,5 @@ public abstract class Session<T> : ISession<T> where T : IPlayer
 
     protected Session()
     {
-        Options.EnabledCategories.Add(CardPack.Categories.First());
     }
 }
