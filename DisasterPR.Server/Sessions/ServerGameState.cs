@@ -261,7 +261,7 @@ public class ServerGameState : IGameState
 
     private async Task SkipFinalAsync()
     {
-        var time = Options.CountdownTimeSet.AnswerChooseTime;
+        var time = Options.CountdownTimeSet.FinalChooseTime;
         if (!await WaitForTimerAsync(time)) return;
         await PrepareNextRoundAsync();
     }
@@ -278,7 +278,7 @@ public class ServerGameState : IGameState
             }
         }
 
-        while (time >= 0)
+        while (time > 0)
         {
             SendTimerUpdate();
             await Task.Delay(1000, _cts.Token);
