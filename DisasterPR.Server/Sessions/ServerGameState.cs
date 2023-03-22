@@ -66,7 +66,16 @@ public class ServerGameState : IGameState
             {
                 if (!Session.IsValid) return;
                 if (!_actions.TryDequeue(out var action)) continue;
-                await action();
+
+                try
+                {
+                    await action();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn("Caught exception in event loop!");
+                    Logger.Warn(ex.ToString());
+                }
             }
         }
     }
