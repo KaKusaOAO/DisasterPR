@@ -38,13 +38,9 @@ public class ServerSession : Session<ServerPlayer>
         _lock.Wait();
         try
         {
-            if (_occupiedRooms >= _roomIds.Length)
-            {
-                throw new IndexOutOfRangeException("Out of room numbers");
-            }
-
+            var room = _roomIds[_occupiedRooms];
             _occupiedRooms++;
-            return _roomIds[_occupiedRooms - 1];
+            return room;
         }
         finally
         {
@@ -103,6 +99,12 @@ public class ServerSession : Session<ServerPlayer>
         {
             await Task.WhenAll(Players.Select(p => 
                 p.Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(RoomDisconnectReason.SomeoneLeftWhileInGame))));
+            
+            foreach (var p in Players)
+            {
+                p.Session = null;
+            }
+            
             Players.Clear();
             Emptied?.Invoke();
             return;

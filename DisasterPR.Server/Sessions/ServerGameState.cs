@@ -50,7 +50,7 @@ public class ServerGameState : IGameState
     {
         Session = session;
 
-        _thread = new Thread(async () => await InternalEventLoopAsync())
+        _thread = new Thread(InternalEventLoopAsync)
         {
             Name = $"Session #{session.RoomId}",
             IsBackground = true
@@ -58,7 +58,7 @@ public class ServerGameState : IGameState
         _thread.Start();
     }
 
-    private async Task InternalEventLoopAsync()
+    private void InternalEventLoopAsync()
     {
         while (Session.IsValid)
         {
@@ -71,7 +71,7 @@ public class ServerGameState : IGameState
 
                 try
                 {
-                    await action();
+                    action().GetAwaiter().GetResult();
                 }
                 catch (Exception ex)
                 {
@@ -80,6 +80,8 @@ public class ServerGameState : IGameState
                 }
             }
         }
+        
+        Logger.Warn("Event loop stopped!");
     }
 
     private void ShuffleTopicsAndWords()
@@ -399,22 +401,21 @@ public class ServerGameState : IGameState
             p.Connection.SendPacketAsync(new ClientboundSetFinalPacket(index))));
 
         await Task.Delay(1000);
-
+        
         if (credit != null)
         {
             var score = credit.Score + 1;
+            credit.Score = score;
             await ChangePlayerScoreAndUpdateAsync(credit, score);
-        }
 
-        var maxScore = Options.WinScore;
-        var winner = Session.Players.FirstOrDefault(p => p.Score >= maxScore);
-        if (winner != null)
-        {
-            await ChangeWinnerPlayerAndUpdateAsync(winner);
-            await ChangeStateAndUpdateAsync(StateOfGame.WinResult);
-            return;
+            var maxScore = Options.WinScore;
+            if (credit.Score >= maxScore)
+            {
+                await ChangeWinnerPlayerAndUpdateAsync(credit);
+                await ChangeStateAndUpdateAsync(StateOfGame.WinResult);
+                return;
+            }
         }
-
         await PrepareNextRoundAsync();
     }
 
