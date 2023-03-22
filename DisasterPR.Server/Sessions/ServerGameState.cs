@@ -107,6 +107,7 @@ public class ServerGameState : IGameState
         }
 
         CurrentState = state;
+        _cts.Cancel();
         Logger.Verbose($"Current state changed to {state}");
         await Task.WhenAll(Session.Players.Select(p =>
             p.Connection.SendPacketAsync(new ClientboundGameStateChangePacket(state))));
