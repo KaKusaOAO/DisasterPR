@@ -67,6 +67,19 @@ public class ServerSession : Session<ServerPlayer>
             await PlayerLeaveAsync(player);
         }
     }
+
+    public async Task SetAndUpdateCardPackAsync(CardPack pack)
+    {
+        CardPack = pack;
+        Options.EnabledCategories.Clear();
+        Options.EnabledCategories.Add(pack.Categories.First());
+        
+        await Task.WhenAll(Players.Select(async p =>
+        {
+            await p.Connection.SendPacketAsync(new ClientboundSetCardPackPacket(pack));
+            await p.Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(this));
+        }));
+    }
     
     public async Task PlayerJoinAsync(ServerPlayer player)
     {
@@ -75,8 +88,6 @@ public class ServerSession : Session<ServerPlayer>
         
         player.Session = this;
         Players.Add(player);
-
-        _ = player.Connection.SendPacketAsync(new ClientboundSetCardPackPacket(CardPack));
     }
     
     public async Task KickPlayerAsync(ServerPlayer player)
