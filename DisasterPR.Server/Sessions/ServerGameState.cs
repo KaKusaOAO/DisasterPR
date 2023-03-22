@@ -32,6 +32,8 @@ public class ServerGameState : IGameState
         CurrentChosenWords.Select(n => (IChosenWordEntry) n).ToList();
 
     public (TopicCard Left, TopicCard Right)? CandidateTopics { get; private set; }
+    public int RoundCycle { get; set; } = 1;
+    
     private ShuffledPool<TopicCard> _topics;
 
     private CancellationTokenSource _cts;
@@ -161,6 +163,13 @@ public class ServerGameState : IGameState
         ShuffleTopicsAndWords();
         await ChangeStateAndUpdateAsync(StateOfGame.Started);
         await ChangeCurrentPlayerIndexAndUpdateAsync(0);
+
+        foreach (var p in Session.Players)
+        {
+            await ChangePlayerScoreAndUpdateAsync(p, 0);
+        }
+
+        await ChangeRoundCycleCountAndUpdateAsync(1);
         await StartRoundAsync();
     }
 
@@ -190,9 +199,7 @@ public class ServerGameState : IGameState
     {
         // Called when timed out
         var time = Options.CountdownTimeSet.TopicChooseTime;
-        _cts = new CancellationTokenSource();
-        await Task.Delay(time * 1000, _cts.Token);
-        if (_cts.IsCancellationRequested) return;
+        if (!await WaitForTimerAsync(time)) return;
 
         var topic = _topics.Next();
         await SetTopicAsync(topic);
@@ -226,7 +233,7 @@ public class ServerGameState : IGameState
         var pack = Session.CardPack;
         var words = cards.Select(w => pack.GetWordIndex(w)).ToList();
         await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundAddChosenWordEntryPacket(entry.Id, entry.Player.Id, words))));
+            p.Connection.SendPacketAsync(new ClientboundAddChosenWordEntryPacket(entry.Id, entry.Player?.Id, words))));
 
         if (Session.Players
             .Where(p => p != CurrentPlayer)
@@ -234,7 +241,7 @@ public class ServerGameState : IGameState
         {
             Logger.Info($"Transitioning into final...");
             _cts.Cancel();
-            await ChangeStateAndUpdateAsync(StateOfGame.ChoosingFinal);
+            await StartFinalAsync();
         }
         else
         {
@@ -245,13 +252,48 @@ public class ServerGameState : IGameState
         }
     }
 
+    private async Task StartFinalAsync()
+    {
+        await ChangeStateAndUpdateAsync(StateOfGame.ChoosingFinal);
+        _ = SkipFinalAsync();
+    }
+
+    private async Task SkipFinalAsync()
+    {
+        var time = Options.CountdownTimeSet.AnswerChooseTime;
+        if (!await WaitForTimerAsync(time)) return;
+        await PrepareNextRoundAsync();
+    }
+
+    private async Task<bool> WaitForTimerAsync(int time)
+    {
+        _cts = new CancellationTokenSource();
+
+        void SendTimerUpdate()
+        {
+            foreach (var player in Session.Players)
+            {
+                _ = player.Connection.SendPacketAsync(new ClientboundUpdateTimerPacket(time));
+            }
+        }
+
+        while (time >= 0)
+        {
+            SendTimerUpdate();
+            await Task.Delay(1000, _cts.Token);
+            if (_cts.IsCancellationRequested) return false;
+            time--;
+        }
+        
+        SendTimerUpdate();
+        return true;
+    }
+
     private async Task ChooseEmptyWordsForPlayersAsync()
     {
         // Called when timed out
         var time = Options.CountdownTimeSet.AnswerChooseTime;
-        _cts = new CancellationTokenSource();
-        await Task.Delay(time * 1000, _cts.Token);
-        if (_cts.IsCancellationRequested) return;
+        if (!await WaitForTimerAsync(time)) return;
 
         async Task RunChooseEmptyWordAsync()
         {
@@ -259,15 +301,17 @@ public class ServerGameState : IGameState
                 .Where(p => p != CurrentPlayer)
                 .Where(p => CurrentChosenWords.All(w => w.Player != p));
             
-            foreach (var player in players)
+            foreach (var _ in players)
             {
-                var entry = new ServerChosenWordEntry(this, player, new List<WordCard>());
+                var entry = new ServerChosenWordEntry(this, null, new List<WordCard>());
                 CurrentChosenWords.Add(entry);
 
                 await Task.WhenAll(Session.Players.Select(p =>
                     p.Connection.SendPacketAsync(
-                        new ClientboundAddChosenWordEntryPacket(entry.Id, entry.Player.Id, new List<int>()))));
+                        new ClientboundAddChosenWordEntryPacket(entry.Id, entry.Player?.Id, new List<int>()))));
             }
+
+            await StartFinalAsync();
         }
         
         if (Thread.CurrentThread != _thread)
@@ -349,10 +393,15 @@ public class ServerGameState : IGameState
         }
 
         var chosen = CurrentChosenWords[index];
-        var score = chosen.Player.Score + 1;
+        var credit = chosen.Player;
         await Task.WhenAll(Session.Players.Select(p =>
             p.Connection.SendPacketAsync(new ClientboundSetFinalPacket(index))));
-        await ChangePlayerScoreAndUpdateAsync(chosen.Player, score);
+        
+        if (credit != null)
+        {
+            var score = credit.Score + 1;
+            await ChangePlayerScoreAndUpdateAsync(credit, score);
+        }
 
         var maxScore = Options.WinScore;
         var winner = Session.Players.FirstOrDefault(p => p.Score >= maxScore);
@@ -363,6 +412,11 @@ public class ServerGameState : IGameState
             return;
         }
 
+        await PrepareNextRoundAsync();
+    }
+
+    private async Task PrepareNextRoundAsync()
+    {
         await ChangeStateAndUpdateAsync(StateOfGame.PrepareNextRound);
 
         _ = Task.Run(async () =>
@@ -371,8 +425,27 @@ public class ServerGameState : IGameState
 
             var pIndex = CurrentPlayerIndex + 1;
             pIndex %= Session.Players.Count;
+
+            if (pIndex == 0)
+            {
+                await ChangeRoundCycleCountAndUpdateAsync(RoundCycle + 1);
+            }
             await ChangeCurrentPlayerIndexAndUpdateAsync(pIndex);
             await StartRoundAsync();
         });
+    }
+
+    private async Task ChangeRoundCycleCountAndUpdateAsync(int cycle)
+    { 
+        if (Thread.CurrentThread != _thread)
+        {
+            _actions.Enqueue(async () => await ChangeRoundCycleCountAndUpdateAsync(cycle));
+            return;
+        }
+
+        RoundCycle = cycle;
+        Logger.Verbose($"Current cycle count is now {cycle}");
+        await Task.WhenAll(Session.Players.Select(p =>
+            p.Connection.SendPacketAsync(new ClientboundUpdateRoundCyclePacket(cycle))));
     }
 }

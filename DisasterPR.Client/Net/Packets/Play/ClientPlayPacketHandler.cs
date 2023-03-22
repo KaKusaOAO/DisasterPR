@@ -194,12 +194,30 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         player.Score = packet.Score;
     }
 
-    public async Task HandleSetWinnerPlayerPacket(ClientboundSetWinnerPlayerPacket packet)
+    public async Task HandleSetWinnerPlayerAsync(ClientboundSetWinnerPlayerPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
         await Task.Yield();
 
         session.LocalGameState.WinnerPlayer = session.Players.Find(p => p.Id == packet.PlayerId);
+    }
+
+    public async Task HandleUpdateTimerAsync(ClientboundUpdateTimerPacket packet) 
+    {
+        var session = Player.Session;
+        if (session == null) return;
+        await Task.Yield();
+
+        session.LocalGameState.CurrentTimer = packet.RemainTime;
+    }
+
+    public async Task HandleUpdateRoundCycleAsync(ClientboundUpdateRoundCyclePacket packet)
+    {
+        var session = Player.Session;
+        if (session == null) return;
+        await Task.Yield();
+
+        session.LocalGameState.RoundCycle = packet.Count;
     }
 }

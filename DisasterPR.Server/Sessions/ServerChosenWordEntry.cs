@@ -7,8 +7,8 @@ public class ServerChosenWordEntry : IChosenWordEntry
 {
     public ServerGameState GameState { get; set; }
     
-    public ServerPlayer Player { get; }
-    Guid IChosenWordEntry.PlayerId => Player.Id;
+    public ServerPlayer? Player { get; }
+    Guid? IChosenWordEntry.PlayerId => Player?.Id;
 
     public Guid Id { get; set; } = Guid.NewGuid();
 
@@ -18,7 +18,7 @@ public class ServerChosenWordEntry : IChosenWordEntry
         ? Enumerable.Repeat(EmptyWordCard.Instance, GameState.CurrentTopic.AnswerCount).ToList<WordCard>()
         : _words;
 
-    public ServerChosenWordEntry(ServerGameState state, ServerPlayer player, List<WordCard> words)
+    public ServerChosenWordEntry(ServerGameState state, ServerPlayer? player, List<WordCard> words)
     {
         GameState = state;
         Player = player;

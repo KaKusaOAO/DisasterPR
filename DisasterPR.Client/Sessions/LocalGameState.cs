@@ -20,6 +20,7 @@ public class LocalGameState : IGameState
     IPlayer IGameState.WinnerPlayer => WinnerPlayer;
     
     public TopicCard CurrentTopic { get; set; }
+    public int CurrentTimer { get; set; }
     
     public List<LocalChosenWordEntry> CurrentChosenWords { get; } = new();
     public LocalChosenWordEntry? FinalChosenWord { get; set; }
@@ -31,6 +32,7 @@ public class LocalGameState : IGameState
         CurrentChosenWords.Select(n => (IChosenWordEntry) n).ToList();
     
     public (TopicCard Left, TopicCard Right)? CandidateTopics { get; set;  }
+    public int RoundCycle { get; set; }
 
     public LocalGameState(LocalSession session)
     {

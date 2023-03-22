@@ -8,8 +8,8 @@ public class LocalChosenWordEntry : IChosenWordEntry
     public bool IsRevealed { get; set; }
     public LocalGameState GameState { get; }
     
-    public AbstractClientPlayer Player { get; }
-    Guid IChosenWordEntry.PlayerId => Player.Id;
+    public AbstractClientPlayer? Player { get; }
+    Guid? IChosenWordEntry.PlayerId => Player?.Id;
     
     public Guid Id { get; }
 

@@ -19,5 +19,7 @@ public interface IClientPlayPacketHandler : IClientPacketHandler
     public Task HandleUpdateSessionOptionsPacket(ClientboundUpdateSessionOptionsPacket packet);
     public Task HandleRevealChosenWordEntryAsync(ClientboundRevealChosenWordEntryPacket packet);
     public Task HandleUpdatePlayerScoreAsync(ClientboundUpdatePlayerScorePacket packet);
-    public Task HandleSetWinnerPlayerPacket(ClientboundSetWinnerPlayerPacket packet);
+    public Task HandleSetWinnerPlayerAsync(ClientboundSetWinnerPlayerPacket packet);
+    public Task HandleUpdateTimerAsync(ClientboundUpdateTimerPacket packet);
+    public Task HandleUpdateRoundCycleAsync(ClientboundUpdateRoundCyclePacket packet);
 }

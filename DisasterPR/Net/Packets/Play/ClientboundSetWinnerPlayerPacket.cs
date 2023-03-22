@@ -21,5 +21,5 @@ public class ClientboundSetWinnerPlayerPacket : IPacket<IClientPlayPacketHandler
         stream.WriteGuid(PlayerId);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleSetWinnerPlayerPacket(this);
+    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleSetWinnerPlayerAsync(this);
 }

@@ -12,6 +12,7 @@ public interface IGameState
     public TopicCard CurrentTopic { get; set; }
     public List<IChosenWordEntry> CurrentChosenWords { get; }
     public (TopicCard Left, TopicCard Right)? CandidateTopics { get; }
+    public int RoundCycle { get; set; }
 }
 
 public enum StateOfGame
