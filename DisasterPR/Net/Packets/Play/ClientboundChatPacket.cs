@@ -21,6 +21,7 @@ public class ClientboundChatPacket : IPacket<IClientPlayPacketHandler>
     
     public void Write(MemoryStream stream)
     {
+        stream.WriteUtf8String(Player);
         stream.WriteUtf8String(Content);
     }
 
