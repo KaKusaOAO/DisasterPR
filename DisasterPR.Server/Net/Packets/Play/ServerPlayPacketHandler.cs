@@ -85,6 +85,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             }
 
             await Connection.SendPacketAsync(new ClientboundJoinedRoomPacket(session));
+            await Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(session));
             await session.PlayerJoinAsync(Player);
         });
     }
