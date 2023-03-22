@@ -220,4 +220,14 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
 
         session.LocalGameState.RoundCycle = packet.Count;
     }
+
+    public async Task HandleUpdatePlayerStateAsync(ClientboundUpdatePlayerStatePacket packet)
+    {
+        var session = Player.Session;
+        if (session == null) return;
+        await Task.Yield();
+
+        var player = session.Players.First(c => packet.Id == c.Id);
+        player.State = packet.State;
+    }
 }

@@ -22,4 +22,5 @@ public interface IClientPlayPacketHandler : IClientPacketHandler
     public Task HandleSetWinnerPlayerAsync(ClientboundSetWinnerPlayerPacket packet);
     public Task HandleUpdateTimerAsync(ClientboundUpdateTimerPacket packet);
     public Task HandleUpdateRoundCycleAsync(ClientboundUpdateRoundCyclePacket packet);
+    public Task HandleUpdatePlayerStateAsync(ClientboundUpdatePlayerStatePacket packet);
 }

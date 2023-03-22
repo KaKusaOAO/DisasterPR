@@ -1,5 +1,6 @@
 using DisasterPR.Cards;
 using DisasterPR.Server.Sessions;
+using DisasterPR.Sessions;
 using ISession = DisasterPR.Sessions.ISession;
 
 namespace DisasterPR.Server;
@@ -14,6 +15,7 @@ public class ServerPlayer : IPlayer
     
     public int Score { get; set; }
     public List<WordCard> HoldingCards { get; } = new();
+    public PlayerState State { get; set; }
 
     public ShuffledPool<WordCard>? CardPool { get; set; }
     public ServerToPlayerConnection Connection { get; }

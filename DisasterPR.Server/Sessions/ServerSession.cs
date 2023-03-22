@@ -85,7 +85,8 @@ public class ServerSession : Session<ServerPlayer>
     {
         player.Connection.Disconnected += OnPlayerDisconnectedAsync;
         await Task.WhenAll(Players.Select(p => p.Connection.SendPacketAsync(new ClientboundAddPlayerPacket(player))));
-        
+
+        player.State = PlayerState.Joining;
         player.Session = this;
         Players.Add(player);
     }

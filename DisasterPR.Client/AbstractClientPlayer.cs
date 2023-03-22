@@ -13,6 +13,7 @@ public abstract class AbstractClientPlayer : IPlayer
     
     public int Score { get; set; }
     public List<WordCard> HoldingCards { get; } = new();
+    public PlayerState State { get; set; }
 
     protected AbstractClientPlayer(string name)
     {

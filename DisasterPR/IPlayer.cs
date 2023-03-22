@@ -10,4 +10,5 @@ public interface IPlayer
     public ISession? Session { get; }
     public int Score { get; set; }
     public List<WordCard> HoldingCards { get; }
+    public PlayerState State { get; set; }
 }

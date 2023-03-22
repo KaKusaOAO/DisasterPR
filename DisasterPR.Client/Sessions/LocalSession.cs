@@ -54,6 +54,7 @@ public class LocalSession : Session<AbstractClientPlayer>
     public async Task PlayerJoinAsync(AbstractClientPlayer player)
     {
         Logger.Info($"Player {player.Name} ({player.Id}) has joined this session.");
+        player.State = PlayerState.Joining;
         Players.Add(player);
         await _playerJoined.InvokeAsync(async d => await d(player));
     }

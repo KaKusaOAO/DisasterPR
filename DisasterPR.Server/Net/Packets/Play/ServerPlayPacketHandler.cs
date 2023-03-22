@@ -148,6 +148,12 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             return;
         }
 
+        if (session.Players.Any(p => p.State != PlayerState.Ready))
+        {
+            Logger.Warn("Not all players are ready!");
+            return;
+        }
+
         await session.ServerGameState.StartAsync();
     }
 
@@ -239,5 +245,17 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         {
             await session.KickPlayerAsync(p);
         }
+    }
+
+    public async Task HandleUpdatePlayerStateAsync(ServerboundUpdatePlayerStatePacket packet)
+    {
+        var session = Player.Session;
+        if (session == null) return;
+        await Task.Yield();
+        
+        Player.State = packet.State;
+        await Task.WhenAll(session.Players
+            .Where(p => p != Player)
+            .Select(p => p.Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(Player))));
     }
 }
