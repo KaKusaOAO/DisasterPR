@@ -36,7 +36,7 @@ public class ServerGameState : IGameState
     
     private ShuffledPool<TopicCard> _topics;
 
-    private CancellationTokenSource _cts;
+    private CancellationTokenSource _cts = new();
 
     public SessionOptions Options => Session.Options;
 
