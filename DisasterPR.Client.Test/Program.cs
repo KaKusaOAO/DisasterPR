@@ -53,7 +53,7 @@ public static class Program
             var session = player.Session!;
             var playersCount = Constants.TestRoomPlayersCount;
             Logger.Info($"Waiting for the session to have {playersCount} or more players");
-            SpinWait.SpinUntil(() => session!.Players.Count >= playersCount);
+            SpinWait.SpinUntil(() => session.Players.Count(p => p.State == PlayerState.Ready) >= playersCount);
 
             if (player == session.HostPlayer)
             {

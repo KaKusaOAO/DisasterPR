@@ -169,6 +169,8 @@ public class ServerGameState : IGameState
 
         foreach (var p in Session.Players)
         {
+            p.State = PlayerState.InGame;
+            await p.Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(p));
             await ChangePlayerScoreAndUpdateAsync(p, 0);
         }
 
