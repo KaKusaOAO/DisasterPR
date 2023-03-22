@@ -398,6 +398,14 @@ public class ServerGameState : IGameState
         await Task.WhenAll(Session.Players.Select(p =>
             p.Connection.SendPacketAsync(new ClientboundSetFinalPacket(index))));
 
+        await Task.Delay(1000);
+
+        if (credit != null)
+        {
+            var score = credit.Score + 1;
+            await ChangePlayerScoreAndUpdateAsync(credit, score);
+        }
+
         var maxScore = Options.WinScore;
         var winner = Session.Players.FirstOrDefault(p => p.Score >= maxScore);
         if (winner != null)
@@ -408,13 +416,6 @@ public class ServerGameState : IGameState
         }
 
         await PrepareNextRoundAsync();
-        await Task.Delay(1000);
-        
-        if (credit != null)
-        {
-            var score = credit.Score + 1;
-            await ChangePlayerScoreAndUpdateAsync(credit, score);
-        }
     }
 
     private async Task PrepareNextRoundAsync()
@@ -423,7 +424,7 @@ public class ServerGameState : IGameState
 
         _ = Task.Run(async () =>
         {
-            await Task.Delay(2000);
+            await Task.Delay(1000);
 
             var pIndex = CurrentPlayerIndex + 1;
             pIndex %= Session.Players.Count;
