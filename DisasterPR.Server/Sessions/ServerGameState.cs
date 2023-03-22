@@ -426,6 +426,7 @@ public class ServerGameState : IGameState
         {
             await Task.Delay(1000);
 
+            Logger.Verbose("Starting next round...");
             var pIndex = CurrentPlayerIndex + 1;
             pIndex %= Session.Players.Count;
 
