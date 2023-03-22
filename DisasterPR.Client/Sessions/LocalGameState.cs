@@ -96,7 +96,7 @@ public class LocalGameState : IGameState
             CandidateTopics = null;
         }
 
-        if (state == StateOfGame.Waiting)
+        if (state == StateOfGame.Started)
         {
             WinnerPlayer = null;
         }
