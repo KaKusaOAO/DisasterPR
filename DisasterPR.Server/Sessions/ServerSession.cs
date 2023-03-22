@@ -1,3 +1,4 @@
+using DisasterPR.Cards;
 using DisasterPR.Events;
 using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
@@ -8,6 +9,8 @@ namespace DisasterPR.Server.Sessions;
 
 public class ServerSession : Session<ServerPlayer>
 {
+    public override CardPack? CardPack { get; set; } = CardPack.GetUpstreamAsync().Result;
+
     public bool IsValid { get; set; } = true;
     
     public ServerGameState ServerGameState { get; set; }

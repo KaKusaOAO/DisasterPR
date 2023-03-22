@@ -5,7 +5,7 @@ namespace DisasterPR.Sessions;
 
 public abstract class Session<T> : ISession<T> where T : IPlayer
 {
-    public CardPack CardPack { get; set; } = CardPack.GetUpstreamAsync().Result;
+    public virtual CardPack? CardPack { get; set; }
     public SessionOptions Options { get; set; } = new();
     public int RoomId { get; set; }
     public List<T> Players { get; set; } = new();
