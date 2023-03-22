@@ -51,7 +51,7 @@ public class LocalPlayer : AbstractClientPlayer
         }
     }
 
-    private async Task WaitForRoomCreationResponseAsync(CancellationToken token)
+    private async Task WaitForRoomCreationResponseAsync(Func<Task> task, CancellationToken token)
     {
         await Task.Yield();
         
@@ -68,7 +68,9 @@ public class LocalPlayer : AbstractClientPlayer
 
         Connection.ReceivedPacket += OnConnectionOnReceivedPacket;
 
+        await task();
         SpinWait.SpinUntil(() => received != null || token.IsCancellationRequested);
+        
         Connection.ReceivedPacket -= OnConnectionOnReceivedPacket;
 
         if (token.IsCancellationRequested)
@@ -90,8 +92,10 @@ public class LocalPlayer : AbstractClientPlayer
             return;
         }
         
-        await Connection.SendPacketAsync(new ServerboundHostRoomPacket(), token);
-        await WaitForRoomCreationResponseAsync(token);
+        await WaitForRoomCreationResponseAsync(async () =>
+        {
+            await Connection.SendPacketAsync(new ServerboundHostRoomPacket(), token);
+        }, token);
         Logger.Verbose($"Hosted a room: #{Session?.RoomId}");
     }
     
@@ -102,8 +106,11 @@ public class LocalPlayer : AbstractClientPlayer
             Logger.Warn("Player is already in a session");
             return;
         }
-        await Connection.SendPacketAsync(new ServerboundJoinRoomPacket(roomId), token);
-        await WaitForRoomCreationResponseAsync(token);
+        
+        await WaitForRoomCreationResponseAsync(async () =>
+        {
+            await Connection.SendPacketAsync(new ServerboundJoinRoomPacket(roomId), token);
+        }, token);
         Logger.Verbose($"Joined a room: #{Session?.RoomId}");
     }
 }

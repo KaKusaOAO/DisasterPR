@@ -36,7 +36,7 @@ public static class Program
         {
             await game.LoginPlayerAsync(CancelToken);
             
-            var player = game.Player;
+            var player = game.Player!;
 
             if (Constants.EnableTestRoom)
             {
@@ -47,7 +47,10 @@ public static class Program
                 await game.HostRoomAsync(CancelToken);
             }
 
-            var session = player!.Session!;
+            player.State = PlayerState.Ready;
+            await player.Connection.SendPacketAsync(new ServerboundUpdatePlayerStatePacket(player));
+
+            var session = player.Session!;
             var playersCount = Constants.TestRoomPlayersCount;
             Logger.Info($"Waiting for the session to have {playersCount} or more players");
             SpinWait.SpinUntil(() => session!.Players.Count >= playersCount);
