@@ -16,16 +16,27 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         Connection = connection;
     }
     
-    public Task HandleChatAsync(ServerboundChatPacket packet)
+    public async Task HandleChatAsync(ServerboundChatPacket packet)
     {
-        throw new NotImplementedException();
+        if (Player.Session == null)
+        {
+            var server = GameServer.Instance;
+            foreach (var p in server.Players.Where(p => p.Session == null))
+            {
+                await p.Connection.SendPacketAsync(new ClientboundChatPacket(p.Name, packet.Content));
+            }
+        }
+        else
+        {
+            foreach (var p in Player.Session.Players)
+            {
+                await p.Connection.SendPacketAsync(new ClientboundChatPacket(p.Name, packet.Content));
+            }
+        }
     }
 
     public async Task HandleHostRoomAsync(ServerboundHostRoomPacket packet)
     {
-        var server = GameServer.Instance;
-        var sessions = server.Sessions;
-
         try
         {
             var roomId = ServerSession.CreateNewRoomId();

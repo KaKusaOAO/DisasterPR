@@ -5,6 +5,11 @@ namespace DisasterPR.Net.Packets.Play;
 public class ServerboundChatPacket : IPacket<IServerPlayPacketHandler>
 {
     public string Content { get; set; }
+
+    public ServerboundChatPacket(string content)
+    {
+        Content = content;
+    }
     
     public ServerboundChatPacket(MemoryStream stream)
     {
