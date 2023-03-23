@@ -4,7 +4,7 @@ public interface IPackProvider
 {
     public static IPackProvider Upstream => new UpstreamPackProvider();
 
-    public static IPackProvider Default => AJinPack;
+    public static IPackProvider Default => new ConcatPackProvider(Upstream, AJinPack);
 
     public static IPackProvider AJinPack => new LambdaPackProvider(async () =>
     {
@@ -13,9 +13,8 @@ public interface IPackProvider
         var category = new CardCategory(Guid.NewGuid(), "新投稿內容");
         return CardPackBuilder.Create()
             .AddCategory(category)
-            .AddTopic(category, "阿晋開了一家店！叫做____。")
-            .AddTopic(category, "阿晋進香團！____無法擋。")
-            .AddWord(category, PartOfSpeech.Noun, "Oh, Mama!")
+            .AddTopic(category, "這個標籤需要你的投稿！____是我們的傳統！")
+            .AddWord(category, PartOfSpeech.Verb, "吃魚喝茶")
             ;
     });
 

@@ -166,6 +166,18 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             return;
         }
 
+        if (!session.CardPack.FilteredTopicsByEnabledCategories(session.Options.EnabledCategories).Any())
+        {
+            Logger.Warn("No topics available!");
+            return;
+        }
+        
+        if (!session.CardPack.FilteredWordsByEnabledCategories(session.Options.EnabledCategories).Any())
+        {
+            Logger.Warn("No words available!");
+            return;
+        }
+
         await session.ServerGameState.StartAsync();
     }
 

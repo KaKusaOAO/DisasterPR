@@ -3,6 +3,11 @@
 public class ConcatPackProvider : IPackProvider
 {
     public List<IPackProvider> Providers { get; } = new();
+
+    public ConcatPackProvider(params IPackProvider[] providers)
+    {
+        Providers.AddRange(providers);
+    }
     
     public async Task<CardPackBuilder> MakeBuilderAsync()
     {
