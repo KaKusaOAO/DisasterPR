@@ -43,8 +43,9 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             var session = CreateSessionWithId(roomId);
             await JoinSessionAsync(session);
         }
-        catch (IndexOutOfRangeException)
+        catch (IndexOutOfRangeException ex)
         {
+            Logger.Warn(ex.ToString());
             await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.NoRoomLeft);
         }
     }
