@@ -170,11 +170,15 @@ public class ServerGameState : IGameState
         foreach (var p in Session.Players)
         {
             p.State = PlayerState.InGame;
-            await p.Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(p));
+            await Task.WhenAll(Session.Players.Select(async p2 =>
+            {
+                await p2.Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(p));
+            }));
             await ChangePlayerScoreAndUpdateAsync(p, 0);
         }
 
         await ChangeRoundCycleCountAndUpdateAsync(1);
+        await Task.Delay(1500);
         await StartRoundAsync();
     }
 
@@ -415,6 +419,7 @@ public class ServerGameState : IGameState
             {
                 await ChangeWinnerPlayerAndUpdateAsync(credit);
                 await ChangeStateAndUpdateAsync(StateOfGame.WinResult);
+                await ChangeStateAndUpdateAsync(StateOfGame.Waiting);
                 return;
             }
         }

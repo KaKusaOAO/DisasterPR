@@ -80,7 +80,11 @@ public class ServerSession : Session<ServerPlayer>
     public async Task PlayerJoinAsync(ServerPlayer player)
     {
         player.Connection.Disconnected += OnPlayerDisconnectedAsync;
-        await Task.WhenAll(Players.Select(p => p.Connection.SendPacketAsync(new ClientboundAddPlayerPacket(player))));
+        await Task.WhenAll(Players.Select(async p =>
+        {
+            await p.Connection.SendPacketAsync(new ClientboundAddPlayerPacket(player));
+            await player.Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(p));
+        }));
 
         player.State = PlayerState.Joining;
         player.Session = this;
