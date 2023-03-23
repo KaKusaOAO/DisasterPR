@@ -7,7 +7,7 @@ public interface IPackProvider
 {
     public static IPackProvider Upstream => new UpstreamPackProvider();
 
-    public static IPackProvider Default => new ConcatPackProvider(Upstream, Custom);
+    public static IPackProvider Default => new ConcatPackProvider(Custom, Upstream);
 
     public static IPackProvider Custom => new LambdaPackProvider(async () =>
     {

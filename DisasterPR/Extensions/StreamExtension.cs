@@ -3,7 +3,7 @@ using DisasterPR.Net.Packets;
 
 namespace DisasterPR.Extensions;
 
-public static class StreamExtension
+public static class vStreamExtension
 {
     private const byte SegmentBits = 0x7f;
     private const byte ContinueBit = 0x80;

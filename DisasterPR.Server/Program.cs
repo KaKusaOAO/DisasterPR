@@ -12,6 +12,7 @@ public static class Program
         Logger.Logged += Logger.LogToEmulatedTerminalAsync;
         Logger.RunThreaded();
 
+        _ = new GameServer();
         BuildWebHost(args).Build().Run();
     }
 

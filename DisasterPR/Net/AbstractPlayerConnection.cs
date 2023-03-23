@@ -112,7 +112,10 @@ public abstract class AbstractPlayerConnection
                     var id = stream.ReadVarInt();
                     var protocol = ConnectionProtocol.OfState(CurrentState);
                     var packet = protocol.CreatePacket(ReceivingFlow, id, stream);
-
+                    
+                    Logger.Verbose(TranslateText.Of("Received packet: %s")
+                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
+                    
                     var handler = Handlers[CurrentState];
                     await packet.HandleAsync(handler);
                     
@@ -123,9 +126,6 @@ public abstract class AbstractPlayerConnection
                             Packet = packet
                         });
                     });
-                    
-                    Logger.Verbose(TranslateText.Of("Received packet: %s")
-                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
                 }
             }
             catch (Exception ex)

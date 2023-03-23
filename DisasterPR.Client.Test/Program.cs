@@ -35,7 +35,6 @@ public static class Program
         try
         {
             await game.LoginPlayerAsync(CancelToken);
-            
             var player = game.Player!;
 
             if (Constants.EnableTestRoom)

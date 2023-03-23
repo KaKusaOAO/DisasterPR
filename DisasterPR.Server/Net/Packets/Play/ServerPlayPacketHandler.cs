@@ -1,4 +1,5 @@
 using DisasterPR.Net.Packets.Play;
+using DisasterPR.Server.Commands;
 using DisasterPR.Server.Sessions;
 using DisasterPR.Sessions;
 using KaLib.Utils;
@@ -18,6 +19,12 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
     
     public async Task HandleChatAsync(ServerboundChatPacket packet)
     {
+        if (packet.Content.StartsWith(Constants.CommandPrefix))
+        {
+            await Command.ExecuteCommandAsync(Player, packet.Content);
+            return;
+        }
+        
         if (Player.Session == null)
         {
             var server = GameServer.Instance;

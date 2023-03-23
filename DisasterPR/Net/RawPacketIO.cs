@@ -57,7 +57,7 @@ public class RawPacketIO
             buf.Write(buffer, 0, len);
 
             if (WebSocket.CloseStatus.HasValue) return;
-            await WebSocket.SendAsync(new ArraySegment<byte>(buf.GetBuffer()), WebSocketMessageType.Binary, false,
+            await WebSocket.SendAsync(new ArraySegment<byte>(buf.GetBuffer()), WebSocketMessageType.Binary, true,
                 token);
         });
     }

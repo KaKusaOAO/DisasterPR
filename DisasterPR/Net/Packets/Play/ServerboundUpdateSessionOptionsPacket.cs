@@ -1,4 +1,5 @@
-﻿using DisasterPR.Extensions;
+﻿using DisasterPR.Cards;
+using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 
 namespace DisasterPR.Net.Packets.Play;
@@ -15,6 +16,13 @@ public class ServerboundUpdateSessionOptionsPacket : IPacket<IServerPlayPacketHa
         WinScore = options.WinScore;
         CountdownTimeSet = options.CountdownTimeSet;
         EnabledCategories = options.EnabledCategories.Select(c => c.Guid).ToList();
+    }
+
+    public ServerboundUpdateSessionOptionsPacket(int winScore, CountdownTimeSet timeSet, List<CardCategory> categories)
+    {
+        WinScore = winScore;
+        CountdownTimeSet = timeSet;
+        EnabledCategories = categories.Select(c => c.Guid).ToList();
     }
 
     public ServerboundUpdateSessionOptionsPacket(MemoryStream stream)
