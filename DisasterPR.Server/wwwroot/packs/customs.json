@@ -7,9 +7,39 @@
   ],
   "words": [
     {
+      "credit": "圓圈圈",
+      "pos": "Verb",
+      "label": "吃魚喝茶"
+    },
+    {
       "credit": "扇子",
       "pos": "Adjective",
       "label": "庭育"
+    },
+    {
+      "credit": "葉障",
+      "pos": "Noun",
+      "label": "女僕晋晋子"
+    },
+    {
+      "credit": "葉障",
+      "pos": "Noun",
+      "label": "桜兎優奈"
+    },
+    {
+      "credit": "葉障",
+      "pos": "Verb",
+      "label": "龜龜"
+    },
+    {
+      "credit": "葉障",
+      "pos": "Verb",
+      "label": "起來重睡"
+    },
+    {
+      "credit": "葉障",
+      "pos": "Noun",
+      "label": "阿咪"
     }
   ]
 }
