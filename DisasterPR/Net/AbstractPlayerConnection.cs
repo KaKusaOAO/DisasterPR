@@ -68,16 +68,14 @@ public abstract class AbstractPlayerConnection
         _stopwatch.Start();
         while (IsConnected)
         {
-            await Task.Yield();
-            if (_stopwatch.Elapsed.TotalSeconds > 5 && CurrentState == PacketState.Play)
-            {
-                _stopwatch.Restart();
-                var flow = ReceivingFlow.Opposite();
-                var packet = flow == PacketFlow.Clientbound
-                    ? new ClientboundHeartbeatPacket()
-                    : new ServerboundHeartbeatPacket() as IPacket;
-                await SendPacketAsync(packet);
-            }
+            SpinWait.SpinUntil(() => _stopwatch.Elapsed.TotalSeconds > 5 && CurrentState == PacketState.Play);
+            
+            _stopwatch.Restart();
+            var flow = ReceivingFlow.Opposite();
+            var packet = flow == PacketFlow.Clientbound
+                ? new ClientboundHeartbeatPacket()
+                : new ServerboundHeartbeatPacket() as IPacket;
+            await SendPacketAsync(packet);
         }
     }
     
@@ -90,7 +88,7 @@ public abstract class AbstractPlayerConnection
         {
             try
             {
-                await Task.Yield();
+                await Task.Delay(16);
                 if (WebSocket.State != WebSocketState.Open)
                 {
                     IsConnected = false;
