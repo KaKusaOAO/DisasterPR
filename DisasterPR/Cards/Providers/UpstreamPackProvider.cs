@@ -8,7 +8,7 @@ public class UpstreamPackProvider : UpstreamFormatPackProvider
     {
     }
 
-    private static CardPack? _cache;
+    private static CardPackBuilder? _cache;
     private static DateTimeOffset _lastUpdate = DateTimeOffset.UnixEpoch;
 
     private static void InvalidateExpiredCache()
@@ -21,13 +21,13 @@ public class UpstreamPackProvider : UpstreamFormatPackProvider
         }
     }
     
-    public override async Task<CardPack> MakeAsync()
+    public override async Task<CardPackBuilder> MakeBuilderAsync()
     {
         InvalidateExpiredCache();
         if (_cache != null) return _cache;
 
-        var pack = await base.MakeAsync();
-        _cache = new CardPack(Guid.NewGuid(), pack.Categories, pack.Topics, pack.Words);
+        var pack = await base.MakeBuilderAsync();
+        _cache = pack.WithExplicitGuid(Guid.Empty);
         _lastUpdate = DateTimeOffset.Now;
         return _cache;
     }

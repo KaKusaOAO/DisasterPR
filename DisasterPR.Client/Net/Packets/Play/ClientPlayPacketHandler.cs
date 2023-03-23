@@ -129,7 +129,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         await Task.Yield();
         
         var pack = session.CardPack;
-        var words = packet.Words.Select(i => pack.Words[i]);
+        var words = packet.Words.Select(i => new HoldingWordCardEntry(pack.Words[i]));
         Player.HoldingCards.Clear();
         Player.HoldingCards.AddRange(words);
     }

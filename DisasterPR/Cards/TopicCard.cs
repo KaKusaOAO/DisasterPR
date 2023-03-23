@@ -13,10 +13,16 @@ public class TopicCard
     public static TopicCard Deserialize(CardPack pack, Stream stream)
     {
         if (pack == null) throw new ArgumentException($"{nameof(pack)} must present!");
+        return Deserialize(pack.Categories.ToList(), stream);
+    }
+    
+    public static TopicCard Deserialize(List<CardCategory> categories, Stream stream)
+    {
+        if (categories == null) throw new ArgumentException($"{nameof(categories)} must present!");
 
         return new TopicCard
         {
-            Categories = stream.ReadList(s => CardCategory.DeserializeNoLabel(s, pack)),
+            Categories = stream.ReadList(s => CardCategory.DeserializeNoLabel(s, categories)),
             Texts = stream.ReadList(s => s.ReadUtf8String())
         };
     }

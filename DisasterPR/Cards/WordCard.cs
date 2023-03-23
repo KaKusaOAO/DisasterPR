@@ -11,10 +11,16 @@ public class WordCard
     public static WordCard Deserialize(CardPack pack, Stream stream)
     {
         if (pack == null) throw new ArgumentException($"{nameof(pack)} must present!");
+        return Deserialize(pack.Categories.ToList(), stream);
+    }
+    
+    public static WordCard Deserialize(List<CardCategory> categories, Stream stream)
+    {
+        if (categories == null) throw new ArgumentException($"{nameof(categories)} must present!");
 
         return new WordCard
         {
-            Categories = stream.ReadList(s => CardCategory.DeserializeNoLabel(s, pack)),
+            Categories = stream.ReadList(s => CardCategory.DeserializeNoLabel(s, categories)),
             PartOfSpeech = (PartOfSpeech) stream.ReadVarInt(),
             Label = stream.ReadUtf8String()
         };

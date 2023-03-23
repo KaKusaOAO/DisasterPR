@@ -1,5 +1,4 @@
-﻿using DisasterPR.Cards;
-using DisasterPR.Sessions;
+﻿using DisasterPR.Sessions;
 
 namespace DisasterPR;
 
@@ -9,6 +8,6 @@ public interface IPlayer
     public string Name { get; }
     public ISession? Session { get; }
     public int Score { get; set; }
-    public List<WordCard> HoldingCards { get; }
+    public List<HoldingWordCardEntry> HoldingCards { get; }
     public PlayerState State { get; set; }
 }

@@ -56,7 +56,10 @@ public class CardCategory
         return new CardCategory(guid, label);
     }
     
-    public static CardCategory DeserializeNoLabel(Stream stream, CardPack pack)
+    public static CardCategory DeserializeNoLabel(Stream stream, CardPack pack) => 
+        DeserializeNoLabel(stream, pack.Categories.ToList());
+
+    public static CardCategory DeserializeNoLabel(Stream stream, List<CardCategory> categories)
     {
         var isBuiltin = stream.ReadBool();
         if (isBuiltin)
@@ -66,7 +69,7 @@ public class CardCategory
         }
 
         var guid = stream.ReadGuid();
-        return pack.Categories.First(c => c.Guid == guid);
+        return categories.First(c => c.Guid == guid);
     }
 
     public void Serialize(Stream stream, bool writeLabel = true)

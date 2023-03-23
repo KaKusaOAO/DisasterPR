@@ -12,7 +12,7 @@ public abstract class AbstractClientPlayer : IPlayer
     ISession? IPlayer.Session => Session;
     
     public int Score { get; set; }
-    public List<WordCard> HoldingCards { get; } = new();
+    public List<HoldingWordCardEntry> HoldingCards { get; } = new();
     public PlayerState State { get; set; }
 
     protected AbstractClientPlayer(string name)

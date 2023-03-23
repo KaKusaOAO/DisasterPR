@@ -7,6 +7,13 @@ public class CardPackBuilder
     public List<CardCategory> Categories { get; } = new();
     public List<TopicCard> Topics { get; } = new();
     public List<WordCard> Words { get; } = new();
+    public Guid? ExplicitGuid { get; private set; } = Guid.NewGuid();
+
+    public CardPackBuilder WithExplicitGuid(Guid guid)
+    {
+        ExplicitGuid = guid;
+        return this;
+    }
 
     public CardPackBuilder AddCategory(Guid guid, string label) => AddCategory(new CardCategory(guid, label));
     
@@ -82,7 +89,9 @@ public class CardPackBuilder
         {
             throw new Exception("Repeating category Guid!");
         }
-        
-        return new(Categories.ToArray(), Topics.ToArray(), Words.ToArray());
+
+        return ExplicitGuid.HasValue
+            ? new CardPack(ExplicitGuid.Value, Categories.ToArray(), Topics.ToArray(), Words.ToArray())
+            : new CardPack(Categories.ToArray(), Topics.ToArray(), Words.ToArray());
     }
 }

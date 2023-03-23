@@ -227,7 +227,7 @@ public class ServerGameState : IGameState
         await SetTopicAsync(topic);
     }
 
-    public async Task ChooseWordAsync(ServerPlayer player, List<WordCard> cards)
+    public async Task ChooseWordAsync(ServerPlayer player, List<HoldingWordCardEntry> cards)
     {
         if (Thread.CurrentThread != _thread)
         {
@@ -241,11 +241,11 @@ public class ServerGameState : IGameState
             return;
         }
 
-        var entry = new ServerChosenWordEntry(this, player, cards);
+        var entry = new ServerChosenWordEntry(this, player, cards.Select(c => c.Card).ToList());
         CurrentChosenWords.Add(entry);
 
         var pack = Session.CardPack;
-        var words = cards.Select(w => pack.GetWordIndex(w)).ToList();
+        var words = cards.Select(w => pack.GetWordIndex(w.Card)).ToList();
         await Task.WhenAll(Session.Players.Select(p =>
             p.Connection.SendPacketAsync(new ClientboundAddChosenWordEntryPacket(entry.Id, entry.Player?.Id, words))));
 
@@ -365,7 +365,7 @@ public class ServerGameState : IGameState
             }
 
             p.HoldingCards.Clear();
-            p.HoldingCards.AddRange(words);
+            p.HoldingCards.AddRange(words.Select(w => new HoldingWordCardEntry(w)));
 
             var indices = words.Select(w => pack.GetWordIndex(w)).ToList();
             await conn.SendPacketAsync(new ClientboundSetTopicPacket(id));

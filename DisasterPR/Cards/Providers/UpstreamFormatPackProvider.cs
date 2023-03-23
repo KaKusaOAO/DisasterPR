@@ -13,7 +13,7 @@ public class UpstreamFormatPackProvider : IPackProvider
         Uri = uri;
     }
     
-    public virtual async Task<CardPack> MakeAsync()
+    public virtual async Task<CardPackBuilder> MakeBuilderAsync()
     {
         var http = new HttpClient();
         var request = await http.GetStreamAsync(Uri);
@@ -99,6 +99,6 @@ public class UpstreamFormatPackProvider : IPackProvider
             builder.AddWord(categories, pos, label);
         }
 
-        return builder.Build();
+        return builder;
     }
 }

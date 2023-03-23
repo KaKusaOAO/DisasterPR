@@ -112,7 +112,7 @@ public static class Program
                         var topic = session.LocalGameState.CurrentTopic;
                         var words = player.HoldingCards;
                         Logger.Info($"Topic: {topic.Texts.JoinStrings("____")}");
-                        Logger.Info($"Holding words: {words.Select(w => w.Label).JoinStrings(", ")}");
+                        Logger.Info($"Holding words: {words.Select(w => w.Card.Label).JoinStrings(", ")}");
 
                         var shuffledWords = Enumerable.Range(0, words.Count).Shuffled().ToList();
                         var cardCount = topic.AnswerCount;
@@ -123,7 +123,7 @@ public static class Program
                         }
 
                         var chosenWords = chosen.Select(i => words[i]);
-                        Logger.Info($"Choosing word: {chosenWords.Select(w => w.Label).JoinStrings(", ")}");
+                        Logger.Info($"Choosing word: {chosenWords.Select(w => w.Card.Label).JoinStrings(", ")}");
                         await session.LocalGameState.ChooseWordAsync(chosen.ToHashSet());
 
                         Logger.Info("Waiting for all the players to choose the words...");
