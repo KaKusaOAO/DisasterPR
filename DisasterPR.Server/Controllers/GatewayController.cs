@@ -26,7 +26,7 @@ public class GatewayController : ControllerBase
         {
             await Task.Yield();
             var player = connection.Player;
-            Logger.Info($"Player {player} connected from {info.RemoteIpAddress}:{info.RemotePort}: {e.Reason}");
+            Logger.Info($"Player {player.Name} disconnected from {info.RemoteIpAddress}:{info.RemotePort}: {e.Reason}");
             server.Players.Remove(player);
         };
 
