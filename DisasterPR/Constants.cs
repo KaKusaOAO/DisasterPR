@@ -2,7 +2,8 @@ namespace DisasterPR;
 
 public static class Constants
 {
-    public static Uri ServerUri => new Uri("ws://play.kakaouo.com:5221/gateway");
+    public const string ServerHost = "play.kakaouo.com:5221";
+    public static Uri ServerUri => new Uri($"ws://{ServerHost}/gateway");
     public const int ProtocolVersion = 1;
     public const int SessionMaxPlayers = 8;
 

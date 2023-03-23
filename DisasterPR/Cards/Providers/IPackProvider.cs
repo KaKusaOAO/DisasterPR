@@ -1,21 +1,38 @@
-﻿namespace DisasterPR.Cards.Providers;
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
+
+namespace DisasterPR.Cards.Providers;
 
 public interface IPackProvider
 {
     public static IPackProvider Upstream => new UpstreamPackProvider();
 
-    public static IPackProvider Default => new ConcatPackProvider(Upstream, AJinPack);
+    public static IPackProvider Default => new ConcatPackProvider(Upstream, Custom);
 
-    public static IPackProvider AJinPack => new LambdaPackProvider(async () =>
+    public static IPackProvider Custom => new LambdaPackProvider(async () =>
     {
-        await Task.Yield();
+        var http = new HttpClient();
+        var request = await http.GetStreamAsync(new Uri($"http://{Constants.ServerHost}/packs/customs.json"));
+        var data = (await JsonSerializer.DeserializeAsync<JsonObject>(request))!;
 
-        var category = new CardCategory(Guid.NewGuid(), "新投稿內容");
-        return CardPackBuilder.Create()
-            .AddCategory(category)
-            .AddTopic(category, "這個標籤需要你的投稿！____是我們的傳統！")
-            .AddWord(category, PartOfSpeech.Verb, "吃魚喝茶")
-            ;
+        var category = new CardCategory(Guid.NewGuid(), "投稿內容！");
+        var builder = CardPackBuilder.Create().AddCategory(category);
+
+        foreach (var node in data["topics"]!.AsArray())
+        {
+            var texts = node!["texts"]!.GetValue<string>();
+            builder.AddTopic(category, texts);
+        }
+
+        foreach (var node in data["words"]!.AsArray())
+        {
+            var label = node!["label"]!.GetValue<string>();
+            var posStr = node!["pos"]!.GetValue<string>();
+            var pos = Enum.Parse<PartOfSpeech>(posStr, true);
+            builder.AddWord(category, pos, label);
+        }
+
+        return builder;
     });
 
     public Task<CardPackBuilder> MakeBuilderAsync();
