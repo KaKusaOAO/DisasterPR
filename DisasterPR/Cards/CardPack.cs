@@ -61,6 +61,11 @@ public class CardPack
         stream.WriteList(Words.ToList(), (s, i) => i.Serialize(s));
     }
 
+    public List<TopicCard> FilteredTopicsByEnabledCategories(List<CardCategory> categories) =>
+        Topics.Where(t => t.Categories.All(categories.Contains)).ToList();
+    public List<WordCard> FilteredWordsByEnabledCategories(List<CardCategory> categories) =>
+        Words.Where(w => w.Categories.All(categories.Contains)).ToList();
+    
     public int GetTopicIndex(TopicCard card) => Topics.IndexOf(card);
     public int GetWordIndex(WordCard card) => Words.IndexOf(card);
 }

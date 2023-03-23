@@ -33,7 +33,7 @@ public class ServerGameState : IGameState
 
     public (TopicCard Left, TopicCard Right)? CandidateTopics { get; private set; }
     public int RoundCycle { get; set; } = 1;
-    
+
     private ShuffledPool<TopicCard> _topics;
 
     private CancellationTokenSource _cts = new();
@@ -81,7 +81,7 @@ public class ServerGameState : IGameState
                 }
             }
         }
-        
+
         Logger.Warn("Event loop stopped!");
     }
 
@@ -93,11 +93,14 @@ public class ServerGameState : IGameState
             return;
         }
 
-        _topics = new ShuffledPool<TopicCard>(Session.CardPack.Topics);
+        _topics = new ShuffledPool<TopicCard>(
+            Session.CardPack.FilteredTopicsByEnabledCategories(Session.Options.EnabledCategories));
 
         foreach (var player in Session.Players)
         {
-            player.CardPool = new ShuffledPool<WordCard>(Session.CardPack.Words);
+            player.CardPool =
+                new ShuffledPool<WordCard>(
+                    Session.CardPack.FilteredWordsByEnabledCategories(Session.Options.EnabledCategories));
         }
     }
 
@@ -163,7 +166,7 @@ public class ServerGameState : IGameState
             _actions.Enqueue(StartAsync);
             return;
         }
-        
+
         ShuffleTopicsAndWords();
         await ChangeStateAndUpdateAsync(StateOfGame.Started);
         await ChangeCurrentPlayerIndexAndUpdateAsync(0);
@@ -295,7 +298,7 @@ public class ServerGameState : IGameState
             if (_cts.IsCancellationRequested) return false;
             time--;
         }
-        
+
         SendTimerUpdate();
         return true;
     }
@@ -311,7 +314,7 @@ public class ServerGameState : IGameState
             var players = Session.Players
                 .Where(p => p != CurrentPlayer)
                 .Where(p => CurrentChosenWords.All(w => w.Player != p));
-            
+
             foreach (var _ in players)
             {
                 var entry = new ServerChosenWordEntry(this, null, new List<WordCard>());
@@ -324,7 +327,7 @@ public class ServerGameState : IGameState
 
             await StartFinalAsync();
         }
-        
+
         if (Thread.CurrentThread != _thread)
         {
             _actions.Enqueue(RunChooseEmptyWordAsync);
@@ -341,7 +344,7 @@ public class ServerGameState : IGameState
             _actions.Enqueue(async () => await SetTopicAsync(topic));
             return;
         }
-        
+
         if (CurrentState != StateOfGame.ChoosingTopic)
         {
             throw new InvalidOperationException("Attempted to choose topic when it's not the time to do it");
@@ -392,7 +395,7 @@ public class ServerGameState : IGameState
             _actions.Enqueue(async () => await ChooseFinalAsync(player, index));
             return;
         }
-        
+
         if (CurrentState != StateOfGame.ChoosingFinal)
         {
             throw new InvalidOperationException("Attempted to choose final card when it's not the time to do it");
@@ -412,7 +415,7 @@ public class ServerGameState : IGameState
             p.Connection.SendPacketAsync(new ClientboundSetFinalPacket(index))));
 
         await Task.Delay(1000);
-        
+
         if (credit != null)
         {
             var score = credit.Score + 1;
@@ -428,6 +431,7 @@ public class ServerGameState : IGameState
                 return;
             }
         }
+
         await PrepareNextRoundAsync();
     }
 
@@ -447,13 +451,14 @@ public class ServerGameState : IGameState
             {
                 await ChangeRoundCycleCountAndUpdateAsync(RoundCycle + 1);
             }
+
             await ChangeCurrentPlayerIndexAndUpdateAsync(pIndex);
             await StartRoundAsync();
         });
     }
 
     private async Task ChangeRoundCycleCountAndUpdateAsync(int cycle)
-    { 
+    {
         if (Thread.CurrentThread != _thread)
         {
             _actions.Enqueue(async () => await ChangeRoundCycleCountAndUpdateAsync(cycle));

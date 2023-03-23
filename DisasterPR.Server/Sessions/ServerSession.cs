@@ -111,6 +111,7 @@ public class ServerSession : Session<ServerPlayer>
             }
             
             Players.Clear();
+            Common.AcquireSemaphore(_lock, () => _occupiedRooms--);
             Emptied?.Invoke();
             return;
         }
