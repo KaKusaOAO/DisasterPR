@@ -23,14 +23,14 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             var server = GameServer.Instance;
             foreach (var p in server.Players.Where(p => p.Session == null))
             {
-                await p.Connection.SendPacketAsync(new ClientboundChatPacket(p.Name, packet.Content));
+                await p.Connection.SendPacketAsync(new ClientboundChatPacket(Player.Name, packet.Content));
             }
         }
         else
         {
             foreach (var p in Player.Session.Players)
             {
-                await p.Connection.SendPacketAsync(new ClientboundChatPacket(p.Name, packet.Content));
+                await p.Connection.SendPacketAsync(new ClientboundChatPacket(Player.Name, packet.Content));
             }
         }
     }

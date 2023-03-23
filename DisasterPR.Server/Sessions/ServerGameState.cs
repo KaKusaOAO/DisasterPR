@@ -43,6 +43,7 @@ public class ServerGameState : IGameState
     private List<ServerChosenWordEntry> _chosenWords = new();
 
     private ConcurrentQueue<Func<Task>> _actions = new();
+    private bool _hasChosenFinal;
 
     private Thread _thread;
 
@@ -201,6 +202,7 @@ public class ServerGameState : IGameState
 
         await CurrentPlayer.Connection.SendPacketAsync(new ClientboundSetCandidateTopicsPacket(left, right));
         await ChangeStateAndUpdateAsync(StateOfGame.ChoosingTopic);
+        _hasChosenFinal = false;
         _ = ChooseOtherRandomTopicAsync();
     }
 
@@ -400,6 +402,9 @@ public class ServerGameState : IGameState
         {
             throw new InvalidOperationException("Wrong player is choosing the final");
         }
+
+        if (_hasChosenFinal) return;
+        _hasChosenFinal = true;
 
         var chosen = CurrentChosenWords[index];
         var credit = chosen.Player;
