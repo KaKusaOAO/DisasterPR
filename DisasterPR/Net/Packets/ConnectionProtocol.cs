@@ -48,6 +48,7 @@ public class ConnectionProtocol
             .AddPacket(s => new ClientboundUpdateTimerPacket(s))
             .AddPacket(s => new ClientboundUpdateRoundCyclePacket(s))
             .AddPacket(s => new ClientboundUpdatePlayerStatePacket(s))
+            .AddPacket(s => new ClientboundReplacePlayerPacket(s))
         )
         .AddFlow(PacketFlow.Serverbound, new PacketSet()
             .AddPacket(s => new ServerboundHeartbeatPacket(s))
