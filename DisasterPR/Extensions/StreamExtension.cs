@@ -186,7 +186,7 @@ public static class vStreamExtension
         writer(stream, value!);
     }
     
-    public static void WriteOptional<T>(this Stream stream, T? value, Action<Stream, T> writer) where T : struct
+    public static void WriteNullable<T>(this Stream stream, T? value, Action<Stream, T> writer) where T : struct
     {
         var present = value.HasValue;
         stream.WriteBool(present);
@@ -197,4 +197,7 @@ public static class vStreamExtension
     
     public static T? ReadOptional<T>(this Stream stream, Func<Stream, T> reader) => 
         !stream.ReadBool() ? default : reader(stream);
+    
+    public static T? ReadNullable<T>(this Stream stream, Func<Stream, T> reader) where T : struct => 
+        !stream.ReadBool() ? null : reader(stream);
 }

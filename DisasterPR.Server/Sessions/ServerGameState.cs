@@ -223,7 +223,7 @@ public class ServerGameState : IGameState
         await SetTopicAsync(topic);
     }
 
-    public async Task ChooseWordAsync(ServerPlayer player, List<HoldingWordCardEntry> cards)
+    public async Task ChooseWordAsync(ISessionPlayer player, List<HoldingWordCardEntry> cards)
     {
         if (Thread.CurrentThread != _thread)
         {

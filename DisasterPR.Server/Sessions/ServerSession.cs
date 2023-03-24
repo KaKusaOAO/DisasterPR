@@ -77,10 +77,111 @@ public class ServerSession : Session<ISessionPlayer>
             await p.UpdateSessionOptions(this);
         }));
     }
-    
-    public async Task PlayerJoinAsync(ISessionPlayer player)
+
+    public async Task<bool> CheckPlayerCanJoinAsync(ServerPlayer player)
     {
-        await player.SendJoinRoomSequenceAsync(this);
+        if (GameState.CurrentState != StateOfGame.Waiting)
+        {
+            var aiPlayers = Players.Where(s => s is AIPlayer).Cast<AIPlayer>().ToList();
+            var ai = aiPlayers.Find(a => a.OriginalName == player.Name);
+            if (ai == null)
+            {
+                await player.Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.RoomPlaying);
+                return false;
+            }
+
+            var index = Players.FindIndex(a => a == ai);
+            Players.Remove(ai);
+            
+            await player.SendJoinRoomSequenceAsync(this, index);
+            Players.Insert(index, player);
+        
+            player.Disconnected += OnPlayerDisconnectedAsync;
+            await Task.WhenAll(Players.Where(p => p != player).Select(async p =>
+            {
+                await p.OnReplaceSessionPlayerAsync(index, player);
+                await player.OnOtherPlayerUpdateStateAsync(p);
+            }));
+
+            player.Session = this;
+            player.CardPool = ai.CardPool;
+            player.HoldingCards.Clear();
+            player.HoldingCards.AddRange(ai.HoldingCards);
+            await SendAllCurrentStateToPlayerAsync(player);
+
+            player.State = PlayerState.InGame;
+            await Task.WhenAll(Players.Select(async p =>
+            {
+                await p.OnOtherPlayerUpdateStateAsync(player);
+            }));
+                    
+            return false;
+        }
+            
+        if (Players.Count >= Constants.SessionMaxPlayers)
+        {
+            await player.Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.RoomFull);
+            return false;
+        }
+
+        if (Players.Find(p => p.Id == player.Id) != null)
+        {
+            await player.Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.GuidDuplicate);
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task SendAllCurrentStateToPlayerAsync(ISessionPlayer player)
+    {
+        var state = GameState.CurrentState;
+        if (state != StateOfGame.Waiting && state != StateOfGame.WinResult)
+        {
+            // Send started state first so player can enter the game screen
+            await player.UpdateSessionGameStateAsync(StateOfGame.Started);
+            await player.UpdateSessionGameStateAsync(state);
+        }
+
+        if (state == StateOfGame.ChoosingTopic)
+        {
+            var candidates = GameState.CandidateTopics;
+            if (candidates.HasValue)
+            {
+                var left = CardPack!.GetTopicIndex(candidates.Value.Left);
+                var right = CardPack.GetTopicIndex(candidates.Value.Right);
+                await player.UpdateCandidateTopicsAsync(left, right);
+            }
+        }
+
+        if (state >= StateOfGame.ChoosingWord)
+        {
+            var topic = GameState.CurrentTopic;
+            if (topic != null!)
+            {
+                var id = CardPack!.GetTopicIndex(topic);
+                await player.UpdateCurrentTopicAsync(id);
+            }
+
+            var holdings = player.HoldingCards.Select(w => CardPack!.GetWordIndex(w.Card)).ToList();
+            await player.UpdateHoldingWordsAsync(holdings);
+
+            foreach (var chosen in GameState.CurrentChosenWords)
+            {
+                await player.AddChosenWordEntryAsync(chosen.Id, chosen.PlayerId,
+                    chosen.Words.Select(w => CardPack!.GetWordIndex(w)).ToList());
+                
+                if (chosen.IsRevealed)
+                {
+                    await player.RevealChosenWordEntryAsync(chosen.Id);
+                }
+            }
+        }
+    }
+
+    public async Task PlayerJoinAsync(ISessionPlayer player, int? selfIndex = null)
+    {
+        await player.SendJoinRoomSequenceAsync(this, selfIndex);
         
         player.Disconnected += OnPlayerDisconnectedAsync;
         await Task.WhenAll(Players.Select(async p =>
@@ -112,11 +213,14 @@ public class ServerSession : Session<ISessionPlayer>
         // Try to replace the player by an AI player
         var ai = new AIPlayer(player);
         var index = Players.IndexOf(player);
-        await Task.WhenAll(Players.Select(async p =>
+        Players[index] = ai;
+        await Task.WhenAll(Players.Where(p => p != ai).Select(async p =>
         {
             await p.OnReplaceSessionPlayerAsync(index, ai);
             await p.OnOtherPlayerUpdateStateAsync(ai);
         }));
+        
+        await SendAllCurrentStateToPlayerAsync(ai);
     }
 
     private async Task InternalPlayerLeaveAsync(ISessionPlayer player)

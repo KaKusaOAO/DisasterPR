@@ -91,24 +91,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         
         await session.AcquireAsync(async () =>
         {
-            if (session.GameState.CurrentState != StateOfGame.Waiting)
-            {
-                await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.RoomPlaying);
-                return;
-            }
-            
-            if (session.Players.Count >= Constants.SessionMaxPlayers)
-            {
-                await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.RoomFull);
-                return;
-            }
-
-            if (session.Players.Find(p => p.Id == Player.Id) != null)
-            {
-                await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.GuidDuplicate);
-                return;
-            }
-
+            if (!await session.CheckPlayerCanJoinAsync(Player)) return;
             await session.PlayerJoinAsync(Player);
         });
     }
@@ -271,6 +254,8 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             if (session == null) return;
             await Task.Yield();
 
+            if (Player != session.HostPlayer) return;
+            
             var options = session.Options;
             options.WinScore = packet.WinScore;
             options.CountdownTimeSet = packet.CountdownTimeSet;

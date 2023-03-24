@@ -10,6 +10,6 @@ public static class Constants
     public const string CommandPrefix = "/";
 
     public const bool EnableTestRoom = true;
-    public const int TestRoomId = 9876;
+    public const int TestRoomId = 1314520;
     public const int TestRoomPlayersCount = 3;
 }

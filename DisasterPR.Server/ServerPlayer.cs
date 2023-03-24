@@ -51,9 +51,9 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
     public Task UpdateSessionOptions(ServerSession session) => 
         Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(session));
 
-    public async Task SendJoinRoomSequenceAsync(ServerSession session)
+    public async Task SendJoinRoomSequenceAsync(ServerSession session, int? selfIndex = null)
     {
-        await Connection.SendPacketAsync(new ClientboundJoinedRoomPacket(session));
+        await Connection.SendPacketAsync(new ClientboundJoinedRoomPacket(session, selfIndex));
         await Connection.SendPacketAsync(new ClientboundSetCardPackPacket(session.CardPack!));
         await Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(session));
     }

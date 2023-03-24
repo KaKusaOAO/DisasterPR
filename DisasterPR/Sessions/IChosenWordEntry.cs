@@ -7,4 +7,5 @@ public interface IChosenWordEntry
     public List<WordCard> Words { get; }
     public Guid? PlayerId { get; } 
     public Guid Id { get; }
+    public bool IsRevealed { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using DisasterPR.Cards;
 using DisasterPR.Events;
+using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 
 namespace DisasterPR.Server.Sessions;
@@ -15,7 +16,10 @@ public class AIPlayer : ISessionPlayer
     public AIPlayer(ISessionPlayer player)
     {
         Id = player.Id;
-        OriginalName = Name = player.Name;
+
+        Name = player.Name;
+        OriginalName = player is AIPlayer ai ? ai.OriginalName : Name;
+        
         if (player is ServerPlayer)
         {
             Name += "的幽靈";
@@ -30,7 +34,7 @@ public class AIPlayer : ISessionPlayer
 
     public Task SetCardPackAsync(CardPack pack) => Task.CompletedTask;
     public Task UpdateSessionOptions(ServerSession session) => Task.CompletedTask;
-    public Task SendJoinRoomSequenceAsync(ServerSession session) => Task.CompletedTask;
+    public Task SendJoinRoomSequenceAsync(ServerSession session, int? selfIndex = null) => Task.CompletedTask;
     public Task OnNewPlayerJoinedSessionAsync(ISessionPlayer player) => Task.CompletedTask;
     public Task OnPlayerLeftSessionAsync(ISessionPlayer player) => Task.CompletedTask;
     public Task OnOtherPlayerUpdateStateAsync(ISessionPlayer player) => Task.CompletedTask;
@@ -61,7 +65,36 @@ public class AIPlayer : ISessionPlayer
 
     public async Task UpdateTimerAsync(int timer)
     {
+        if (Random.Shared.NextDouble() > 0.33) return;
         await Task.Yield();
+        
+        // Process AI step
+        var stateOpt = Session?.GameState.CurrentState;
+        if (!stateOpt.HasValue) return;
+
+        var state = stateOpt.Value;
+        var context = Session!.ServerGameState;
+        
+        if (state == StateOfGame.ChoosingTopic && context.CurrentPlayer == this)
+        {
+            var side = Random.Shared.Next(2) > 0 ? HorizontalSide.Left : HorizontalSide.Right;
+            await context.ChooseTopicAsync(side);
+        }
+        
+        if (state == StateOfGame.ChoosingWord && context.CurrentPlayer != this)
+        {
+            if (context.CurrentChosenWords.All(c => c.Player != this))
+            {
+                var count = context.CurrentTopic.AnswerCount;
+                var list = HoldingCards.Shuffled().Take(count).ToList();
+                await context.ChooseWordAsync(this, list);
+            }
+        }
+
+        if (state == StateOfGame.ChoosingFinal && context.CurrentPlayer == this)
+        {
+            
+        }
     }
 
     public Task UpdateCurrentTopicAsync(int id) => Task.CompletedTask;

@@ -18,7 +18,7 @@ public interface ISessionPlayer : IPlayer
     public Task SetCardPackAsync(CardPack pack);
     public Task UpdateSessionOptions(ServerSession session);
 
-    public Task SendJoinRoomSequenceAsync(ServerSession session);
+    public Task SendJoinRoomSequenceAsync(ServerSession session, int? selfIndex = null);
     public Task OnNewPlayerJoinedSessionAsync(ISessionPlayer player);
     public Task OnPlayerLeftSessionAsync(ISessionPlayer player);
     public Task OnOtherPlayerUpdateStateAsync(ISessionPlayer player);
