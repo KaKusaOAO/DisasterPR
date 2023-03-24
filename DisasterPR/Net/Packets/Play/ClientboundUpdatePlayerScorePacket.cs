@@ -25,5 +25,5 @@ public class ClientboundUpdatePlayerScorePacket : IPacket<IClientPlayPacketHandl
         stream.WriteVarInt(Score);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleUpdatePlayerScoreAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdatePlayerScore(this);
 }

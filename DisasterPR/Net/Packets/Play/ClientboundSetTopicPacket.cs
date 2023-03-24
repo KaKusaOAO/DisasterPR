@@ -21,5 +21,5 @@ public class ClientboundSetTopicPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteVarInt(Index);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleSetTopicPacket(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleSetTopic(this);
 }

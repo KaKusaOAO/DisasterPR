@@ -25,5 +25,5 @@ public class ClientboundChatPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteUtf8String(Content);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleChatAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleChat(this);
 }

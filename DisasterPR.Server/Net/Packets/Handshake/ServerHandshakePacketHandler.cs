@@ -14,9 +14,8 @@ public class ServerHandshakePacketHandler : IServerHandshakePacketHandler
         Connection = connection;
     }
 
-    public async Task HandleHelloAsync(ServerboundHelloPacket packet)
+    public void HandleHello(ServerboundHelloPacket packet)
     {
-        await Task.Yield();
         Logger.Verbose($"The client is using protocol version {packet.Version}");
         Connection.ProtocolVersion = packet.Version;
         Connection.CurrentState = PacketState.Login;

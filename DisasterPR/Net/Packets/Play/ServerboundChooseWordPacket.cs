@@ -21,5 +21,5 @@ public class ServerboundChooseWordPacket : IPacket<IServerPlayPacketHandler>
         stream.WriteList(Indices.ToList(), (s, i) => s.WriteVarInt(i));
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleChooseWordAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleChooseWord(this);
 }

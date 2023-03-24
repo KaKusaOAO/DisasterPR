@@ -11,10 +11,10 @@ public class BinaryProvider : IPackProvider
         Stream = stream;
     }
 
-    public async Task<CardPackBuilder> MakeBuilderAsync()
+    public CardPackBuilder MakeBuilder()
     {
         var guid = Stream.ReadGuid();
-        if (guid == Guid.Empty) return await new UpstreamPackProvider().MakeBuilderAsync();
+        if (guid == Guid.Empty) return new UpstreamPackProvider().MakeBuilder();
 
         var builder = CardPackBuilder.Create().WithExplicitGuid(guid);
         builder.Categories.AddRange(Stream.ReadList(CardCategory.Deserialize));

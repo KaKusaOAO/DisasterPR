@@ -21,5 +21,5 @@ public class ClientboundSetFinalPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteVarInt(Index);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleSetFinalPacket(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleSetFinal(this);
 }

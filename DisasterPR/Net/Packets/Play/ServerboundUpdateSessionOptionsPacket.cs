@@ -39,5 +39,5 @@ public class ServerboundUpdateSessionOptionsPacket : IPacket<IServerPlayPacketHa
         stream.WriteList(EnabledCategories, (s, g) => s.WriteGuid(g));
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleUpdateSessionOptionsAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleUpdateSessionOptions(this);
 }

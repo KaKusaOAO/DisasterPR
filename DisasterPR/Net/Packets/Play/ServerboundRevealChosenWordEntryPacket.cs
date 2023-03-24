@@ -21,5 +21,5 @@ public class ServerboundRevealChosenWordEntryPacket : IPacket<IServerPlayPacketH
         stream.WriteGuid(Guid);
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleRevealChosenWordEntryAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleRevealChosenWordEntry(this);
 }

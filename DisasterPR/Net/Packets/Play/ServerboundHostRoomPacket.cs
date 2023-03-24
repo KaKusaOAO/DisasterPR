@@ -17,5 +17,5 @@ public class ServerboundHostRoomPacket : IPacket<IServerPlayPacketHandler>
         // throw new NotImplementedException();
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleHostRoomAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleHostRoom(this);
 }

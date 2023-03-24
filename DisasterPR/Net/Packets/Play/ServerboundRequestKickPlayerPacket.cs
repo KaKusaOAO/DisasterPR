@@ -21,5 +21,5 @@ public class ServerboundRequestKickPlayerPacket : IPacket<IServerPlayPacketHandl
         stream.WriteGuid(PlayerId);    
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleRequestKickPlayerAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleRequestKickPlayer(this);
 }

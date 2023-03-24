@@ -21,12 +21,12 @@ public class UpstreamPackProvider : UpstreamFormatPackProvider
         }
     }
     
-    public override async Task<CardPackBuilder> MakeBuilderAsync()
+    public override CardPackBuilder MakeBuilder()
     {
         InvalidateExpiredCache();
         if (_cache != null) return _cache;
 
-        var pack = await base.MakeBuilderAsync();
+        var pack = base.MakeBuilder();
         _cache = pack.WithExplicitGuid(Guid.Empty);
         _lastUpdate = DateTimeOffset.Now;
         return _cache;

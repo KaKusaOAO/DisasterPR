@@ -10,7 +10,7 @@ Logger.Level = LogLevel.Verbose;
 Logger.Logged += Logger.LogToEmulatedTerminalAsync;
 Logger.RunThreaded();
 
-var pack = await CardPack.GetUpstreamAsync();
+var pack = CardPack.GetUpstream();
 var buffer = new MemoryStream();
 pack.Serialize(buffer);
 buffer.Position = 0;

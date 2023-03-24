@@ -10,7 +10,7 @@ namespace DisasterPR.Server.Sessions;
 
 public class ServerSession : Session<ServerPlayer>
 {
-    public override CardPack? CardPack { get; set; } = IPackProvider.Default.MakeBuilderAsync().Result.Build();
+    public override CardPack? CardPack { get; set; } = IPackProvider.Default.Make();
 
     public bool IsValid { get; set; } = true;
     

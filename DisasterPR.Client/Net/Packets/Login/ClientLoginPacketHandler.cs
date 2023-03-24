@@ -17,15 +17,14 @@ public class ClientLoginPacketHandler : IClientLoginPacketHandler
         Connection = connection;
     }
 
-    public Task HandleAckAsync(ClientboundAckPacket packet)
+    public void HandleAck(ClientboundAckPacket packet)
     {
         Logger.Verbose($"Player {Player.Name} ID is {packet.Id}");
         Player.Id = packet.Id;
         Connection.CurrentState = PacketState.Play;
-        return Task.CompletedTask;
     }
 
-    public async Task HandleDisconnectAsync(ClientboundDisconnectPacket packet)
+    public async void HandleDisconnect(ClientboundDisconnectPacket packet)
     {
         await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
     }

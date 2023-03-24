@@ -35,5 +35,5 @@ public interface IPackProvider
         return builder;
     });
 
-    public Task<CardPackBuilder> MakeBuilderAsync();
+    public CardPackBuilder MakeBuilder();
 }

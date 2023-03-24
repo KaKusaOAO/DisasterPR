@@ -21,5 +21,5 @@ public class ClientboundUpdateRoundCyclePacket : IPacket<IClientPlayPacketHandle
         stream.WriteVarInt(Count);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleUpdateRoundCycleAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdateRoundCycle(this);
 }

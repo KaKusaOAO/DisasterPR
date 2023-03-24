@@ -22,27 +22,5 @@ public class ClientboundGameStateChangePacket : IPacket<IClientPlayPacketHandler
         stream.WriteVarInt((int) State);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleGameStateChangeAsync(this);
-}
-
-public class ClientboundGameCurrentPlayerChangePacket : IPacket<IClientPlayPacketHandler>
-{
-    public int Index { get; set; }
-    
-    public ClientboundGameCurrentPlayerChangePacket(int index)
-    {
-        Index = index;
-    }
-
-    public ClientboundGameCurrentPlayerChangePacket(MemoryStream stream)
-    {
-        Index = stream.ReadVarInt();
-    }
-    
-    public void Write(MemoryStream stream)
-    {
-        stream.WriteVarInt(Index);
-    }
-
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleGameCurrentPlayerChangeAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleGameStateChange(this);
 }

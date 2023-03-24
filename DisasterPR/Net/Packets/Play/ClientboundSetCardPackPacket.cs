@@ -21,5 +21,5 @@ public class ClientboundSetCardPackPacket : IPacket<IClientPlayPacketHandler>
         CardPack.Serialize(stream);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleSetCardPackAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleSetCardPack(this);
 }

@@ -40,5 +40,5 @@ public class ClientboundAddChosenWordEntryPacket : IPacket<IClientPlayPacketHand
         stream.WriteList(Words, (s, i) => s.WriteVarInt(i));
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleAddChosenWordEntryAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleAddChosenWordEntry(this);
 }

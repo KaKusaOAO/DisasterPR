@@ -21,5 +21,5 @@ public class ClientboundSetWordsPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteList(Words, (s, i) => s.WriteVarInt(i));
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleSetWordsPacket(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleSetWords(this);
 }

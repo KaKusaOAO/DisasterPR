@@ -21,5 +21,5 @@ public class ClientboundUpdateTimerPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteVarInt(RemainTime);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleUpdateTimerAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdateTimer(this);
 }

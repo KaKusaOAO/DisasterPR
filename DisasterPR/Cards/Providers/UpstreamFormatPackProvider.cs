@@ -13,11 +13,11 @@ public class UpstreamFormatPackProvider : IPackProvider
         Uri = uri;
     }
     
-    public virtual async Task<CardPackBuilder> MakeBuilderAsync()
+    public virtual CardPackBuilder MakeBuilder()
     {
-        var http = new HttpClient();
-        var request = await http.GetStreamAsync(Uri);
-        var data = (await JsonSerializer.DeserializeAsync<JsonObject>(request))!;
+        var backend = DisasterPRCore.Backend;
+        var request = backend.GetHttpStream(Uri)!;
+        var data = JsonSerializer.Deserialize<JsonObject>(request)!;
         var builder = CardPackBuilder.Create().AddBuiltinCategories();
         
         var pack = data["CardPack"]!.AsObject();
@@ -39,7 +39,7 @@ public class UpstreamFormatPackProvider : IPackProvider
             }
         }
 
-        foreach (var (key, value) in topicOneFill)
+        foreach (var (_, value) in topicOneFill)
         {
             if (value is not JsonObject) continue;
             

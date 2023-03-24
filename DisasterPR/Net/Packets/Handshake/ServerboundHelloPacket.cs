@@ -21,5 +21,5 @@ public class ServerboundHelloPacket : IPacket<IServerHandshakePacketHandler>
         stream.WriteVarInt(Version);
     }
 
-    public Task HandleAsync(IServerHandshakePacketHandler handler) => handler.HandleHelloAsync(this);
+    public void Handle(IServerHandshakePacketHandler handler) => handler.HandleHello(this);
 }

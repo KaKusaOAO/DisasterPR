@@ -17,5 +17,5 @@ public class ServerboundLeaveRoomPacket : IPacket<IServerPlayPacketHandler>
         
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleLeaveRoomAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleLeaveRoom(this);
 }

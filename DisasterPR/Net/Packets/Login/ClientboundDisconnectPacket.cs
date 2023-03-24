@@ -36,5 +36,5 @@ public class ClientboundDisconnectPacket : IPacket<IClientLoginPacketHandler>
         }
     }
 
-    public Task HandleAsync(IClientLoginPacketHandler handler) => handler.HandleDisconnectAsync(this);
+    public void Handle(IClientLoginPacketHandler handler) => handler.HandleDisconnect(this);
 }

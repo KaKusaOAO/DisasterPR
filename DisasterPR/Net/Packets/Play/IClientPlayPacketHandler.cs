@@ -2,25 +2,25 @@ namespace DisasterPR.Net.Packets.Play;
 
 public interface IClientPlayPacketHandler : IClientPacketHandler
 {
-    public Task HandleAddPlayerAsync(ClientboundAddPlayerPacket packet);
-    public Task HandleRemovePlayerAsync(ClientboundRemovePlayerPacket packet);
-    public Task HandleChatAsync(ClientboundChatPacket packet);
-    public Task HandleRoomDisconnectedAsync(ClientboundRoomDisconnectedPacket packet);
-    public Task HandleHeartbeatAsync(ClientboundHeartbeatPacket packet);
-    public Task HandleJoinedRoomAsync(ClientboundJoinedRoomPacket packet);
-    public Task HandleSetCardPackAsync(ClientboundSetCardPackPacket packet);
-    public Task HandleSetCandidateTopicsPacket(ClientboundSetCandidateTopicsPacket packet);
-    public Task HandleSetTopicPacket(ClientboundSetTopicPacket packet);
-    public Task HandleSetWordsPacket(ClientboundSetWordsPacket packet);
-    public Task HandleSetFinalPacket(ClientboundSetFinalPacket packet);
-    public Task HandleGameStateChangeAsync(ClientboundGameStateChangePacket packet);
-    public Task HandleGameCurrentPlayerChangeAsync(ClientboundGameCurrentPlayerChangePacket packet);
-    public Task HandleAddChosenWordEntryAsync(ClientboundAddChosenWordEntryPacket packet);
-    public Task HandleUpdateSessionOptionsPacket(ClientboundUpdateSessionOptionsPacket packet);
-    public Task HandleRevealChosenWordEntryAsync(ClientboundRevealChosenWordEntryPacket packet);
-    public Task HandleUpdatePlayerScoreAsync(ClientboundUpdatePlayerScorePacket packet);
-    public Task HandleSetWinnerPlayerAsync(ClientboundSetWinnerPlayerPacket packet);
-    public Task HandleUpdateTimerAsync(ClientboundUpdateTimerPacket packet);
-    public Task HandleUpdateRoundCycleAsync(ClientboundUpdateRoundCyclePacket packet);
-    public Task HandleUpdatePlayerStateAsync(ClientboundUpdatePlayerStatePacket packet);
+    public void HandleAddPlayer(ClientboundAddPlayerPacket packet);
+    public void HandleRemovePlayer(ClientboundRemovePlayerPacket packet);
+    public void HandleChat(ClientboundChatPacket packet);
+    public void HandleRoomDisconnected(ClientboundRoomDisconnectedPacket packet);
+    public void HandleHeartbeat(ClientboundHeartbeatPacket packet);
+    public void HandleJoinedRoom(ClientboundJoinedRoomPacket packet);
+    public void HandleSetCardPack(ClientboundSetCardPackPacket packet);
+    public void HandleSetCandidateTopics(ClientboundSetCandidateTopicsPacket packet);
+    public void HandleSetTopic(ClientboundSetTopicPacket packet);
+    public void HandleSetWords(ClientboundSetWordsPacket packet);
+    public void HandleSetFinal(ClientboundSetFinalPacket packet);
+    public void HandleGameStateChange(ClientboundGameStateChangePacket packet);
+    public void HandleGameCurrentPlayerChange(ClientboundGameCurrentPlayerChangePacket packet);
+    public void HandleAddChosenWordEntry(ClientboundAddChosenWordEntryPacket packet);
+    public void HandleUpdateSessionOptions(ClientboundUpdateSessionOptionsPacket packet);
+    public void HandleRevealChosenWordEntry(ClientboundRevealChosenWordEntryPacket packet);
+    public void HandleUpdatePlayerScore(ClientboundUpdatePlayerScorePacket packet);
+    public void HandleSetWinnerPlayer(ClientboundSetWinnerPlayerPacket packet);
+    public void HandleUpdateTimer(ClientboundUpdateTimerPacket packet);
+    public void HandleUpdateRoundCycle(ClientboundUpdateRoundCyclePacket packet);
+    public void HandleUpdatePlayerState(ClientboundUpdatePlayerStatePacket packet);
 }

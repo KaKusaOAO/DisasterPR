@@ -9,14 +9,9 @@ public class ConcatPackProvider : IPackProvider
         Providers.AddRange(providers);
     }
     
-    public async Task<CardPackBuilder> MakeBuilderAsync()
+    public CardPackBuilder MakeBuilder()
     {
-        var builders = new List<CardPackBuilder>();
-        foreach (var provider in Providers)
-        {
-            var b = await provider.MakeBuilderAsync();
-            builders.Add(b);
-        }
+        var builders = Providers.Select(provider => provider.MakeBuilder()).ToList();
 
         return builders.Aggregate(CardPackBuilder.Create(), (a, b) =>
         {

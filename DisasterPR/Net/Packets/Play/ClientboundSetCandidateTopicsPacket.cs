@@ -26,5 +26,5 @@ public class ClientboundSetCandidateTopicsPacket : IPacket<IClientPlayPacketHand
         stream.WriteVarInt(Right);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleSetCandidateTopicsPacket(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleSetCandidateTopics(this);
 }

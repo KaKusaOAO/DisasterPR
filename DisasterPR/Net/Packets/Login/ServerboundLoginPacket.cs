@@ -22,5 +22,5 @@ public class ServerboundLoginPacket : IPacket<IServerLoginPacketHandler>
         stream.WriteUtf8String(PlayerName);
     }
 
-    public Task HandleAsync(IServerLoginPacketHandler handler) => handler.HandleLoginAsync(this);
+    public void Handle(IServerLoginPacketHandler handler) => handler.HandleLogin(this);
 }

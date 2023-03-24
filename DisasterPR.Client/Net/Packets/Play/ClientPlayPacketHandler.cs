@@ -16,7 +16,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         Connection = connection;
     }
     
-    public async Task HandleAddPlayerAsync(ClientboundAddPlayerPacket packet)
+    public async void HandleAddPlayer(ClientboundAddPlayerPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -26,7 +26,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         await session.PlayerJoinAsync(player);
     }
 
-    public async Task HandleRemovePlayerAsync(ClientboundRemovePlayerPacket packet)
+    public async void HandleRemovePlayer(ClientboundRemovePlayerPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -39,7 +39,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         }
     }
 
-    public async Task HandleGameStateChangeAsync(ClientboundGameStateChangePacket packet)
+    public async void HandleGameStateChange(ClientboundGameStateChangePacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -47,7 +47,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         await session.LocalGameState.TransitionToStateAsync(packet.State);
     }
 
-    public async Task HandleGameCurrentPlayerChangeAsync(ClientboundGameCurrentPlayerChangePacket packet)
+    public async void HandleGameCurrentPlayerChange(ClientboundGameCurrentPlayerChangePacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -58,7 +58,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         state.OnCurrentPlayerUpdated();
     }
 
-    public async Task HandleChatAsync(ClientboundChatPacket packet)
+    public async void HandleChat(ClientboundChatPacket packet)
     {
         Game.Instance.InternalOnPlayerChat(new PlayerChatEventArgs
         {
@@ -67,16 +67,15 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         });  
     }
 
-    public Task HandleRoomDisconnectedAsync(ClientboundRoomDisconnectedPacket packet)
+    public void HandleRoomDisconnected(ClientboundRoomDisconnectedPacket packet)
     {
         Player.Session?.Invalidate();
         Player.Session = null;
-        return Task.CompletedTask;
     }
 
-    public Task HandleHeartbeatAsync(ClientboundHeartbeatPacket packet) => Task.CompletedTask;
+    public void HandleHeartbeat(ClientboundHeartbeatPacket packet) {}
     
-    public Task HandleJoinedRoomAsync(ClientboundJoinedRoomPacket packet)
+    public void HandleJoinedRoom(ClientboundJoinedRoomPacket packet)
     {
         var session = new LocalSession();
         session.Players.AddRange(packet.Players.Select(p => new RemotePlayer(p)
@@ -88,10 +87,9 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         session.RoomId = packet.RoomId;
         
         Player.Session = session;
-        return Task.CompletedTask;
     }
 
-    public async Task HandleSetCardPackAsync(ClientboundSetCardPackPacket packet)
+    public async void HandleSetCardPack(ClientboundSetCardPackPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -100,7 +98,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         session.CardPack = packet.CardPack;
     }
 
-    public async Task HandleSetCandidateTopicsPacket(ClientboundSetCandidateTopicsPacket packet)
+    public async void HandleSetCandidateTopics(ClientboundSetCandidateTopicsPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -112,7 +110,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         session.LocalGameState.CandidateTopics = (left, right);
     }
 
-    public async Task HandleSetTopicPacket(ClientboundSetTopicPacket packet)
+    public async void HandleSetTopic(ClientboundSetTopicPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -122,7 +120,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         session.LocalGameState.CurrentTopic = pack.Topics[packet.Index];
     }
 
-    public async Task HandleSetWordsPacket(ClientboundSetWordsPacket packet)
+    public async void HandleSetWords(ClientboundSetWordsPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -134,7 +132,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         Player.HoldingCards.AddRange(words);
     }
 
-    public async Task HandleAddChosenWordEntryAsync(ClientboundAddChosenWordEntryPacket packet)
+    public async void HandleAddChosenWordEntry(ClientboundAddChosenWordEntryPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -147,7 +145,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         state.CurrentChosenWords.Add(new LocalChosenWordEntry(packet.Id, state, player, words));
     }
 
-    public async Task HandleUpdateSessionOptionsPacket(ClientboundUpdateSessionOptionsPacket packet)
+    public async void HandleUpdateSessionOptions(ClientboundUpdateSessionOptionsPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -160,7 +158,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
             .Select(g => session.CardPack.Categories.First(c => c.Guid == g)).ToList();
     }
 
-    public async Task HandleRevealChosenWordEntryAsync(ClientboundRevealChosenWordEntryPacket packet)
+    public async void HandleRevealChosenWordEntry(ClientboundRevealChosenWordEntryPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -172,7 +170,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         Logger.Info($"Revealed chosen word: {chosen.Words.Select(w => w.Label).JoinStrings(", ")}");
     }
 
-    public async Task HandleSetFinalPacket(ClientboundSetFinalPacket packet)
+    public async void HandleSetFinal(ClientboundSetFinalPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -184,7 +182,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         Logger.Info($"Chosen final word: {chosen.Words.Select(w => w.Label).JoinStrings(", ")}");
     }
 
-    public async Task HandleUpdatePlayerScoreAsync(ClientboundUpdatePlayerScorePacket packet)
+    public async void HandleUpdatePlayerScore(ClientboundUpdatePlayerScorePacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -194,7 +192,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         player.Score = packet.Score;
     }
 
-    public async Task HandleSetWinnerPlayerAsync(ClientboundSetWinnerPlayerPacket packet)
+    public async void HandleSetWinnerPlayer(ClientboundSetWinnerPlayerPacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -203,7 +201,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         session.LocalGameState.WinnerPlayer = session.Players.Find(p => p.Id == packet.PlayerId);
     }
 
-    public async Task HandleUpdateTimerAsync(ClientboundUpdateTimerPacket packet) 
+    public async void HandleUpdateTimer(ClientboundUpdateTimerPacket packet) 
     {
         var session = Player.Session;
         if (session == null) return;
@@ -212,7 +210,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         session.LocalGameState.CurrentTimer = packet.RemainTime;
     }
 
-    public async Task HandleUpdateRoundCycleAsync(ClientboundUpdateRoundCyclePacket packet)
+    public async void HandleUpdateRoundCycle(ClientboundUpdateRoundCyclePacket packet)
     {
         var session = Player.Session;
         if (session == null) return;
@@ -221,7 +219,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         session.LocalGameState.RoundCycle = packet.Count;
     }
 
-    public async Task HandleUpdatePlayerStateAsync(ClientboundUpdatePlayerStatePacket packet)
+    public async void HandleUpdatePlayerState(ClientboundUpdatePlayerStatePacket packet)
     {
         var session = Player.Session;
         if (session == null) return;

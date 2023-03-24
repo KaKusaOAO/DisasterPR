@@ -26,5 +26,5 @@ public class ClientboundRemovePlayerPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteGuid(PlayerId);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleRemovePlayerAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleRemovePlayer(this);
 }

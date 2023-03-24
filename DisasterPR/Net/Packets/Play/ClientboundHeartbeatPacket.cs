@@ -17,5 +17,5 @@ public class ClientboundHeartbeatPacket : IPacket<IClientPlayPacketHandler>
         
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleHeartbeatAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleHeartbeat(this);
 }

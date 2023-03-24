@@ -32,5 +32,5 @@ public class ClientboundJoinedRoomPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteList(Players, (s, p) => s.WriteAddPlayerEntry(p));
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleJoinedRoomAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleJoinedRoom(this);
 }

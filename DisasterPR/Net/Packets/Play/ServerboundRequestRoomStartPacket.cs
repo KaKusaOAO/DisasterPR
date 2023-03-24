@@ -17,5 +17,5 @@ public class ServerboundRequestRoomStartPacket : IPacket<IServerPlayPacketHandle
         
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleRequestRoomStartAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleRequestRoomStart(this);
 }

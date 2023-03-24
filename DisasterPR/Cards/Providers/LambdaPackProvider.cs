@@ -2,14 +2,19 @@
 
 public class LambdaPackProvider : IPackProvider
 {
-    private Func<Task<CardPackBuilder>> _func;
+    private Func<CardPackBuilder> _func;
 
     public LambdaPackProvider(Func<Task<CardPackBuilder>> func)
+    {
+        _func = () => func().Result;
+    }
+    
+    public LambdaPackProvider(Func<CardPackBuilder> func)
     {
         _func = func;
     }
     
-    public Task<CardPackBuilder> MakeBuilderAsync()
+    public CardPackBuilder MakeBuilder()
     {
         return _func();
     }

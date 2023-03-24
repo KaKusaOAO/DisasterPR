@@ -21,5 +21,5 @@ public class ServerboundChooseFinalPacket : IPacket<IServerPlayPacketHandler>
         stream.WriteVarInt(Index);
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleChooseFinalAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleChooseFinal(this);
 }

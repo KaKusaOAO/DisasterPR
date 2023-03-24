@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Cards;
+using DisasterPR.Cards.Providers;
 using KaLib.Utils;
 
 namespace DisasterPR;
@@ -13,6 +14,6 @@ public static class Bootstrap
         _bootstrapped = true;
         
         Logger.Info("Prefetching upstream cardpack...");
-        await CardPack.GetUpstreamAsync();
+        await IPackProvider.Upstream.MakeAsync();
     }
 }

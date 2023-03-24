@@ -2,14 +2,19 @@
 
 public class LazyLambdaPackProvider : IPackProvider
 {
-    private Lazy<Task<CardPackBuilder>> _lazy;
+    private Lazy<CardPackBuilder> _lazy;
 
     public LazyLambdaPackProvider(Func<Task<CardPackBuilder>> func)
     {
-        _lazy = new Lazy<Task<CardPackBuilder>>(func);
+        _lazy = new Lazy<CardPackBuilder>(() => func().Result);
     }
     
-    public Task<CardPackBuilder> MakeBuilderAsync()
+    public LazyLambdaPackProvider(Func<CardPackBuilder> func)
+    {
+        _lazy = new Lazy<CardPackBuilder>(func);
+    }
+    
+    public CardPackBuilder MakeBuilder()
     {
         return _lazy.Value;
     }

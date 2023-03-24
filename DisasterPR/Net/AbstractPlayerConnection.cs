@@ -117,7 +117,7 @@ public abstract class AbstractPlayerConnection
                         .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
                     
                     var handler = Handlers[CurrentState];
-                    await packet.HandleAsync(handler);
+                    packet.Handle(handler);
                     
                     await _receivedPacketEvent.InvokeAsync(async e =>
                     {

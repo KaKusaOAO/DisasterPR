@@ -26,7 +26,7 @@ public class CardPackCommand : Command, IRegisteredCommand
             return;
         }
 
-        var builder = await IPackProvider.Default.MakeBuilderAsync();
+        var builder = IPackProvider.Default.MakeBuilder();
         var pack = builder.Build();
         await session.SetAndUpdateCardPackAsync(pack);
         await source.SendMessageAsync($"The card pack has been reset for session #{session.RoomId}");

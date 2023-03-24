@@ -46,5 +46,5 @@ public class ClientboundRoomDisconnectedPacket : IPacket<IClientPlayPacketHandle
         }
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleRoomDisconnectedAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleRoomDisconnected(this);
 }

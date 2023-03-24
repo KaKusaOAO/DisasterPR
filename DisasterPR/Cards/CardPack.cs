@@ -1,4 +1,5 @@
-﻿using DisasterPR.Cards.Providers;
+﻿using DisasterPR.Attributes;
+using DisasterPR.Cards.Providers;
 using DisasterPR.Extensions;
 
 namespace DisasterPR.Cards;
@@ -10,7 +11,7 @@ public class CardPack
     public TopicCard[] Topics { get; private set; }
     public WordCard[] Words { get; private set; }
 
-    public static Task<CardPack> GetUpstreamAsync() => IPackProvider.Upstream.MakeAsync();
+    public static CardPack GetUpstream() => IPackProvider.Upstream.Make();
 
     public bool IsUpstream => Guid == Guid.Empty;
 
@@ -38,7 +39,7 @@ public class CardPack
     public static CardPack Deserialize(Stream stream)
     {
         var guid = stream.ReadGuid();
-        if (guid == Guid.Empty) return GetUpstreamAsync().Result;
+        if (guid == Guid.Empty) return GetUpstream();
         
         var pack = new CardPack
         {

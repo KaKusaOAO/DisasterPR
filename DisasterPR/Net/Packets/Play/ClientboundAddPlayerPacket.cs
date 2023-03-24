@@ -25,5 +25,5 @@ public class ClientboundAddPlayerPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteUtf8String(PlayerName);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleAddPlayerAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleAddPlayer(this);
 }

@@ -21,5 +21,5 @@ public class ClientboundAckPacket : IPacket<IClientLoginPacketHandler>
         stream.WriteGuid(Id);
     }
 
-    public Task HandleAsync(IClientLoginPacketHandler handler) => handler.HandleAckAsync(this);
+    public void Handle(IClientLoginPacketHandler handler) => handler.HandleAck(this);
 }

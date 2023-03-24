@@ -21,5 +21,5 @@ public class ServerboundChooseTopicPacket : IPacket<IServerPlayPacketHandler>
         stream.WriteVarInt((int) Side);
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleChooseTopicAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleChooseTopic(this);
 }

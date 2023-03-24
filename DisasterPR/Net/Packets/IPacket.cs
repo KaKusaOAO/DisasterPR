@@ -3,12 +3,12 @@ namespace DisasterPR.Net.Packets;
 public interface IPacket
 {
     public void Write(MemoryStream stream);
-    public Task HandleAsync(IPacketHandler handler);
+    public void Handle(IPacketHandler handler);
 }
 
 public interface IPacket<in T> : IPacket where T: IPacketHandler
 {
-    public Task HandleAsync(T handler);
+    public void Handle(T handler);
 
-    Task IPacket.HandleAsync(IPacketHandler handler) => HandleAsync((T)handler);
+    void IPacket.Handle(IPacketHandler handler) => Handle((T)handler);
 }

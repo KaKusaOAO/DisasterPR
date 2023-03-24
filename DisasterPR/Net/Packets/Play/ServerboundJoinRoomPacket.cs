@@ -21,5 +21,5 @@ public class ServerboundJoinRoomPacket : IPacket<IServerPlayPacketHandler>
         stream.WriteVarInt(RoomId);
     }
 
-    public Task HandleAsync(IServerPlayPacketHandler handler) => handler.HandleJoinRoomAsync(this);
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleJoinRoom(this);
 }

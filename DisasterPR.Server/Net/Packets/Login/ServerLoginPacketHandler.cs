@@ -15,7 +15,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
         Connection = connection;
     }
 
-    public async Task HandleLoginAsync(ServerboundLoginPacket packet)
+    public async void HandleLogin(ServerboundLoginPacket packet)
     {
         var version = Connection.ProtocolVersion;
         if (version > Constants.ProtocolVersion)

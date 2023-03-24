@@ -27,5 +27,5 @@ public class ClientboundUpdatePlayerStatePacket : IPacket<IClientPlayPacketHandl
         stream.WriteVarInt((int) State);
     }
 
-    public Task HandleAsync(IClientPlayPacketHandler handler) => handler.HandleUpdatePlayerStateAsync(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdatePlayerState(this);
 }

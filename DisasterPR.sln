@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisasterPR.Client.Test", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisasterPR.Test", "DisasterPR.Test\DisasterPR.Test.csproj", "{1180A58C-F3B7-46B3-A52A-AF85973FD2AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisasterPR.Client.Unity", "DisasterPR.Client.Unity\DisasterPR.Client.Unity.csproj", "{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{1180A58C-F3B7-46B3-A52A-AF85973FD2AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1180A58C-F3B7-46B3-A52A-AF85973FD2AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1180A58C-F3B7-46B3-A52A-AF85973FD2AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
