@@ -79,8 +79,16 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         {
             Session = session
         }));
-        
-        session.Players.Add(Player);
+
+        if (packet.SelfIndex.HasValue)
+        {
+            session.Players.Insert(packet.SelfIndex.Value, Player);
+        }
+        else
+        {
+            session.Players.Add(Player);
+        }
+
         session.RoomId = packet.RoomId;
         
         Player.Session = session;
