@@ -29,7 +29,7 @@ public class LocalPlayer : AbstractClientPlayer
     
     private void InternalLogin()
     {
-        Logger.Verbose("Connection opened, sending handshake");
+        Logger.Info("Connection opened, sending handshake");
         Connection.SendPacket(new ServerboundHelloPacket(Constants.ProtocolVersion));
         Connection.CurrentState = PacketState.Login;
         Connection.SendPacket(new ServerboundLoginPacket(Name));

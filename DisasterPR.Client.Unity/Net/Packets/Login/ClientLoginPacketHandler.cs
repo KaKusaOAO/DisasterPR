@@ -24,6 +24,6 @@ public class ClientLoginPacketHandler : IClientLoginPacketHandler
 
     public void HandleDisconnect(ClientboundDisconnectPacket packet)
     {
-       Connection.WebSocket.Close();
+        Connection.HandleDisconnect(packet);
     }
 }

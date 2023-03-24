@@ -14,6 +14,7 @@ public class TaskManager : MonoBehaviour
     void Awake()
     {
         _instance = this;
+        DontDestroyOnLoad(gameObject);
     }
     
     void Update()

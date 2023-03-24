@@ -4,6 +4,7 @@ using DisasterPR.Events;
 using DisasterPR.Extensions;
 using DisasterPR.Net;
 using DisasterPR.Net.Packets;
+using DisasterPR.Net.Packets.Login;
 using DisasterPR.Net.Packets.Play;
 using KaLib.Texts;
 using KaLib.Utils;
@@ -38,9 +39,25 @@ public abstract class AbstractPlayerConnection
     protected AbstractPlayerConnection(IWebSocket webSocket)
     {
         WebSocket = webSocket;
+        webSocket.OnClose += e =>
+        {
+            if (e == WebSocketCloseCode.Normal) return;
+            
+            Disconnected?.Invoke(new DisconnectedEventArgs
+            {
+                Reason = PlayerKickReason.Disconnected
+            });
+        };
+        
         RawPacketIO = new RawPacketIO(webSocket);
         RawPacketIO.OnPacketReceived += RawPacketIOOnOnPacketReceived;
         _stopwatch.Start();
+        
+        TaskManager.Instance.AddTickable(() =>
+        {
+            Update();
+            return !IsConnected;
+        });
     }
 
     public void Update()
@@ -91,5 +108,14 @@ public abstract class AbstractPlayerConnection
         
         Logger.Verbose(TranslateText.Of("Sent packet: %s")
             .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
+    }
+
+    public void HandleDisconnect(ClientboundDisconnectPacket packet)
+    {
+        Disconnected?.Invoke(new DisconnectedEventArgs()
+        {
+            Reason = packet.Reason,
+            Message = packet.Message
+        });
     }
 }

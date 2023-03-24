@@ -26,13 +26,14 @@ public class ClientboundJoinedRoomPacket : IPacket<IClientPlayPacketHandler>
     public ClientboundJoinedRoomPacket(MemoryStream stream)
     {
         RoomId = stream.ReadVarInt();
-        SelfIndex = stream.ReadBool() ? stream.ReadVarInt() : null;
+        SelfIndex = stream.ReadOptional(s => s.ReadVarInt());
         Players = stream.ReadList(s => s.ReadAddPlayerEntry());
     }
     
     public void Write(MemoryStream stream)
     {
         stream.WriteVarInt(RoomId);
+        stream.WriteOptional(SelfIndex, (s, v) => s.WriteVarInt(v));
         stream.WriteList(Players, (s, p) => s.WriteAddPlayerEntry(p));
     }
 

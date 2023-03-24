@@ -1,8 +1,11 @@
+using System.Diagnostics;
 using System.Net.WebSockets;
 using DisasterPR.Client.Unity.Backends.WebSockets;
 using DisasterPR.Client.Unity.Net.Packets.Login;
 using DisasterPR.Client.Unity.Net.Packets.Play;
+using DisasterPR.Events;
 using DisasterPR.Net;
+using DisasterPR.Net.Packets.Login;
 using KaLib.Utils;
 using AbstractPlayerConnection = DisasterPR.Client.Unity.Net.AbstractPlayerConnection;
 
@@ -32,6 +35,7 @@ public class PlayerToServerConnection : AbstractPlayerConnection
         
         var uri = Constants.ServerUri;
         Logger.Info($"Connecting to server {uri}...");
+
         WebSocket.Connect();
         IsConnected = true;
     }
