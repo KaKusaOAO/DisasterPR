@@ -58,6 +58,18 @@ public class LocalSession : Session<AbstractClientPlayer>
         Players.Add(player);
         await _playerJoined.InvokeAsync(async d => await d(player));
     }
+    
+    public async Task PlayerReplaceAsync(int index, AbstractClientPlayer player)
+    {
+        var oldPlayer = Players[index];
+        Logger.Info($"Player {player.Name} ({player.Id}) has joined this session, " +
+                    $"replacing old player {oldPlayer.Name} ({oldPlayer.Id}).");
+        player.State = PlayerState.Joining;
+        Players[index] = player;
+        
+        await _playerLeft.InvokeAsync(async d => await d(oldPlayer));
+        await _playerJoined.InvokeAsync(async d => await d(player));
+    }
 
     public async Task PlayerLeaveAsync(AbstractClientPlayer player)
     {

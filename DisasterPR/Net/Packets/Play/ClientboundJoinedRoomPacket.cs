@@ -7,12 +7,15 @@ public class ClientboundJoinedRoomPacket : IPacket<IClientPlayPacketHandler>
 {
     public int RoomId { get; set; }
     
+    public int? SelfIndex { get; set; }
+    
     // All players without the receiver
     public List<AddPlayerEntry> Players { get; set; }
     
-    public ClientboundJoinedRoomPacket(ISession session)
+    public ClientboundJoinedRoomPacket(ISession session, int? selfIndex = null)
     {
         RoomId = session.RoomId;
+        SelfIndex = selfIndex;
         Players = session.Players.Select(p => new AddPlayerEntry
         {
             Guid = p.Id,
@@ -23,6 +26,7 @@ public class ClientboundJoinedRoomPacket : IPacket<IClientPlayPacketHandler>
     public ClientboundJoinedRoomPacket(MemoryStream stream)
     {
         RoomId = stream.ReadVarInt();
+        SelfIndex = stream.ReadBool() ? stream.ReadVarInt() : null;
         Players = stream.ReadList(s => s.ReadAddPlayerEntry());
     }
     

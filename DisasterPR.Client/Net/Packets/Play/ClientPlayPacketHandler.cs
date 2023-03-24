@@ -16,14 +16,16 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         Connection = connection;
     }
     
-    public async void HandleAddPlayer(ClientboundAddPlayerPacket packet)
+    public void HandleAddPlayer(ClientboundAddPlayerPacket packet)
     {
-        var session = Player.Session;
-        if (session == null) return;
-        await Task.Yield();
+        Task.Run(async () =>
+        {
+            var session = Player.Session;
+            if (session == null) return;
 
-        var player = new RemotePlayer(packet.PlayerId, packet.PlayerName);
-        await session.PlayerJoinAsync(player);
+            var player = new RemotePlayer(packet.PlayerId, packet.PlayerName);
+            await session.PlayerJoinAsync(player);
+        }).Wait();
     }
 
     public async void HandleRemovePlayer(ClientboundRemovePlayerPacket packet)
@@ -227,5 +229,17 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
 
         var player = session.Players.First(c => packet.Id == c.Id);
         player.State = packet.State;
+    }
+
+    public void HandleReplacePlayer(ClientboundReplacePlayerPacket packet)
+    {
+        Task.Run(async () =>
+        {
+            var session = Player.Session;
+            if (session == null) return;
+
+            var player = new RemotePlayer(packet.PlayerId, packet.PlayerName);
+            await session.PlayerReplaceAsync(packet.Index, player);
+        }).Wait();
     }
 }

@@ -46,6 +46,18 @@ public class LocalSession : Session<AbstractClientPlayer>
         PlayerJoined?.Invoke(player);
     }
 
+    public void PlayerReplace(int index, AbstractClientPlayer player)
+    {
+        var oldPlayer = Players[index];
+        Logger.Info($"Player {player.Name} ({player.Id}) has joined this session, " +
+                    $"replacing old player {oldPlayer.Name} ({oldPlayer.Id}).");
+        player.State = PlayerState.Joining;
+        Players[index] = player;
+        
+        PlayerLeft?.Invoke(oldPlayer);
+        PlayerJoined?.Invoke(player);
+    }
+
     public void PlayerLeave(AbstractClientPlayer player)
     {
         Logger.Info($"Player {player.Name} ({player.Id}) has left this session.");

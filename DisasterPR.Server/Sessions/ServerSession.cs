@@ -8,7 +8,7 @@ using KaLib.Utils;
 
 namespace DisasterPR.Server.Sessions;
 
-public class ServerSession : Session<ServerPlayer>
+public class ServerSession : Session<ISessionPlayer>
 {
     public override CardPack? CardPack { get; set; } = IPackProvider.Default.Make();
 
@@ -58,7 +58,7 @@ public class ServerSession : Session<ServerPlayer>
     
     private async Task OnPlayerDisconnectedAsync(DisconnectedEventArgs _)
     {
-        var players = Players.Where(p => !p.Connection.IsConnected);
+        var players = Players.Where(p => !p.IsConnected);
         foreach (var player in players)
         {
             await PlayerLeaveAsync(player);
@@ -73,18 +73,20 @@ public class ServerSession : Session<ServerPlayer>
         
         await Task.WhenAll(Players.Select(async p =>
         {
-            await p.Connection.SendPacketAsync(new ClientboundSetCardPackPacket(pack));
-            await p.Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(this));
+            await p.SetCardPackAsync(pack);
+            await p.UpdateSessionOptions(this);
         }));
     }
     
-    public async Task PlayerJoinAsync(ServerPlayer player)
+    public async Task PlayerJoinAsync(ISessionPlayer player)
     {
-        player.Connection.Disconnected += OnPlayerDisconnectedAsync;
+        await player.SendJoinRoomSequenceAsync(this);
+        
+        player.Disconnected += OnPlayerDisconnectedAsync;
         await Task.WhenAll(Players.Select(async p =>
         {
-            await p.Connection.SendPacketAsync(new ClientboundAddPlayerPacket(player));
-            await player.Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(p));
+            await p.OnNewPlayerJoinedSessionAsync(player);
+            await player.OnOtherPlayerUpdateStateAsync(p);
         }));
 
         player.State = PlayerState.Joining;
@@ -92,37 +94,34 @@ public class ServerSession : Session<ServerPlayer>
         Players.Add(player);
     }
     
-    public async Task KickPlayerAsync(ServerPlayer player)
+    public async Task KickPlayerAsync(ISessionPlayer player)
     {
-        await player.Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(RoomDisconnectReason.Kicked));
+        await player.KickFromSessionAsync(RoomDisconnectReason.Kicked);
         await PlayerLeaveAsync(player);
     }
     
-    public async Task PlayerLeaveAsync(ServerPlayer player)
+    public async Task PlayerLeaveAsync(ISessionPlayer player)
     {
         var state = ServerGameState.CurrentState;
-        if (state != StateOfGame.Waiting && state != StateOfGame.WinResult)
+        if (state is StateOfGame.Waiting or StateOfGame.WinResult)
         {
-            await Task.WhenAll(Players.Select(p => 
-                p.Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(RoomDisconnectReason.SomeoneLeftWhileInGame))));
-            
-            foreach (var p in Players)
-            {
-                p.Session = null;
-            }
-            
-            Players.Clear();
-            Common.AcquireSemaphore(_lock, () => _occupiedRooms--);
-            Emptied?.Invoke();
+            await InternalPlayerLeaveAsync(player);
             return;
         }
 
-        await InternalPlayerLeaveAsync(player);
+        // Try to replace the player by an AI player
+        var ai = new AIPlayer(player);
+        var index = Players.IndexOf(player);
+        await Task.WhenAll(Players.Select(async p =>
+        {
+            await p.OnReplaceSessionPlayerAsync(index, ai);
+            await p.OnOtherPlayerUpdateStateAsync(ai);
+        }));
     }
 
-    private async Task InternalPlayerLeaveAsync(ServerPlayer player)
+    private async Task InternalPlayerLeaveAsync(ISessionPlayer player)
     {
-        player.Connection.Disconnected -= OnPlayerDisconnectedAsync;
+        player.Disconnected -= OnPlayerDisconnectedAsync;
         player.Session = null;
         Players.Remove(player);
         
@@ -133,7 +132,7 @@ public class ServerSession : Session<ServerPlayer>
             return;
         }
         
-        await Task.WhenAll(Players.Select(p => p.Connection.SendPacketAsync(new ClientboundRemovePlayerPacket(player))));
+        await Task.WhenAll(Players.Select(p => p.OnPlayerLeftSessionAsync(player)));
     }
 
     public void Invalidate()

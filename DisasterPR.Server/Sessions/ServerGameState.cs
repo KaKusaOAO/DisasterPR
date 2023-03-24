@@ -18,10 +18,10 @@ public class ServerGameState : IGameState
     public StateOfGame CurrentState { get; set; }
     public int CurrentPlayerIndex { get; set; }
 
-    public ServerPlayer CurrentPlayer => Session.Players[CurrentPlayerIndex];
+    public ISessionPlayer CurrentPlayer => Session.Players[CurrentPlayerIndex];
     IPlayer IGameState.CurrentPlayer => CurrentPlayer;
 
-    public ServerPlayer? WinnerPlayer { get; set; }
+    public ISessionPlayer? WinnerPlayer { get; set; }
     IPlayer? IGameState.WinnerPlayer => WinnerPlayer;
 
     public TopicCard CurrentTopic { get; set; }
@@ -94,7 +94,7 @@ public class ServerGameState : IGameState
         }
 
         _topics = new ShuffledPool<TopicCard>(
-            Session.CardPack.FilteredTopicsByEnabledCategories(Session.Options.EnabledCategories));
+            Session.CardPack!.FilteredTopicsByEnabledCategories(Session.Options.EnabledCategories));
 
         foreach (var player in Session.Players)
         {
@@ -115,8 +115,7 @@ public class ServerGameState : IGameState
         CurrentState = state;
         _cts.Cancel();
         Logger.Verbose($"Current state changed to {state}");
-        await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundGameStateChangePacket(state))));
+        await Task.WhenAll(Session.Players.Select(p => p.UpdateSessionGameStateAsync(state)));
     }
 
     private async Task ChangeCurrentPlayerIndexAndUpdateAsync(int index)
@@ -129,11 +128,10 @@ public class ServerGameState : IGameState
 
         CurrentPlayerIndex = index;
         Logger.Verbose($"Current player is now {CurrentPlayer.Name} ({CurrentPlayer.Id})");
-        await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundGameCurrentPlayerChangePacket(index))));
+        await Task.WhenAll(Session.Players.Select(p => p.UpdateCurrentPlayerIndexAsync(index)));
     }
 
-    private async Task ChangePlayerScoreAndUpdateAsync(ServerPlayer player, int score)
+    private async Task ChangePlayerScoreAndUpdateAsync(ISessionPlayer player, int score)
     {
         if (Thread.CurrentThread != _thread)
         {
@@ -142,11 +140,10 @@ public class ServerGameState : IGameState
         }
 
         player.Score = score;
-        await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundUpdatePlayerScorePacket(player, score))));
+        await Task.WhenAll(Session.Players.Select(p => p.UpdatePlayerScoreAsync(player, score)));
     }
 
-    private async Task ChangeWinnerPlayerAndUpdateAsync(ServerPlayer player)
+    private async Task ChangeWinnerPlayerAndUpdateAsync(ISessionPlayer player)
     {
         if (Thread.CurrentThread != _thread)
         {
@@ -155,8 +152,7 @@ public class ServerGameState : IGameState
         }
 
         WinnerPlayer = player;
-        await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundSetWinnerPlayerPacket(player.Id))));
+        await Task.WhenAll(Session.Players.Select(p => p.UpdateWinnerPlayerAsync(player.Id)));
     }
 
     public async Task StartAsync()
@@ -176,7 +172,7 @@ public class ServerGameState : IGameState
             p.State = PlayerState.InGame;
             await Task.WhenAll(Session.Players.Select(async p2 =>
             {
-                await p2.Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(p));
+                await p2.OnOtherPlayerUpdateStateAsync(p);
             }));
             await ChangePlayerScoreAndUpdateAsync(p, 0);
         }
@@ -198,12 +194,12 @@ public class ServerGameState : IGameState
 
         (TopicCard Left, TopicCard Right) topics = (_topics.Next(), _topics.Next());
 
-        var pack = Session.CardPack;
+        var pack = Session.CardPack!;
         var left = pack.GetTopicIndex(topics.Left);
         var right = pack.GetTopicIndex(topics.Right);
         CandidateTopics = topics;
 
-        await CurrentPlayer.Connection.SendPacketAsync(new ClientboundSetCandidateTopicsPacket(left, right));
+        await CurrentPlayer.UpdateCandidateTopicsAsync(left, right);
         await ChangeStateAndUpdateAsync(StateOfGame.ChoosingTopic);
         _hasChosenFinal = false;
         _ = ChooseOtherRandomTopicAsync();
@@ -245,9 +241,9 @@ public class ServerGameState : IGameState
         CurrentChosenWords.Add(entry);
 
         var pack = Session.CardPack;
-        var words = cards.Select(w => pack.GetWordIndex(w.Card)).ToList();
+        var words = cards.Select(w => pack!.GetWordIndex(w.Card)).ToList();
         await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundAddChosenWordEntryPacket(entry.Id, entry.Player?.Id, words))));
+            p.AddChosenWordEntryAsync(entry.Id, entry.Player?.Id, words)));
 
         if (Session.Players
             .Where(p => p != CurrentPlayer)
@@ -287,7 +283,7 @@ public class ServerGameState : IGameState
         {
             foreach (var player in Session.Players)
             {
-                _ = player.Connection.SendPacketAsync(new ClientboundUpdateTimerPacket(time));
+                _ = player.UpdateTimerAsync(time);
             }
         }
 
@@ -321,8 +317,7 @@ public class ServerGameState : IGameState
                 CurrentChosenWords.Add(entry);
 
                 await Task.WhenAll(Session.Players.Select(p =>
-                    p.Connection.SendPacketAsync(
-                        new ClientboundAddChosenWordEntryPacket(entry.Id, entry.Player?.Id, new List<int>()))));
+                    p.AddChosenWordEntryAsync(entry.Id, entry.Player?.Id, new List<int>())));
             }
 
             await StartFinalAsync();
@@ -352,9 +347,8 @@ public class ServerGameState : IGameState
 
         CurrentTopic = topic;
 
-        async Task SendTopicAndWordsAsync(ServerPlayer p)
+        async Task SendTopicAndWordsAsync(ISessionPlayer p)
         {
-            var conn = p.Connection;
             var pack = Session.CardPack;
             var id = pack.GetTopicIndex(CurrentTopic);
             var words = new List<WordCard>();
@@ -368,8 +362,8 @@ public class ServerGameState : IGameState
             p.HoldingCards.AddRange(words.Select(w => new HoldingWordCardEntry(w)));
 
             var indices = words.Select(w => pack.GetWordIndex(w)).ToList();
-            await conn.SendPacketAsync(new ClientboundSetTopicPacket(id));
-            await conn.SendPacketAsync(new ClientboundSetWordsPacket(indices));
+            await p.UpdateCurrentTopicAsync(id);
+            await p.UpdateHoldingWordsAsync(indices);
         }
 
         await Task.WhenAll(Session.Players.Select(SendTopicAndWordsAsync));
@@ -385,7 +379,7 @@ public class ServerGameState : IGameState
         }
 
         await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundRevealChosenWordEntryPacket(guid))));
+            p.RevealChosenWordEntryAsync(guid)));
     }
 
     public async Task ChooseFinalAsync(ServerPlayer player, int index)
@@ -412,7 +406,7 @@ public class ServerGameState : IGameState
         var chosen = CurrentChosenWords[index];
         var credit = chosen.Player;
         await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundSetFinalPacket(index))));
+            p.UpdateFinalWordCardAsync(index)));
 
         await Task.Delay(1000);
 
@@ -467,7 +461,6 @@ public class ServerGameState : IGameState
 
         RoundCycle = cycle;
         Logger.Verbose($"Current cycle count is now {cycle}");
-        await Task.WhenAll(Session.Players.Select(p =>
-            p.Connection.SendPacketAsync(new ClientboundUpdateRoundCyclePacket(cycle))));
+        await Task.WhenAll(Session.Players.Select(p => p.UpdateRoundCycleAsync(cycle)));
     }
 }

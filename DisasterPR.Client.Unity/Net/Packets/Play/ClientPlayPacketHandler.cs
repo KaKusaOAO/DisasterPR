@@ -212,4 +212,13 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         var player = session.Players.First(c => packet.Id == c.Id);
         player.State = packet.State;
     }
+
+    public void HandleReplacePlayer(ClientboundReplacePlayerPacket packet)
+    {
+        var session = Player.Session;
+        if (session == null) return;
+
+        var player = new RemotePlayer(packet.PlayerId, packet.PlayerName);
+        session.PlayerReplace(packet.Index, player);
+    }
 }

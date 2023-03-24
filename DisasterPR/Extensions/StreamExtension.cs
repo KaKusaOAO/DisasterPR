@@ -176,4 +176,25 @@ public static class vStreamExtension
     {
         stream.WriteByte((byte) (value ? 1 : 0));
     }
+
+    public static void WriteOptional<T>(this Stream stream, T? value, Action<Stream, T> writer)
+    {
+        var present = value == null;
+        stream.WriteBool(present);
+        if (!present) return;
+
+        writer(stream, value!);
+    }
+    
+    public static void WriteOptional<T>(this Stream stream, T? value, Action<Stream, T> writer) where T : struct
+    {
+        var present = value.HasValue;
+        stream.WriteBool(present);
+        if (!present) return;
+
+        writer(stream, value!.Value);
+    }
+    
+    public static T? ReadOptional<T>(this Stream stream, Func<Stream, T> reader) => 
+        !stream.ReadBool() ? default : reader(stream);
 }

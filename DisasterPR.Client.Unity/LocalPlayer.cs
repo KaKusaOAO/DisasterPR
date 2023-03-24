@@ -14,6 +14,8 @@ public class LocalPlayer : AbstractClientPlayer
 {
     public PlayerToServerConnection Connection { get; }
 
+    public override List<HoldingWordCardEntry> HoldingCards { get; } = new();
+
     public LocalPlayer(IWebSocket webSocket, string name) : base(name)
     {
         Connection = new PlayerToServerConnection(webSocket, this);

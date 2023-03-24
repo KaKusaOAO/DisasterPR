@@ -39,7 +39,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             {
                 foreach (var p in Player.Session.Players)
                 {
-                    await p.Connection.SendPacketAsync(new ClientboundChatPacket(Player.Name, packet.Content));
+                    await p.OnSessionChat(Player.Name, packet.Content);
                 }
             }
         }).Wait();
@@ -109,9 +109,6 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
                 return;
             }
 
-            await Connection.SendPacketAsync(new ClientboundJoinedRoomPacket(session));
-            await Connection.SendPacketAsync(new ClientboundSetCardPackPacket(session.CardPack!));
-            await Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(session));
             await session.PlayerJoinAsync(Player);
         });
     }
@@ -278,10 +275,10 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             options.WinScore = packet.WinScore;
             options.CountdownTimeSet = packet.CountdownTimeSet;
             options.EnabledCategories = packet.EnabledCategories
-                .Select(g => session.CardPack.Categories.First(c => c.Guid == g)).ToList();
+                .Select(g => session.CardPack!.Categories.First(c => c.Guid == g)).ToList();
 
             await Task.WhenAll(session.Players.Select(p =>
-                p.Connection.SendPacketAsync(new ClientboundUpdateSessionOptionsPacket(session))));
+                p.UpdateSessionOptions(session)));
         }).Wait();
     }
 
@@ -325,7 +322,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             Player.State = packet.State;
             await Task.WhenAll(session.Players
                 .Where(p => p != Player)
-                .Select(p => p.Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(Player))));
+                .Select(p => p.UpdatePlayerStateAsync(Player)));
         }).Wait();
     }
 }
