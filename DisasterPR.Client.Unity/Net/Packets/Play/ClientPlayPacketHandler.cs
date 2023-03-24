@@ -229,4 +229,9 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         var player = new RemotePlayer(packet.PlayerId, packet.PlayerName);
         session.PlayerReplace(packet.Index, player);
     }
+
+    public void HandleUpdatePlayerGuid(ClientboundUpdatePlayerGuidPacket packet)
+    {
+        Player.Id = packet.Guid;
+    }
 }

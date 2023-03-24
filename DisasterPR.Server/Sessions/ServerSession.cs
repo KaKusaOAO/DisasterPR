@@ -107,7 +107,6 @@ public class ServerSession : Session<ISessionPlayer>
             player.CardPool = ai.CardPool;
             player.HoldingCards.Clear();
             player.HoldingCards.AddRange(ai.HoldingCards);
-            await SendAllCurrentStateToPlayerAsync(player);
 
             player.State = PlayerState.InGame;
             await Task.WhenAll(Players.Select(async p =>
@@ -115,6 +114,7 @@ public class ServerSession : Session<ISessionPlayer>
                 await p.OnOtherPlayerUpdateStateAsync(player);
             }));
                     
+            _ = SendAllCurrentStateToPlayerAsync(player);
             return false;
         }
             
@@ -140,8 +140,11 @@ public class ServerSession : Session<ISessionPlayer>
         {
             // Send started state first so player can enter the game screen
             await player.UpdateSessionGameStateAsync(StateOfGame.Started);
-            await player.UpdateSessionGameStateAsync(state);
+            await Task.Delay(1100);
         }
+
+        await player.UpdateCurrentPlayerIndexAsync(GameState.CurrentPlayerIndex);
+        await player.UpdateRoundCycleAsync(GameState.RoundCycle);
 
         if (state == StateOfGame.ChoosingTopic)
         {
@@ -152,10 +155,15 @@ public class ServerSession : Session<ISessionPlayer>
                 var right = CardPack.GetTopicIndex(candidates.Value.Right);
                 await player.UpdateCandidateTopicsAsync(left, right);
             }
+            await player.UpdateSessionGameStateAsync(state);
         }
 
         if (state >= StateOfGame.ChoosingWord)
         {
+            // Change to this state so words and topics get updated
+            await player.UpdateSessionGameStateAsync(StateOfGame.ChoosingWord);
+            await player.UpdateSessionGameStateAsync(state);
+            
             var topic = GameState.CurrentTopic;
             if (topic != null!)
             {

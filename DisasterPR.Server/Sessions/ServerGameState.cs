@@ -237,6 +237,12 @@ public class ServerGameState : IGameState
             return;
         }
 
+        if (CurrentChosenWords.Any(c => c.Player == player))
+        {
+            Logger.Warn($"Player {player.Name} has already chosen their card!");
+            return;
+        }
+
         var entry = new ServerChosenWordEntry(this, player, cards.Select(c => c.Card).ToList());
         CurrentChosenWords.Add(entry);
 

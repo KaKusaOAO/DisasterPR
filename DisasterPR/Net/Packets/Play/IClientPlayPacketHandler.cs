@@ -24,4 +24,5 @@ public interface IClientPlayPacketHandler : IClientPacketHandler
     public void HandleUpdateRoundCycle(ClientboundUpdateRoundCyclePacket packet);
     public void HandleUpdatePlayerState(ClientboundUpdatePlayerStatePacket packet);
     public void HandleReplacePlayer(ClientboundReplacePlayerPacket packet);
+    public void HandleUpdatePlayerGuid(ClientboundUpdatePlayerGuidPacket packet);
 }

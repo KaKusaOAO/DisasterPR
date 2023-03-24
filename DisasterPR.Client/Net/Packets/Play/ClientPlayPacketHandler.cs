@@ -242,4 +242,9 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
             await session.PlayerReplaceAsync(packet.Index, player);
         }).Wait();
     }
+
+    public void HandleUpdatePlayerGuid(ClientboundUpdatePlayerGuidPacket packet)
+    {
+        Player.Id = packet.Guid;
+    }
 }
