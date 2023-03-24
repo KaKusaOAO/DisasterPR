@@ -10,7 +10,7 @@ namespace DisasterPR.Server;
 
 public class ServerPlayer : ISessionPlayer, ICommandSender
 {
-    public Guid Id { get; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
     
     public async Task SendMessageAsync(string content)

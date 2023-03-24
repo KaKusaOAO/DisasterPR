@@ -7,8 +7,8 @@ public class ServerChosenWordEntry : IChosenWordEntry
 {
     public ServerGameState GameState { get; set; }
     
-    public ISessionPlayer? Player { get; }
-    Guid? IChosenWordEntry.PlayerId => Player?.Id;
+    public Guid? PlayerId { get; set; }
+    public ISessionPlayer? Player => GameState.Session.Players.Find(c => c.Id == PlayerId);
 
     public Guid Id { get; set; } = Guid.NewGuid();
     public bool IsRevealed { get; set; }
@@ -22,7 +22,7 @@ public class ServerChosenWordEntry : IChosenWordEntry
     public ServerChosenWordEntry(ServerGameState state, ISessionPlayer? player, List<WordCard> words)
     {
         GameState = state;
-        Player = player;
+        PlayerId = player?.Id;
         _words = words;
     }
 }

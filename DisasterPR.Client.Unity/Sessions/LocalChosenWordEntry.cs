@@ -7,9 +7,9 @@ public class LocalChosenWordEntry : IChosenWordEntry
 {
     public bool IsRevealed { get; set; }
     public LocalGameState GameState { get; }
-    
-    public AbstractClientPlayer? Player { get; }
-    Guid? IChosenWordEntry.PlayerId => Player?.Id;
+
+    public AbstractClientPlayer? Player => GameState.Session.Players.Find(c => c.Id == PlayerId);
+    public Guid? PlayerId { get; set; }
     
     public Guid Id { get; }
 
@@ -19,11 +19,11 @@ public class LocalChosenWordEntry : IChosenWordEntry
         ? Enumerable.Repeat(EmptyWordCard.Instance, GameState.CurrentTopic.AnswerCount).ToList<WordCard>()
         : _words;
 
-    public LocalChosenWordEntry(Guid id, LocalGameState state, AbstractClientPlayer player, List<WordCard> words)
+    public LocalChosenWordEntry(Guid id, LocalGameState state, AbstractClientPlayer? player, List<WordCard> words)
     {
         Id = id;
         GameState = state;
-        Player = player;
+        PlayerId = player?.Id;
         _words = words;
     }
 }

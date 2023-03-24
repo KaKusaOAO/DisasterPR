@@ -90,6 +90,7 @@ public class ServerSession : Session<ISessionPlayer>
                 return false;
             }
 
+            player.Id = ai.Id;
             await player.Connection.SendPacketAsync(new ClientboundUpdatePlayerGuidPacket(ai.Id));
             
             var index = Players.FindIndex(a => a == ai);
@@ -166,10 +167,6 @@ public class ServerSession : Session<ISessionPlayer>
 
         if (state >= StateOfGame.ChoosingWord)
         {
-            // Change to this state so words and topics get updated
-            await player.UpdateSessionGameStateAsync(StateOfGame.ChoosingWord);
-            await player.UpdateSessionGameStateAsync(state);
-            
             var topic = GameState.CurrentTopic;
             if (topic != null!)
             {
@@ -179,6 +176,10 @@ public class ServerSession : Session<ISessionPlayer>
 
             var holdings = player.HoldingCards.Select(w => CardPack!.GetWordIndex(w.Card)).ToList();
             await player.UpdateHoldingWordsAsync(holdings);
+            
+            // Change to this state so words and topics get updated
+            await player.UpdateSessionGameStateAsync(StateOfGame.ChoosingWord);
+            await player.UpdateSessionGameStateAsync(state);
 
             foreach (var chosen in GameState.CurrentChosenWords)
             {
