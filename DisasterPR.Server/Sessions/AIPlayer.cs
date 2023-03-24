@@ -65,7 +65,7 @@ public class AIPlayer : ISessionPlayer
 
     public async Task UpdateTimerAsync(int timer)
     {
-        if (Random.Shared.NextDouble() > 0.33) return;
+        if (Random.Shared.NextDouble() > 0.5) return;
         await Task.Yield();
         
         // Process AI step
@@ -93,7 +93,14 @@ public class AIPlayer : ISessionPlayer
 
         if (state == StateOfGame.ChoosingFinal && context.CurrentPlayer == this)
         {
+            var unrevealed = context.CurrentChosenWords.Find(w => !w.IsRevealed);
+            if (unrevealed != null)
+            {
+                await context.RevealChosenWordEntryAsync(unrevealed.Id);
+                return;
+            }
             
+            await context.ChooseFinalAsync(this, Random.Shared.Next(context.CurrentChosenWords.Count));
         }
     }
 

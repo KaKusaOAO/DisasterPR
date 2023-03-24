@@ -67,10 +67,13 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
     public Task OnOtherPlayerUpdateStateAsync(ISessionPlayer player) => 
         Connection.SendPacketAsync(new ClientboundUpdatePlayerStatePacket(player));
 
-    public Task OnReplaceSessionPlayerAsync(int index, ISessionPlayer player) =>
-        Connection.SendPacketAsync(new ClientboundReplacePlayerPacket(index, player));
+    public async Task OnReplaceSessionPlayerAsync(int index, ISessionPlayer player)
+    {
+        await Connection.SendPacketAsync(new ClientboundReplacePlayerPacket(index, player));
+        await Connection.SendPacketAsync(new ClientboundUpdatePlayerScorePacket(player, player.Score));
+    }
 
-    
+
     public Task KickFromSessionAsync(RoomDisconnectReason reason) => 
         Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(RoomDisconnectReason.Kicked));
 

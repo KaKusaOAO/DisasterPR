@@ -113,12 +113,19 @@ public abstract class AbstractPlayerConnection
                     var protocol = ConnectionProtocol.OfState(CurrentState);
                     var packet = protocol.CreatePacket(ReceivingFlow, id, stream);
                     
-                    Logger.Verbose(TranslateText.Of("Received packet: %s")
-                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
-                    
-                    var handler = Handlers[CurrentState];
-                    packet.Handle(handler);
-                    
+                    /* Logger.Verbose(TranslateText.Of("Received packet: %s")
+                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold))); */
+
+                    try
+                    {
+                        var handler = Handlers[CurrentState];
+                        packet.Handle(handler);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Warn(ex.ToString());
+                    }
+
                     await _receivedPacketEvent.InvokeAsync(async e =>
                     {
                         await e(new ReceivedPacketEventArgs
@@ -158,8 +165,8 @@ public abstract class AbstractPlayerConnection
         var protocol = ConnectionProtocol.OfState(CurrentState);
         await RawPacketIO.SendPacketAsync(protocol, ReceivingFlow.Opposite(), packet, token);
         
-        Logger.Verbose(TranslateText.Of("Sent packet: %s")
-            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
+        /* Logger.Verbose(TranslateText.Of("Sent packet: %s")
+            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold))); */
     }
 
     public async Task SendPacketAsync(IPacket packet) => await SendPacketAsync(packet, CancellationToken.None);

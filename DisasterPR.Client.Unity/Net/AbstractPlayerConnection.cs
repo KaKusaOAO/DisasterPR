@@ -73,8 +73,8 @@ public abstract class AbstractPlayerConnection
             var protocol = ConnectionProtocol.OfState(CurrentState);
             var packet = protocol.CreatePacket(PacketFlow.Clientbound, id, stream);
                     
-            Logger.Verbose(TranslateText.Of("Received packet: %s")
-                .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
+            /* Logger.Verbose(TranslateText.Of("Received packet: %s")
+                .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold))); */
                     
             var handler = Handlers[CurrentState];
             packet.Handle(handler);
@@ -106,8 +106,8 @@ public abstract class AbstractPlayerConnection
         var protocol = ConnectionProtocol.OfState(CurrentState);
         RawPacketIO.SendPacket(protocol, PacketFlow.Serverbound, packet);
         
-        Logger.Verbose(TranslateText.Of("Sent packet: %s")
-            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
+        /* Logger.Verbose(TranslateText.Of("Sent packet: %s")
+            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold))); */
     }
 
     public void HandleDisconnect(ClientboundDisconnectPacket packet)

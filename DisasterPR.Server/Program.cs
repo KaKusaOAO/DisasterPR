@@ -8,6 +8,11 @@ public static class Program
 {
     public static void Main(string[] args)
     {
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            Logger.Warn(e.ExceptionObject.ToString());
+        };
+        
         Logger.Level = LogLevel.Verbose;
         Logger.Logged += Logger.LogToEmulatedTerminalAsync;
         Logger.RunThreaded();

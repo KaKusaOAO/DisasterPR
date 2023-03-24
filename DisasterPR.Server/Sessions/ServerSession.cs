@@ -5,6 +5,7 @@ using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Sessions;
 using KaLib.Utils;
+using KaLib.Utils.Extensions;
 
 namespace DisasterPR.Server.Sessions;
 
@@ -106,6 +107,7 @@ public class ServerSession : Session<ISessionPlayer>
                 await player.OnOtherPlayerUpdateStateAsync(p);
             }));
             
+            player.Score = ai.Score;
             await Task.WhenAll(Players.Select(async p =>
             {
                 await player.UpdatePlayerScoreAsync(p, p.Score);
@@ -147,7 +149,7 @@ public class ServerSession : Session<ISessionPlayer>
         {
             // Send started state first so player can enter the game screen
             await player.UpdateSessionGameStateAsync(StateOfGame.Started);
-            await Task.Delay(1100);
+            await Task.Delay(100);
         }
 
         await player.UpdateCurrentPlayerIndexAsync(GameState.CurrentPlayerIndex);
@@ -179,17 +181,29 @@ public class ServerSession : Session<ISessionPlayer>
             
             // Change to this state so words and topics get updated
             await player.UpdateSessionGameStateAsync(StateOfGame.ChoosingWord);
-            await player.UpdateSessionGameStateAsync(state);
-
-            foreach (var chosen in GameState.CurrentChosenWords)
+            if (state != StateOfGame.ChoosingWord)
             {
+                await player.UpdateSessionGameStateAsync(state);
+            }
+            
+            var hasRevealed = false;
+            foreach (var chosen in ServerGameState.CurrentChosenWords)
+            {
+                var desc = "[" + chosen.Words.Select(w => w.Label).JoinStrings(", ") + "]";
+                Logger.Info($"Sending chosen words: {desc}");
                 await player.AddChosenWordEntryAsync(chosen.Id, chosen.PlayerId,
                     chosen.Words.Select(w => CardPack!.GetWordIndex(w)).ToList());
                 
                 if (chosen.IsRevealed)
                 {
+                    hasRevealed = true;
                     await player.RevealChosenWordEntryAsync(chosen.Id);
                 }
+            }
+
+            if (hasRevealed)
+            {
+                await player.RevealChosenWordEntryAsync(ServerGameState.LastRevealedGuid!.Value);
             }
         }
     }

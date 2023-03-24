@@ -46,7 +46,7 @@
     },
     {
       "credit": "葉障",
-      "texts": "賤葆將會有新的女生加入團隊，聽說她會____°"
+      "texts": "賤葆將會有新的女生加入團隊，聽說她會____。"
     },
     {
       "credit": "葉障",
@@ -183,6 +183,50 @@
     {
       "credit": "圓圈圈",
       "texts": "武漢肺炎的離去，是因為____的追求，還是因為____的不挽留？"
+    },
+    {
+      "credit": "咔咔",
+      "texts": "妳老公跟____在睡覺，妳要馬上____。"
+    },
+    {
+      "credit": "咔咔",
+      "texts": "你再____，就把你丟到____賣。"
+    },
+    {
+      "credit": "咔咔",
+      "texts": "萬有引力，我有____。"
+    },
+    {
+      "credit": "咔咔",
+      "texts": "萬有引力，我有____。"
+    },
+    {
+      "credit": "咔咔",
+      "texts": "別亂說！我可是____系Vtuber呢。"
+    },
+    {
+      "credit": "咔咔",
+      "texts": "________"
+    },
+    {
+      "credit": "葉障",
+      "texts": "震驚！____直播時不穿內褲。"
+    },
+    {
+      "credit": "葉障",
+      "texts": "擊飛____好爽喔！"
+    },
+    {
+      "credit": "葉障",
+      "texts": "____即將被送入勞改營。"
+    },
+    {
+      "credit": "葉障",
+      "texts": "請自由的發揮：________。"
+    },
+    {
+      "credit": "葉障",
+      "texts": "下面一位在和________。"
     }
   ],
   "words": [
@@ -194,7 +238,7 @@
     {
       "credit": "扇子",
       "pos": "Adjective",
-      "label": "庭育"
+      "label": "廷育"
     },
     {
       "credit": "葉障",
@@ -255,6 +299,371 @@
       "credit": "圓圈圈",
       "pos": "Noun",
       "label": "卡比獸"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "梅伯"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "胡子"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "賤葆"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "小潔"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "哈記"
+    },
+    {
+      "credit": "咔咔",
+      "pos": "Noun",
+      "label": "黑心橘子"
+    },
+    {
+      "credit": "咔咔",
+      "pos": "Verb",
+      "label": "斷么九"
+    },
+    {
+      "credit": "咔咔",
+      "pos": "Adjective",
+      "label": "怪異性癖的"
+    },
+    {
+      "credit": "咔咔",
+      "pos": "Noun",
+      "label": "傳燈大法師"
+    },
+    {
+      "credit": "咔咔",
+      "pos": "Noun",
+      "label": "阿晋"
+    },
+    {
+      "credit": "咔咔",
+      "pos": "Noun",
+      "label": "阿晋晋"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "高雄氣爆"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "橘子"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Verb",
+      "label": "用衛生棉條破處"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "棺材在路上飛"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "涼麵"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "葉障"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "圓圈"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "艾芋"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "伯勳"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "蝸牛"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "森姆"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "外婆肉"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "百八"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "咔咔"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "白棠"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "葉落楓"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "晴天"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "Yunari"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "菜喳"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "魚乾"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "浮千"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "美妮"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "黑羽"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "瓜瓜"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "凱洛"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "狸貓"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "冏哥"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "餅乾"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "技冏"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "繁星"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "橘子種橘子樹"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "311大地震"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "鐵板麵加蛋"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "香菜"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "小林村滅村"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "割包皮龜頭不見"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Verb",
+      "label": "耶穌基督督錯洞"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "品子"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "晨晨"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "松鼠"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "D7"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "夢琦"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Noun",
+      "label": "小魔女DoReMi"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "從天而降的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "清楚口愛"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "碩大的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "巨大化"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "只會嘴砲的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "好像明白了什麼"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "經驗豐富的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "還年輕的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "陽壽耗盡的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "天下無雙的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "強烈癖好的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Verb",
+      "label": "歐晋晋督錯洞"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "偉大的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "身經百戰的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "短小精幹的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "渣男"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "虛情假意的"
+    },
+    {
+      "credit": "圓圈",
+      "pos": "Adjective",
+      "label": "可憐兮兮的"
+    },
+    {
+      "credit": "咔咔",
+      "pos": "Adjective",
+      "label": "可憐兮兮的"
     }
   ]
 }

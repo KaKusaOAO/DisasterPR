@@ -46,6 +46,7 @@ public class ServerGameState : IGameState
     private bool _hasChosenFinal;
 
     private Thread _thread;
+    public Guid? LastRevealedGuid { get; private set; }
 
     public ServerGameState(ServerSession session)
     {
@@ -323,7 +324,7 @@ public class ServerGameState : IGameState
                 CurrentChosenWords.Add(entry);
 
                 await Task.WhenAll(Session.Players.Select(p =>
-                    p.AddChosenWordEntryAsync(entry.Id, entry.Player?.Id, new List<int>())));
+                    p.AddChosenWordEntryAsync(entry.Id, entry.PlayerId, new List<int>())));
             }
 
             await StartFinalAsync();
@@ -384,11 +385,19 @@ public class ServerGameState : IGameState
             throw new InvalidOperationException("Attempted to reveal cards when it's not the time to do it");
         }
 
+        var chosen = CurrentChosenWords.Find(w => w.Id == guid);
+        if (chosen == null)
+        {
+            throw new InvalidOperationException("Attempted to reveal a non-existing card");
+        }
+
+        chosen.IsRevealed = true;
+        LastRevealedGuid = guid;
         await Task.WhenAll(Session.Players.Select(p =>
             p.RevealChosenWordEntryAsync(guid)));
     }
 
-    public async Task ChooseFinalAsync(ServerPlayer player, int index)
+    public async Task ChooseFinalAsync(ISessionPlayer player, int index)
     {
         if (Thread.CurrentThread != _thread)
         {
