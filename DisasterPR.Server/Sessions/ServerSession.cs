@@ -90,6 +90,8 @@ public class ServerSession : Session<ISessionPlayer>
                 return false;
             }
 
+            await player.Connection.SendPacketAsync(new ClientboundUpdatePlayerGuidPacket(ai.Id));
+            
             var index = Players.FindIndex(a => a == ai);
             Players.Remove(ai);
             
@@ -102,12 +104,16 @@ public class ServerSession : Session<ISessionPlayer>
                 await p.OnReplaceSessionPlayerAsync(index, player);
                 await player.OnOtherPlayerUpdateStateAsync(p);
             }));
+            
+            await Task.WhenAll(Players.Select(async p =>
+            {
+                await player.UpdatePlayerScoreAsync(p, p.Score);
+            }));
 
             player.Session = this;
             player.CardPool = ai.CardPool;
             player.HoldingCards.Clear();
             player.HoldingCards.AddRange(ai.HoldingCards);
-
             player.State = PlayerState.InGame;
             await Task.WhenAll(Players.Select(async p =>
             {
