@@ -49,7 +49,13 @@ public class AIPlayer : ISessionPlayer
         return Task.CompletedTask;
     }
 
-    public Task UpdateSessionGameStateAsync(StateOfGame state) => Task.CompletedTask;
+    public async Task UpdateSessionGameStateAsync(StateOfGame state)
+    {
+        if (state != StateOfGame.Waiting) return;
+        if (Session == null) return;
+        await Session.PlayerLeaveAsync(this);
+    }
+
     public Task UpdateCurrentPlayerIndexAsync(int index) => Task.CompletedTask;
 
     public Task UpdatePlayerScoreAsync(ISessionPlayer player, int score) => Task.CompletedTask;
