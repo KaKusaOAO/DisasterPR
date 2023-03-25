@@ -8,12 +8,13 @@ public static class Bootstrap
 {
     private static bool _bootstrapped;
     
-    public static async Task BootAsync()
+    public static void Boot()
     {
         if (_bootstrapped) return;
         _bootstrapped = true;
         
         Logger.Info("Prefetching upstream cardpack...");
-        await IPackProvider.Upstream.MakeAsync();
+        IPackProvider.Upstream.Make();
+        Logger.Info("Upstream pack fetched.");
     }
 }

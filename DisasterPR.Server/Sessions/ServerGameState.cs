@@ -43,7 +43,7 @@ public class ServerGameState : IGameState
     private List<ServerChosenWordEntry> _chosenWords = new();
 
     private ConcurrentQueue<Func<Task>> _actions = new();
-    private bool _hasChosenFinal;
+    public bool HasChosenFinal { get; private set; }
 
     private Thread _thread;
     public Guid? LastRevealedGuid { get; private set; }
@@ -202,7 +202,7 @@ public class ServerGameState : IGameState
 
         await CurrentPlayer.UpdateCandidateTopicsAsync(left, right);
         await ChangeStateAndUpdateAsync(StateOfGame.ChoosingTopic);
-        _hasChosenFinal = false;
+        HasChosenFinal = false;
         _ = ChooseOtherRandomTopicAsync();
     }
 
@@ -356,14 +356,17 @@ public class ServerGameState : IGameState
 
         async Task SendTopicAndWordsAsync(ISessionPlayer p)
         {
-            var pack = Session.CardPack;
+            var pack = Session.CardPack!;
             var id = pack.GetTopicIndex(CurrentTopic);
             var words = new List<WordCard>();
-
+            words.AddRange(p.CardPool.Items.Shuffled().Take(11));
+            
+            /*
             for (var i = 0; i < 11; i++)
             {
                 words.Add(p.CardPool!.Next());
             }
+            */
 
             p.HoldingCards.Clear();
             p.HoldingCards.AddRange(words.Select(w => new HoldingWordCardEntry(w)));
@@ -415,8 +418,8 @@ public class ServerGameState : IGameState
             throw new InvalidOperationException("Wrong player is choosing the final");
         }
 
-        if (_hasChosenFinal) return;
-        _hasChosenFinal = true;
+        if (HasChosenFinal) return;
+        HasChosenFinal = true;
 
         var chosen = CurrentChosenWords[index];
         var credit = chosen.Player;
@@ -437,6 +440,16 @@ public class ServerGameState : IGameState
                 await ChangeWinnerPlayerAndUpdateAsync(credit);
                 await ChangeStateAndUpdateAsync(StateOfGame.WinResult);
                 await ChangeStateAndUpdateAsync(StateOfGame.Waiting);
+
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(1500);
+
+                    foreach (var ai in Session.Players.Where(p => p is AIPlayer).ToList())
+                    {
+                        await Session.PlayerLeaveAsync(ai);
+                    }
+                });
                 return;
             }
         }

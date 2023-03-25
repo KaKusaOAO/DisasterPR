@@ -25,4 +25,8 @@ public class ShuffledPool<T>
         Index %= _arr.Length;
         return item;
     }
+
+    public IEnumerable<T> Next(int count) => Enumerable.Range(0, count).Select(_ => Next());
+
+    public List<T> Items => _arr.ToList();
 }

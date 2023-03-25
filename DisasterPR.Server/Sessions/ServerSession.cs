@@ -110,7 +110,7 @@ public class ServerSession : Session<ISessionPlayer>
             player.Score = ai.Score;
             await Task.WhenAll(Players.Select(async p =>
             {
-                await player.UpdatePlayerScoreAsync(p, p.Score);
+                await p.UpdatePlayerScoreAsync(player, player.Score);
             }));
 
             player.Session = this;
@@ -243,6 +243,15 @@ public class ServerSession : Session<ISessionPlayer>
         var ai = new AIPlayer(player);
         var index = Players.IndexOf(player);
         Players[index] = ai;
+        
+        // If all players now are AIs, the room should be cleaned now.
+        if (Players.All(p => p is AIPlayer))
+        {
+            Players.Clear();
+            Emptied?.Invoke();
+            return;
+        }
+
         await Task.WhenAll(Players.Where(p => p != ai).Select(async p =>
         {
             await p.OnReplaceSessionPlayerAsync(index, ai);

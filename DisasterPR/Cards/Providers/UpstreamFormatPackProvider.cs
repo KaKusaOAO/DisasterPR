@@ -12,11 +12,16 @@ public class UpstreamFormatPackProvider : IPackProvider
     {
         Uri = uri;
     }
-    
+
+    protected virtual Task<Stream> GetStreamAsync()
+    {
+        var http = new HttpClient();
+        return http.GetStreamAsync(Uri);
+    }
+
     public virtual CardPackBuilder MakeBuilder()
     {
-        var backend = DisasterPRCore.Backend;
-        var request = backend.GetHttpStream(Uri)!;
+        var request = GetStreamAsync().Result;
         var data = JsonSerializer.Deserialize<JsonObject>(request)!;
         var builder = CardPackBuilder.Create().AddBuiltinCategories();
         

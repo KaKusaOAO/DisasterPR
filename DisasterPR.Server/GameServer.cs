@@ -30,8 +30,9 @@ public class GameServer
         
         _instance = this;
         Dashboard = new Dashboard(this);
+        Bootstrap.Boot();
+        
         RegisterConsoleCommands();
-        _ = Bootstrap.BootAsync();
         _ = StartCommandLineLoopAsync();
     }
 
@@ -62,7 +63,8 @@ public class GameServer
         Dispatcher = new CommandDispatcher<IServerCommandSource>();
         RegisterConsole<HelpCommand>()
             .RegisterConsole<ExecuteCommand>()
-            .RegisterConsole<CardPackCommand>();
+            .RegisterConsole<CardPackCommand>()
+            .RegisterConsole<AiCommand>();
     }
 
     private GameServer RegisterConsole<T>() where T : IRegisteredCommand

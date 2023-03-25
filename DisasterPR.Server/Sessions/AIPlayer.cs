@@ -31,6 +31,12 @@ public class AIPlayer : ISessionPlayer
         Session = player.Session;
         HoldingCards.AddRange(player.HoldingCards);
     }
+    
+    public AIPlayer()
+    {
+        Id = Guid.NewGuid();
+        Name = "AI-#" + Random.Shared.Next(1000);
+    }
 
     public Task SetCardPackAsync(CardPack pack) => Task.CompletedTask;
     public Task UpdateSessionOptions(ServerSession session) => Task.CompletedTask;
@@ -49,12 +55,7 @@ public class AIPlayer : ISessionPlayer
         return Task.CompletedTask;
     }
 
-    public async Task UpdateSessionGameStateAsync(StateOfGame state)
-    {
-        if (state != StateOfGame.Waiting) return;
-        if (Session == null) return;
-        await Session.PlayerLeaveAsync(this);
-    }
+    public Task UpdateSessionGameStateAsync(StateOfGame state) => Task.CompletedTask;
 
     public Task UpdateCurrentPlayerIndexAsync(int index) => Task.CompletedTask;
 
@@ -71,7 +72,6 @@ public class AIPlayer : ISessionPlayer
 
     public async Task UpdateTimerAsync(int timer)
     {
-        if (Random.Shared.NextDouble() > 0.5) return;
         await Task.Yield();
         
         // Process AI step
@@ -99,14 +99,18 @@ public class AIPlayer : ISessionPlayer
 
         if (state == StateOfGame.ChoosingFinal && context.CurrentPlayer == this)
         {
+            if (Session.ServerGameState.HasChosenFinal) return;
+            
             var unrevealed = context.CurrentChosenWords.Find(w => !w.IsRevealed);
             if (unrevealed != null)
             {
                 await context.RevealChosenWordEntryAsync(unrevealed.Id);
                 return;
             }
-            
-            await context.ChooseFinalAsync(this, Random.Shared.Next(context.CurrentChosenWords.Count));
+
+            var index = Random.Shared.Next(context.CurrentChosenWords.Count);
+            await context.RevealChosenWordEntryAsync(context.CurrentChosenWords[index].Id);
+            await context.ChooseFinalAsync(this, index);
         }
     }
 
