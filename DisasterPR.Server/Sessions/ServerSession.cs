@@ -272,4 +272,9 @@ public class ServerSession : Session<ISessionPlayer>
     {
         IsValid = false;
     }
+
+    public static void RevertRoomId()
+    {
+        _occupiedRooms--;
+    }
 }

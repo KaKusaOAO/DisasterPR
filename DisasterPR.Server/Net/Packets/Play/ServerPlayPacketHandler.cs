@@ -1,3 +1,4 @@
+using System.Net;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Server.Commands;
 using DisasterPR.Server.Sessions;
@@ -52,8 +53,24 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             try
             {
                 var roomId = ServerSession.CreateNewRoomId();
-                var session = CreateSessionWithId(roomId);
-                await JoinSessionAsync(session);
+                
+                try
+                {
+                    var session = CreateSessionWithId(roomId);
+                    await JoinSessionAsync(session);
+                }
+                catch (AggregateException ex)
+                {
+                    var inner = ex.InnerExceptions.First();
+                    var message = inner.Message;
+                    if (inner is HttpRequestException hex)
+                    {
+                        message = $"無法從伺服器取得卡包資料！ ({(int?) hex.StatusCode})";
+                    }
+                
+                    await Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(message));
+                    ServerSession.RevertRoomId();
+                }
             }
             catch (IndexOutOfRangeException ex)
             {
