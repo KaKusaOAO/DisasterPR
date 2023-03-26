@@ -11,23 +11,23 @@ namespace DisasterPR.Server.Commands;
 
 public class Command
 {
-    public static LiteralArgumentBuilder<IServerCommandSource> Literal(string name)
+    public static LiteralArgumentBuilder<CommandSource> Literal(string name)
     {
-        return LiteralArgumentBuilder<IServerCommandSource>.Literal(name);
+        return LiteralArgumentBuilder<CommandSource>.Literal(name);
     }
 
-    public static RequiredArgumentBuilder<IServerCommandSource, T> Argument<T>(string name, IArgumentType<T> type)
+    public static RequiredArgumentBuilder<CommandSource, T> Argument<T>(string name, IArgumentType<T> type)
     {
-        return RequiredArgumentBuilder<IServerCommandSource, T>.Argument(name, type);
+        return RequiredArgumentBuilder<CommandSource, T>.Argument(name, type);
     }
 
     public static Task ExecuteCommandAsync(ServerPlayer player, string input) =>
-        ExecuteCommandAsync(IServerCommandSource.OfPlayer(player), Constants.CommandPrefix, input);
+        ExecuteCommandAsync(CommandSource.OfPlayer(player), Constants.CommandPrefix, input);
 
     public static Task ExecuteCommandByConsoleAsync(string input) =>
-        ExecuteCommandAsync(IServerCommandSource.OfConsole(), "", input);
+        ExecuteCommandAsync(CommandSource.OfConsole(), "", input);
 
-    public static async Task ExecuteCommandAsync(IServerCommandSource source, string prefix, string input)
+    public static async Task ExecuteCommandAsync(CommandSource source, string prefix, string input)
     {
         var dispatcher = GameServer.Instance.Dispatcher;
         var cursorOffset = prefix.Length;
@@ -35,7 +35,7 @@ public class Command
         await ExecuteParseResultAsync(result, prefix, input, cursorOffset);
     }
     
-    private static async Task ExecuteParseResultAsync(ParseResults<IServerCommandSource> result, string prefix, 
+    private static async Task ExecuteParseResultAsync(ParseResults<CommandSource> result, string prefix, 
         string input, int cursorOffset)
     {
         var dispatcher = GameServer.Instance.Dispatcher;
@@ -103,8 +103,8 @@ public class Command
         await dispatcher.ExecuteAsync(result);
     }
     
-    private static string GetUsageText(CommandDispatcher<IServerCommandSource> dispatcher,
-        CommandContextBuilder<IServerCommandSource> context, string input, int cursorOffset)
+    private static string GetUsageText(CommandDispatcher<CommandSource> dispatcher,
+        CommandContextBuilder<CommandSource> context, string input, int cursorOffset)
     {
         var nodes = context.GetNodes();
         if (!nodes.Any()) return "";
@@ -114,5 +114,18 @@ public class Command
         cursorOffset += node.GetRange().GetStart();
         var usage = dispatcher.GetSmartUsage(parent?.GetNode() ?? dispatcher.GetRoot(), context.GetSource());
         return input[..cursorOffset] + usage[node.GetNode()];
+    }
+
+    protected static async Task<bool> CheckSourceInSessionAsync(CommandContext<CommandSource> context)
+    {
+        var source = context.GetSource();
+        var session = source.Session;
+        if (session == null)
+        {
+            await source.SendErrorMessageAsync("你不在房間內。");
+            return false;
+        }
+
+        return true;
     }
 }

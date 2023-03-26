@@ -7,14 +7,17 @@ using KaLib.Brigadier.Context;
 
 namespace DisasterPR.Server.Commands;
 
-public class AiCommand : IRegisteredCommand
+public class AiCommand : Command, IRegisteredCommand
 {
-    public static void Register(CommandDispatcher<IServerCommandSource> d)
+    public static void Register(CommandDispatcher<CommandSource> d)
     {
-        d.Register(LiteralArgumentBuilder<IServerCommandSource>.Literal("ai").Executes(ExecuteAsync));
+        d.Register(LiteralArgumentBuilder<CommandSource>.Literal("ai")
+            .Requires(s => s.IsCapableOfSessionHostOperations())
+            .Executes(ExecuteAsync)
+        );
     }
 
-    private static async Task ExecuteAsync(CommandContext<IServerCommandSource> context)
+    private static async Task ExecuteAsync(CommandContext<CommandSource> context)
     {
         var source = context.GetSource();
         var session = source.Session;

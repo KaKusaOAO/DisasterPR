@@ -9,12 +9,15 @@ public class ExecuteCommand : Command, IRegisteredCommand
 {
     public const string CommandName = "execute";
 
-    public static void Register(CommandDispatcher<IServerCommandSource> d)
+    public static void Register(CommandDispatcher<CommandSource> d)
     {
-        var root = d.Register(Literal(CommandName));
+        var root = d.Register(Literal(CommandName)
+            .Requires(c => c.Sender is ConsoleCommandSender));
+        
         d.Register(Literal(CommandName)
             // -> /execute run ...
-            .Then(Literal("run").Redirect(d.GetRoot()))
+            .Then(Literal("run")
+                .Redirect(d.GetRoot()))
             // -> /execute in ...
             .Then(Literal("in")
                 // -> /execute in session ...
@@ -24,11 +27,10 @@ public class ExecuteCommand : Command, IRegisteredCommand
                         .Fork(root, context =>
                         {
                             var source = context.GetSource();
-                            return GameServer.Instance.Sessions.Values.Select(s => new ServerCommandSource
+                            return GameServer.Instance.Sessions.Values.Select(session => source.Copy().Modify(s =>
                             {
-                                Sender = source.Sender,
-                                Session = s
-                            });
+                                s.Session = session;
+                            }));
                         })
                     )
                     // -> /execute in session id <roomId> ...
@@ -39,11 +41,10 @@ public class ExecuteCommand : Command, IRegisteredCommand
                                 var source = context.GetSource();
                                 var id = context.GetArgument<int>("roomId");
                                 GameServer.Instance.Sessions.TryGetValue(id, out var session);
-                                return new ServerCommandSource
+                                return source.Copy().Modify(s =>
                                 {
-                                    Sender = source.Sender,
-                                    Session = session
-                                };
+                                    s.Session = session;
+                                });
                             })
                         )
                     )

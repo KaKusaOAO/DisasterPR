@@ -19,7 +19,7 @@ public class GameServer
 
     public Dashboard Dashboard { get; }
     
-    public CommandDispatcher<IServerCommandSource> Dispatcher { get; private set; }
+    public CommandDispatcher<CommandSource> Dispatcher { get; private set; }
 
     public GameServer()
     {
@@ -41,7 +41,7 @@ public class GameServer
         await Task.Delay(5000);
         while (true)
         {
-            var source = IServerCommandSource.OfConsole();
+            var source = CommandSource.OfConsole();
             
             var line = Terminal.ReadLine("> ",
                 (input, index) =>
@@ -60,10 +60,10 @@ public class GameServer
     
     private void RegisterConsoleCommands()
     {
-        Dispatcher = new CommandDispatcher<IServerCommandSource>();
+        Dispatcher = new CommandDispatcher<CommandSource>();
         RegisterConsole<HelpCommand>()
             .RegisterConsole<ExecuteCommand>()
-            .RegisterConsole<CardPackCommand>()
+            .RegisterConsole<SessionCommand>()
             .RegisterConsole<AiCommand>();
     }
 

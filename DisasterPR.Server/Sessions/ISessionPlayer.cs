@@ -24,6 +24,7 @@ public interface ISessionPlayer : IPlayer
     public Task OnOtherPlayerUpdateStateAsync(ISessionPlayer player);
     public Task OnReplaceSessionPlayerAsync(int index, ISessionPlayer player);
     public Task KickFromSessionAsync(RoomDisconnectReason reason);
+    public Task KickFromSessionAsync(string reason);
     public Task UpdateSessionGameStateAsync(StateOfGame state);
     public Task UpdateCurrentPlayerIndexAsync(int index);
     public Task UpdatePlayerScoreAsync(ISessionPlayer player, int score);
@@ -38,4 +39,5 @@ public interface ISessionPlayer : IPlayer
     public Task RevealChosenWordEntryAsync(Guid id);
     public Task UpdateFinalWordCardAsync(int index);
     public Task UpdateRoundCycleAsync(int cycle);
+    public Task SendToastAsync(string message);
 }

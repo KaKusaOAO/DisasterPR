@@ -73,10 +73,12 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
         await Connection.SendPacketAsync(new ClientboundReplacePlayerPacket(index, player));
         await Connection.SendPacketAsync(new ClientboundUpdatePlayerScorePacket(player, player.Score));
     }
-
-
+    
     public Task KickFromSessionAsync(RoomDisconnectReason reason) => 
         Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(RoomDisconnectReason.Kicked));
+    
+    public Task KickFromSessionAsync(string reason) => 
+        Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(reason));
 
     public Task UpdateSessionGameStateAsync(StateOfGame state) => 
         Connection.SendPacketAsync(new ClientboundGameStateChangePacket(state));
@@ -122,4 +124,7 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
 
     public Task UpdateRoundCycleAsync(int cycle) =>
         Connection.SendPacketAsync(new ClientboundUpdateRoundCyclePacket(cycle));
+
+    public Task SendToastAsync(string message) =>
+        Connection.SendPacketAsync(new ClientboundSystemChatPacket(message));
 }

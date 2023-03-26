@@ -55,6 +55,15 @@ public class AIPlayer : ISessionPlayer
         return Task.CompletedTask;
     }
 
+    public Task KickFromSessionAsync(string reason)
+    {
+        Disconnected?.Invoke(new DisconnectedEventArgs
+        {
+            Reason = PlayerKickReason.Disconnected
+        });
+        return Task.CompletedTask;
+    }
+
     public Task UpdateSessionGameStateAsync(StateOfGame state) => Task.CompletedTask;
 
     public Task UpdateCurrentPlayerIndexAsync(int index) => Task.CompletedTask;
@@ -123,6 +132,7 @@ public class AIPlayer : ISessionPlayer
     public Task UpdateFinalWordCardAsync(int index) => Task.CompletedTask;
 
     public Task UpdateRoundCycleAsync(int cycle) => Task.CompletedTask;
+    public Task SendToastAsync(string message) => Task.CompletedTask;
 
     public int Score { get; set; }
     public List<HoldingWordCardEntry> HoldingCards { get; } = new();
