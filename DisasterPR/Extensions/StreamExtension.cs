@@ -1,5 +1,7 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using DisasterPR.Net.Packets;
+using KaLib.Utils;
 
 namespace DisasterPR.Extensions;
 
@@ -200,4 +202,14 @@ public static class vStreamExtension
     
     public static T? ReadNullable<T>(this Stream stream, Func<Stream, T> reader) where T : struct => 
         !stream.ReadBool() ? null : reader(stream);
+
+    public static T ReadEnum<T>(this Stream stream) where T : struct
+    {
+        var type = Enum.GetUnderlyingType(typeof(T));
+        if (type == typeof(int)) return (T)Enum.ToObject(typeof(T), stream.ReadVarInt());
+        throw new NotSupportedException();
+    }
+
+    public static void WriteEnum<T>(this Stream stream, T val) where T : struct => 
+        stream.WriteVarInt((int) Convert.ChangeType(val, TypeCode.Int32));
 }

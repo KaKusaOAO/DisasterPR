@@ -34,7 +34,7 @@ public interface ISessionPlayer : IPlayer
     public Task UpdateCandidateTopicsAsync(int left, int right);
     public Task UpdateTimerAsync(int timer);
     public Task UpdateCurrentTopicAsync(int id);
-    public Task UpdateHoldingWordsAsync(List<int> indices);
+    public Task UpdateHoldingWordsAsync(List<HoldingWordCardEntry> entries);
     public Task RevealChosenWordEntryAsync(Guid id);
     public Task UpdateFinalWordCardAsync(int index);
     public Task UpdateRoundCycleAsync(int cycle);

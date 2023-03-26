@@ -116,7 +116,7 @@ public class AIPlayer : ISessionPlayer
 
     public Task UpdateCurrentTopicAsync(int id) => Task.CompletedTask;
 
-    public Task UpdateHoldingWordsAsync(List<int> indices) => Task.CompletedTask;
+    public Task UpdateHoldingWordsAsync(List<HoldingWordCardEntry> entries) => Task.CompletedTask;
 
     public Task RevealChosenWordEntryAsync(Guid id) => Task.CompletedTask;
 

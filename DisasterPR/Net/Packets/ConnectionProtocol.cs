@@ -50,6 +50,8 @@ public class ConnectionProtocol
             .AddPacket(s => new ClientboundUpdatePlayerStatePacket(s))
             .AddPacket(s => new ClientboundReplacePlayerPacket(s))
             .AddPacket(s => new ClientboundUpdatePlayerGuidPacket(s))
+            .AddPacket(s => new ClientboundSystemChatPacket(s))
+            .AddPacket(s => new ClientboundUpdateLockedWordPacket(s))
         )
         .AddFlow(PacketFlow.Serverbound, new PacketSet()
             .AddPacket(s => new ServerboundHeartbeatPacket(s))
@@ -65,6 +67,7 @@ public class ConnectionProtocol
             .AddPacket(s => new ServerboundUpdateSessionOptionsPacket(s))
             .AddPacket(s => new ServerboundRequestKickPlayerPacket(s))
             .AddPacket(s => new ServerboundUpdatePlayerStatePacket(s))
+            .AddPacket(s => new ServerboundUpdateLockedWordPacket(s))
         )
     );
     

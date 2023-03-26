@@ -5,6 +5,7 @@ using DisasterPR.Server.Commands.Senders;
 using DisasterPR.Server.Sessions;
 using DisasterPR.Sessions;
 using ISession = DisasterPR.Sessions.ISession;
+using LogLevel = KaLib.Utils.LogLevel;
 
 namespace DisasterPR.Server;
 
@@ -15,12 +16,12 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
     
     public async Task SendMessageAsync(string content)
     {
-        await Connection.SendPacketAsync(new ClientboundChatPacket("系統", "訊息：" + content));
+        await Connection.SendPacketAsync(new ClientboundSystemChatPacket(content));
     }
 
     public async Task SendErrorMessageAsync(string content)
     {
-        await Connection.SendPacketAsync(new ClientboundChatPacket("系統", "錯誤：" + content));
+        await Connection.SendPacketAsync(new ClientboundSystemChatPacket(content, LogLevel.Error));
     }
 
     public ServerSession? Session { get; set; }
@@ -103,7 +104,16 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
 
     public Task UpdateTimerAsync(int timer) => Connection.SendPacketAsync(new ClientboundUpdateTimerPacket(timer));
     public Task UpdateCurrentTopicAsync(int id) => Connection.SendPacketAsync(new ClientboundSetTopicPacket(id));
-    public Task UpdateHoldingWordsAsync(List<int> indices) => Connection.SendPacketAsync(new ClientboundSetWordsPacket(indices));
+    public Task UpdateHoldingWordsAsync(List<HoldingWordCardEntry> entries)
+    {
+        var data = entries.Select(h => new ClientboundSetWordsPacket.Entry
+        {
+            IsLocked = h.IsLocked,
+            Index = Session!.CardPack!.GetWordIndex(h.Card)
+        }).ToList();
+        
+        return Connection.SendPacketAsync(new ClientboundSetWordsPacket(data));
+    }
 
     public Task RevealChosenWordEntryAsync(Guid id) =>
         Connection.SendPacketAsync(new ClientboundRevealChosenWordEntryPacket(id));

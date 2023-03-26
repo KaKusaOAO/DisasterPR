@@ -6,6 +6,7 @@ public class PacketSet
     private Dictionary<Type, int> _packetIdMap = new();
     private Dictionary<int, Func<MemoryStream, IPacket>> _deserializers = new();
 
+    [Obsolete("Using this is not supported on some platforms.")]
     public PacketSet AddPacket<T>() where T : IPacket => AddPacket(typeof(T));
 
     public PacketSet AddPacket<T>(Func<MemoryStream, T> deserializer) where T : IPacket
@@ -15,6 +16,7 @@ public class PacketSet
         return this;
     }
 
+    [Obsolete("Using this is not supported on some platforms.")]
     public PacketSet AddPacket(Type type)
     {
         if (!typeof(IPacket).IsAssignableFrom(type))

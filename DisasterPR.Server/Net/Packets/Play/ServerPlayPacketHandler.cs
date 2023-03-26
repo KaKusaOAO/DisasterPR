@@ -327,4 +327,13 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
                 .Select(p => p.UpdatePlayerStateAsync(Player)));
         }).Wait();
     }
+
+    public void HandleUpdateLockedWord(ServerboundUpdateLockedWordPacket packet)
+    {
+        Task.Run(async () =>
+        {
+            Player.HoldingCards[packet.Index].IsLocked = packet.IsLocked;
+            await Player.Connection.SendPacketAsync(new ClientboundUpdateLockedWordPacket(packet.Index, packet.IsLocked));
+        }).Wait();
+    }
 }

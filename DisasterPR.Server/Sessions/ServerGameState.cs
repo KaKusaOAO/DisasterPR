@@ -231,6 +231,12 @@ public class ServerGameState : IGameState
             _actions.Enqueue(async () => await ChooseWordAsync(player, cards));
             return;
         }
+        
+        if (cards.Any(card => card.IsLocked))
+        {
+            Logger.Warn($"Player {player.Name} is choosing locked cards!");
+            return;
+        }
 
         if (cards.Any(card => !player.HoldingCards.Contains(card)))
         {
@@ -358,22 +364,16 @@ public class ServerGameState : IGameState
         {
             var pack = Session.CardPack!;
             var id = pack.GetTopicIndex(CurrentTopic);
-            var words = new List<WordCard>();
-            words.AddRange(p.CardPool.Items.Shuffled().Take(11));
-            
-            /*
-            for (var i = 0; i < 11; i++)
-            {
-                words.Add(p.CardPool!.Next());
-            }
-            */
+            var words = new List<HoldingWordCardEntry>();
+            words.AddRange(p.HoldingCards.Where(w => w.IsLocked));
+            words.AddRange(p.CardPool.Items.Shuffled().Take(11)
+                .Select(w => new HoldingWordCardEntry(w, false)));
 
             p.HoldingCards.Clear();
-            p.HoldingCards.AddRange(words.Select(w => new HoldingWordCardEntry(w)));
+            p.HoldingCards.AddRange(words.Take(11));
 
-            var indices = words.Select(w => pack.GetWordIndex(w)).ToList();
             await p.UpdateCurrentTopicAsync(id);
-            await p.UpdateHoldingWordsAsync(indices);
+            await p.UpdateHoldingWordsAsync(p.HoldingCards);
         }
 
         await Task.WhenAll(Session.Players.Select(SendTopicAndWordsAsync));

@@ -15,4 +15,5 @@ public interface IServerPlayPacketHandler : IServerPacketHandler
     public void HandleLeaveRoom(ServerboundLeaveRoomPacket packet);
     public void HandleRequestKickPlayer(ServerboundRequestKickPlayerPacket packet);
     public void HandleUpdatePlayerState(ServerboundUpdatePlayerStatePacket packet);
+    public void HandleUpdateLockedWord(ServerboundUpdateLockedWordPacket packet);
 }

@@ -25,4 +25,6 @@ public interface IClientPlayPacketHandler : IClientPacketHandler
     public void HandleUpdatePlayerState(ClientboundUpdatePlayerStatePacket packet);
     public void HandleReplacePlayer(ClientboundReplacePlayerPacket packet);
     public void HandleUpdatePlayerGuid(ClientboundUpdatePlayerGuidPacket packet);
+    public void HandleSystemChat(ClientboundSystemChatPacket packet);
+    public void HandleUpdateLockedWord(ClientboundUpdateLockedWordPacket packet);
 }

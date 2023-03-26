@@ -1,0 +1,29 @@
+using DisasterPR.Extensions;
+
+namespace DisasterPR.Net.Packets.Play;
+
+public class ServerboundUpdateLockedWordPacket : IPacket<IServerPlayPacketHandler>
+{
+    public int Index { get; set; }
+    public bool IsLocked { get; set; }
+    
+    public ServerboundUpdateLockedWordPacket(int index, bool locked)
+    {
+        Index = index;
+        IsLocked = locked;
+    }
+
+    public ServerboundUpdateLockedWordPacket(MemoryStream stream)
+    {
+        Index = stream.ReadVarInt();
+        IsLocked = stream.ReadBool();
+    }
+    
+    public void Write(MemoryStream stream)
+    {
+        stream.WriteVarInt(Index);
+        stream.WriteBool(IsLocked);
+    }
+
+    public void Handle(IServerPlayPacketHandler handler) => handler.HandleUpdateLockedWord(this);
+}

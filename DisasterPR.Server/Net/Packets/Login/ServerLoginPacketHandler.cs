@@ -18,20 +18,32 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
     public async void HandleLogin(ServerboundLoginPacket packet)
     {
         var version = Connection.ProtocolVersion;
-        if (version > Constants.ProtocolVersion)
+        var shouldDisconnect = false;
+        
+        try
         {
-            Logger.Warn("The server is too old!");
-            await Connection.SendPacketAsync(new ClientboundDisconnectPacket(PlayerKickReason.ServerTooOld));
-            await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
-            return;
-        }
+            if (version > Constants.ProtocolVersion)
+            {
+                shouldDisconnect = true;
+                Logger.Warn("The server is too old!");
+                await Connection.SendPacketAsync(new ClientboundDisconnectPacket(PlayerKickReason.ServerTooOld));
+                await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                return;
+            }
 
-        if (version < Constants.ProtocolVersion)
+            if (version < Constants.ProtocolVersion)
+            {
+                shouldDisconnect = true;
+                Logger.Warn("The client is too old!");
+                await Connection.SendPacketAsync(new ClientboundDisconnectPacket(PlayerKickReason.ClientTooOld));
+                await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                return;
+            }
+        }
+        catch (Exception)
         {
-            Logger.Warn("The client is too old!");
-            await Connection.SendPacketAsync(new ClientboundDisconnectPacket(PlayerKickReason.ClientTooOld));
-            await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
-            return;
+            // Why exceptions???
+            if (shouldDisconnect) return;
         }
 
         Player.Name = packet.PlayerName;

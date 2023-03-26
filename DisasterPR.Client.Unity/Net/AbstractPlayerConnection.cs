@@ -36,6 +36,18 @@ public abstract class AbstractPlayerConnection
     private Stopwatch _stopwatch = new();
     private PacketState _currentState;
 
+    private Dictionary<Type, Action<IPacket>> _typedPacketHandlers = new();
+
+    public void AddTypedPacketHandler<T>(Action<T> handler) where T : IPacket
+    {
+        _typedPacketHandlers.Add(typeof(T), p => handler((T)p));
+    }
+
+    public void ClearTypedPacketHandlers()
+    {
+        _typedPacketHandlers.Clear();
+    }
+
     protected AbstractPlayerConnection(IWebSocket webSocket)
     {
         WebSocket = webSocket;
@@ -78,6 +90,12 @@ public abstract class AbstractPlayerConnection
                     
             var handler = Handlers[CurrentState];
             packet.Handle(handler);
+
+            var type = packet.GetType();
+            if (_typedPacketHandlers.ContainsKey(type))
+            {
+                _typedPacketHandlers[type].Invoke(packet);
+            }
                     
             ReceivedPacket?.Invoke(new ReceivedPacketEventArgs
             {

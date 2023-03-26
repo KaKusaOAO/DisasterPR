@@ -10,11 +10,10 @@ Logger.Level = LogLevel.Verbose;
 Logger.Logged += Logger.LogToEmulatedTerminalAsync;
 Logger.RunThreaded();
 
-var pack = CardPack.GetUpstream();
 var buffer = new MemoryStream();
-pack.Serialize(buffer);
+buffer.WriteEnum(LogLevel.Fatal);
 buffer.Position = 0;
 
-var read = CardPack.Deserialize(buffer);
+var read = buffer.ReadEnum<LogLevel>();
 Logger.Info($"Test passed");
 await Logger.FlushAsync();

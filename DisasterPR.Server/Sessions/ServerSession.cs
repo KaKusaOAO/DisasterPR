@@ -176,8 +176,7 @@ public class ServerSession : Session<ISessionPlayer>
                 await player.UpdateCurrentTopicAsync(id);
             }
 
-            var holdings = player.HoldingCards.Select(w => CardPack!.GetWordIndex(w.Card)).ToList();
-            await player.UpdateHoldingWordsAsync(holdings);
+            await player.UpdateHoldingWordsAsync(player.HoldingCards);
             
             // Change to this state so words and topics get updated
             await player.UpdateSessionGameStateAsync(StateOfGame.ChoosingWord);

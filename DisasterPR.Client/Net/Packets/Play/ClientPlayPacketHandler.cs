@@ -129,7 +129,8 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         await Task.Yield();
         
         var pack = session.CardPack;
-        var words = packet.Words.Select(i => new HoldingWordCardEntry(pack.Words[i]));
+        var words = packet.Entries
+            .Select(i => new HoldingWordCardEntry(pack.Words[i.Index], i.IsLocked));
         Player.HoldingCards.Clear();
         Player.HoldingCards.AddRange(words);
     }
@@ -246,5 +247,15 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
     public void HandleUpdatePlayerGuid(ClientboundUpdatePlayerGuidPacket packet)
     {
         Player.Id = packet.Guid;
+    }
+
+    public void HandleSystemChat(ClientboundSystemChatPacket packet)
+    {
+        // implement this later?
+    }
+    
+    public void HandleUpdateLockedWord(ClientboundUpdateLockedWordPacket packet)
+    {
+        Player.HoldingCards[packet.Index].IsLocked = packet.IsLocked;
     }
 }
