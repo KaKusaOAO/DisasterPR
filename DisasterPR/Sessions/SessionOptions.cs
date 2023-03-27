@@ -6,12 +6,17 @@ namespace DisasterPR.Sessions;
 public class SessionOptions
 {
     /// <summary>
-    /// The score the winner has to reach. Between 2 and 9.
+    /// 玩家是否可以鎖定卡片？
+    /// </summary>
+    public bool CanLockCards { get; set; }
+    
+    /// <summary>
+    /// 玩家的勝利分數，介於 2~9 之間。
     /// </summary>
     public int WinScore { get; set; } = 5;
     
     /// <summary>
-    /// The countdown time set.
+    /// 各階段倒數時間設定。
     /// </summary>
     public CountdownTimeSet CountdownTimeSet { get; set; } = CountdownTimeSet.Default;
 

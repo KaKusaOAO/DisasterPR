@@ -12,13 +12,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-using System.Net.WebSockets;
-using DisasterPR.Server.Controllers;
-using Google.Apis.Auth.OAuth2;
-using KaLib.Utils;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
-namespace DisasterPR.Server;
+namespace DisasterPR.Proxy;
 
 public class Startup
 {

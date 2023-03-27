@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisasterPR.Test", "Disaster
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisasterPR.Client.Unity", "DisasterPR.Client.Unity\DisasterPR.Client.Unity.csproj", "{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisasterPR.Proxy", "DisasterPR.Proxy\DisasterPR.Proxy.csproj", "{1E20A522-F57F-4B8C-A760-5E64946F6F37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A837FBE1-4E71-4C07-9EBD-882AB2F8D23D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E20A522-F57F-4B8C-A760-5E64946F6F37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E20A522-F57F-4B8C-A760-5E64946F6F37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E20A522-F57F-4B8C-A760-5E64946F6F37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E20A522-F57F-4B8C-A760-5E64946F6F37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
