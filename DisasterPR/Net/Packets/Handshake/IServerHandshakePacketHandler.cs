@@ -1,6 +1,4 @@
-using DisasterPR.Net.Packets.Handshake;
-
-namespace DisasterPR.Net.Packets;
+namespace DisasterPR.Net.Packets.Handshake;
 
 public interface IServerHandshakePacketHandler : IServerPacketHandler
 {
