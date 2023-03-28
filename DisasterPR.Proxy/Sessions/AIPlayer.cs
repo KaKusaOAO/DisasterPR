@@ -1,4 +1,5 @@
-﻿using DisasterPR.Cards;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Cards;
 using DisasterPR.Events;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
@@ -12,6 +13,8 @@ public class AIPlayer : ISessionPlayer
     public string OriginalName { get; }
     public ServerSession? Session { get; set; }
     public ShuffledPool<WordCard> CardPool { get; set; }
+    public string UpstreamId => Math.Abs(Id.GetHashCode()).ToString();
+    public bool IsRemotePlayer => false;
 
     public AIPlayer(ISessionPlayer player)
     {

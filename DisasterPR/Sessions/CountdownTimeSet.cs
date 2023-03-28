@@ -24,14 +24,14 @@ public class CountdownTimeSet
     /// </summary>
     public int FinalChooseTime { get; }
     
-    private CountdownTimeSet(int topicChoose, int answerChoose, int finalChoose)
+    public CountdownTimeSet(int topicChoose, int answerChoose, int finalChoose)
     {
         TopicChooseTime = topicChoose;
         AnswerChooseTime = answerChoose;
         FinalChooseTime = finalChoose;
     }
 
-    private CountdownTimeSet(int topicChoose)
+    public CountdownTimeSet(int topicChoose)
     {
         TopicChooseTime = topicChoose;
         AnswerChooseTime = topicChoose * 3;

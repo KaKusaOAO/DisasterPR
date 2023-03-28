@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Cards;
 using DisasterPR.Events;
 using DisasterPR.Net.Packets.Play;
@@ -13,7 +14,9 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
-    
+    public string UpstreamId => Math.Abs(Id.GetHashCode()).ToString();
+    public bool IsRemotePlayer => false;
+
     public async Task SendMessageAsync(string content)
     {
         await Connection.SendPacketAsync(new ClientboundSystemChatPacket(content));

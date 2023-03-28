@@ -1,4 +1,5 @@
-﻿using DisasterPR.Cards;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Cards;
 using DisasterPR.Events;
 using DisasterPR.Sessions;
 using ISession = DisasterPR.Sessions.ISession;
@@ -10,10 +11,12 @@ public interface ISessionPlayer : IPlayer
     public event DisconnectedEventDelegate Disconnected;
     
     public bool IsConnected { get; }
+    public bool IsRemotePlayer { get; }
     
     public new ServerSession? Session { get; set; }
     ISession? IPlayer.Session => Session;
     public ShuffledPool<WordCard> CardPool { get; set; }
+    public string UpstreamId { get; }
 
     public Task SetCardPackAsync(CardPack pack);
     public Task UpdateSessionOptions(ServerSession session);

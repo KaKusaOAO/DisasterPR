@@ -46,11 +46,7 @@ public class SessionCommand : Command, IRegisteredCommand
             return;
         }
 
-        foreach (var player in session.Players.ToList())
-        {
-            await player.KickFromSessionAsync("房間已被解散。");
-            await session.PlayerLeaveAsync(player);
-        }
+        await session.DisbandAsync();
         await source.SendMessageAsync($"已解散房間 #{session.RoomId}。");
     }
 

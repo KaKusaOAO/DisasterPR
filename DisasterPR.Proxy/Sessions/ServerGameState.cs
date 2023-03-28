@@ -1,7 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using DisasterPR.Cards;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
+using Firebase.Database.Query;
 using KaLib.Utils;
 using ISession = DisasterPR.Sessions.ISession;
 using SessionOptions = DisasterPR.Sessions.SessionOptions;
@@ -84,7 +87,7 @@ public class ServerGameState : IGameState
         Logger.Warn("Event loop stopped!");
     }
 
-    private void ShuffleTopicsAndWords()
+    public void ShuffleTopicsAndWords()
     {
         if (Thread.CurrentThread != _thread)
         {
@@ -92,6 +95,7 @@ public class ServerGameState : IGameState
             return;
         }
 
+        Logger.Info("Shuffling topics and words...");
         _topics = new ShuffledPool<TopicCard>(
             Session.CardPack!.FilteredTopicsByEnabledCategories(Session.Options.EnabledCategories));
 
@@ -176,6 +180,45 @@ public class ServerGameState : IGameState
             await ChangePlayerScoreAndUpdateAsync(p, 0);
         }
 
+        if (Session.IsLocal)
+        {
+            var firebase = GameServer.Instance.FirebaseClient;
+            var room = firebase.Child($"Room/{Session.RoomId}");
+            var data = new JsonObject
+            {
+                {
+                    "狀態", new JsonObject
+                    {
+                        {"狀態", 4}
+                    }
+                },
+                {"現在回合", 1}
+            };
+            await room.PatchAsync(JsonSerializer.Serialize(data));
+            
+            data = new JsonObject
+            {
+                {
+                    "狀態", new JsonObject
+                    {
+                        {"狀態", 5}
+                    }
+                }
+            };
+            await room.PatchAsync(JsonSerializer.Serialize(data));
+            
+            data = new JsonObject
+            {
+                {
+                    "狀態", new JsonObject
+                    {
+                        {"狀態", 1}
+                    }
+                }
+            };
+            await room.PatchAsync(JsonSerializer.Serialize(data));
+        }
+
         await ChangeRoundCycleCountAndUpdateAsync(1);
         await Task.Delay(1500);
         await StartRoundAsync();
@@ -191,7 +234,7 @@ public class ServerGameState : IGameState
 
         CurrentChosenWords.Clear();
 
-        (TopicCard Left, TopicCard Right) topics = (_topics.Next(), _topics.Next());
+        (TopicCard Left, TopicCard Right) topics = GetNextCandidateTopics();
 
         var pack = Session.CardPack!;
         var left = pack.GetTopicIndex(topics.Left);
@@ -204,11 +247,19 @@ public class ServerGameState : IGameState
         _ = ChooseOtherRandomTopicAsync();
     }
 
-    private async Task ChooseOtherRandomTopicAsync()
+    public (TopicCard Left, TopicCard Right) GetNextCandidateTopics()
+    {
+        var result = (_topics.Next(), _topics.Next());
+        CandidateTopics = result;
+        return result;
+    }
+
+    public async Task ChooseOtherRandomTopicAsync()
     {
         // Called when timed out
         var time = Options.CountdownTimeSet.TopicChooseTime;
         if (!await WaitForTimerAsync(time)) return;
+        if (Session.IsRemote) return;
 
         var topic = _topics.Next();
         await SetTopicAsync(topic);
@@ -248,13 +299,22 @@ public class ServerGameState : IGameState
             return;
         }
 
-        var entry = new ServerChosenWordEntry(this, player, cards.Select(c => c.Card).ToList());
-        CurrentChosenWords.Add(entry);
+        var firebase = GameServer.Instance.FirebaseClient;
+        var tsid = $"{DateTimeOffset.Now.ToUnixTimeMilliseconds()}{player.UpstreamId}";
+        var room = firebase.Child($"Room/{Session.RoomId}/提交排隊/{tsid}");
+        var aCount = CurrentTopic.AnswerCount;
+        var data = new JsonObject
+        {
+            {"誰的答案", Session.Players.IndexOf(player) + 1}
+        };
+        for (var i = 0; i < aCount; i++)
+        {
+            var wordKey = aCount > 1 ? $"答案{i+1}" : "答案";
+            var word = cards[i].Card.Label;
+            data.Add(wordKey, word);
+        }
 
-        var pack = Session.CardPack;
-        var words = cards.Select(w => pack!.GetWordIndex(w.Card)).ToList();
-        await Task.WhenAll(Session.Players.Select(p =>
-            p.AddChosenWordEntryAsync(entry.Id, entry.Player?.Id, words)));
+        await room.PatchAsync(JsonSerializer.Serialize(data));
 
         if (Session.Players
             .Where(p => p != CurrentPlayer)
@@ -279,14 +339,21 @@ public class ServerGameState : IGameState
         _ = SkipFinalAsync();
     }
 
-    private async Task SkipFinalAsync()
+    public async Task SkipFinalAsync()
     {
         var time = Options.CountdownTimeSet.FinalChooseTime;
         if (!await WaitForTimerAsync(time)) return;
+        if (Session.IsRemote) return;
+        
         await PrepareNextRoundAsync();
     }
 
-    private async Task<bool> WaitForTimerAsync(int time)
+    public void CancelTimer()
+    {
+        _cts.Cancel();
+    } 
+
+    public async Task<bool> WaitForTimerAsync(int time)
     {
         _cts = new CancellationTokenSource();
 
@@ -310,11 +377,12 @@ public class ServerGameState : IGameState
         return true;
     }
 
-    private async Task ChooseEmptyWordsForPlayersAsync()
+    public async Task ChooseEmptyWordsForPlayersAsync()
     {
         // Called when timed out
         var time = Options.CountdownTimeSet.AnswerChooseTime;
         if (!await WaitForTimerAsync(time)) return;
+        if (Session.IsRemote) return;
 
         async Task RunChooseEmptyWordAsync()
         {
@@ -322,14 +390,30 @@ public class ServerGameState : IGameState
                 .Where(p => p != CurrentPlayer)
                 .Where(p => CurrentChosenWords.All(w => w.Player != p));
 
-            foreach (var _ in players)
+            var firebase = GameServer.Instance.FirebaseClient;
+            var room = firebase.Child($"Room/{Session.RoomId}");
+            var data = new JsonObject();
+            
+            foreach (var p in players)
             {
                 var entry = new ServerChosenWordEntry(this, null, new List<WordCard>());
                 CurrentChosenWords.Add(entry);
 
                 await Task.WhenAll(Session.Players.Select(p =>
                     p.AddChosenWordEntryAsync(entry.Id, entry.PlayerId, new List<int>())));
+                
+                var idx = CurrentChosenWords.Count;
+                var aCount = CurrentTopic.AnswerCount;
+                data.Add($"誰的答案{idx}", 0);
+                for (var i = 0; i < aCount; i++)
+                {
+                    var wordKey = aCount > 1 ? $"答案{idx}{i+1}" : $"答案{idx}";
+                    data.Add(wordKey, EmptyWordCard.Instance.Label);
+                }
             }
+            
+            data.Add("答案卡數量", CurrentChosenWords.Count);
+            await room.PatchAsync(JsonSerializer.Serialize(data));
 
             await StartFinalAsync();
         }
@@ -357,20 +441,49 @@ public class ServerGameState : IGameState
         }
 
         CurrentTopic = topic;
+        HasChosenFinal = false;
+
+        var firebase = GameServer.Instance.FirebaseClient;
+        var room = firebase.Child($"Room/{Session.RoomId}");
+        var data = new JsonObject
+        {
+            {"題目狀態", topic.AnswerCount},
+            {"題目2狀態", 1}, // ?
+        };
+        for (var i = 0; i < topic.Texts.Count; i++)
+        {
+            data.Add($"題目{i+1}", topic.Texts[i]);
+        }
+        await room.PatchAsync(JsonSerializer.Serialize(data));
+
+        data = new JsonObject
+        {
+            {
+                "狀態", new JsonObject
+                {
+                    {"狀態", 3}
+                }
+            }
+        };
+        await room.PatchAsync(JsonSerializer.Serialize(data));
 
         async Task SendTopicAndWordsAsync(ISessionPlayer p)
         {
-            var pack = Session.CardPack!;
-            var id = pack.GetTopicIndex(CurrentTopic);
-            var words = new List<HoldingWordCardEntry>();
-            words.AddRange(p.HoldingCards.Where(w => w.IsLocked));
-            words.AddRange(p.CardPool.Items.Shuffled().Take(11)
-                .Select(w => new HoldingWordCardEntry(w, false)));
+            if (!p.IsRemotePlayer)
+            {
+                var pack = Session.CardPack!;
+                var id = pack.GetTopicIndex(CurrentTopic);
+                var words = new List<HoldingWordCardEntry>();
+                words.AddRange(p.HoldingCards.Where(w => w.IsLocked));
+                words.AddRange(p.CardPool.Items.Shuffled().Take(11)
+                    .Select(w => new HoldingWordCardEntry(w, false)));
 
-            p.HoldingCards.Clear();
-            p.HoldingCards.AddRange(words.Take(11));
+                p.HoldingCards.Clear();
+                p.HoldingCards.AddRange(words.Take(11));
 
-            await p.UpdateCurrentTopicAsync(id);
+                await p.UpdateCurrentTopicAsync(id);
+            }
+
             await p.UpdateHoldingWordsAsync(p.HoldingCards);
         }
 
@@ -394,8 +507,15 @@ public class ServerGameState : IGameState
 
         chosen.IsRevealed = true;
         LastRevealedGuid = guid;
-        await Task.WhenAll(Session.Players.Select(p =>
-            p.RevealChosenWordEntryAsync(guid)));
+        
+        var firebase = GameServer.Instance.FirebaseClient;
+        var room = firebase.Child($"Room/{Session.RoomId}");
+        var data = new JsonObject
+        {
+            {"提案卡", CurrentChosenWords.IndexOf(chosen) + 1},
+            {"提案卡是誰的", chosen.Player == null ? 0 : (Session.Players.IndexOf(chosen.Player) + 1)}
+        };
+        await room.PatchAsync(JsonSerializer.Serialize(data));
     }
 
     public async Task ChooseFinalAsync(ISessionPlayer player, int index)
@@ -404,6 +524,12 @@ public class ServerGameState : IGameState
         {
             _actions.Enqueue(async () => await ChooseFinalAsync(player, index));
             return;
+        }
+
+        if (!player.IsRemotePlayer)
+        {
+            if (HasChosenFinal) return;
+            HasChosenFinal = true;
         }
 
         if (CurrentState != StateOfGame.ChoosingFinal)
@@ -416,22 +542,47 @@ public class ServerGameState : IGameState
             throw new InvalidOperationException("Wrong player is choosing the final");
         }
 
-        if (HasChosenFinal) return;
-        HasChosenFinal = true;
+        var firebase = GameServer.Instance.FirebaseClient;
+        var room = firebase.Child($"Room/{Session.RoomId}");
+        var data = new JsonObject
+        {
+            {"狀態", new JsonObject
+            {
+                { "狀態", 4 }
+            }},
+            { "現在回合", (CurrentPlayerIndex + 1) % Session.Players.Count + 1}
+        };
+        await room.PatchAsync(JsonSerializer.Serialize(data));
 
         var chosen = CurrentChosenWords[index];
         var credit = chosen.Player;
         await Task.WhenAll(Session.Players.Select(p =>
             p.UpdateFinalWordCardAsync(index)));
 
-        await Task.Delay(1000);
-
         if (credit != null)
         {
             var score = credit.Score + 1;
             credit.Score = score;
-            await ChangePlayerScoreAndUpdateAsync(credit, score);
 
+            var idx = Session.Players.IndexOf(credit);
+            data = new JsonObject
+            {
+                {$"成員{idx+1}分數", score }
+            };
+            await room.PatchAsync(JsonSerializer.Serialize(data));
+
+            await Task.Delay(1000);
+            await ChangePlayerScoreAndUpdateAsync(credit, score);
+            
+            data = new JsonObject
+            {
+                {"狀態", new JsonObject
+                {
+                    { "狀態", 5 }
+                }},
+            };
+            await room.PatchAsync(JsonSerializer.Serialize(data));
+            
             var maxScore = Options.WinScore;
             if (credit.Score >= maxScore)
             {
@@ -451,8 +602,19 @@ public class ServerGameState : IGameState
                 return;
             }
         }
-
-        await PrepareNextRoundAsync();
+        else
+        {
+            await Task.Delay(1000);
+            
+            data = new JsonObject
+            {
+                {"狀態", new JsonObject
+                {
+                    { "狀態", 5 }
+                }},
+            };
+            await room.PatchAsync(JsonSerializer.Serialize(data));
+        }
     }
 
     private async Task PrepareNextRoundAsync()

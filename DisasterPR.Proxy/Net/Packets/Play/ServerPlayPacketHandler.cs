@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Proxy.Commands;
 using DisasterPR.Proxy.Sessions;
@@ -56,6 +58,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
                 try
                 {
                     var session = CreateSessionWithId(roomId);
+                    session.RunOnHosted();
                     await JoinSessionAsync(session);
                 }
                 catch (AggregateException ex)
@@ -85,13 +88,6 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         Logger.Verbose($"Created room #{roomId}");
 
         var session = new ServerSession(roomId);
-        session.Emptied += () =>
-        {
-            session.Invalidate();
-            sessions.Remove(roomId);
-            Logger.Verbose($"Removed room #{roomId}");
-        };
-            
         sessions.Add(roomId, session);
         return session;
     }
@@ -128,11 +124,22 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             
             if (!sessions.ContainsKey(id))
             {
-                await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.NotFound);
-                return;
+                var firebase = GameServer.Instance.FirebaseClient;
+                var query = firebase.Child("RoomList");
+                var json = JsonSerializer.Deserialize<JsonNode>(query.OnceAsJsonAsync().Result)!.AsObject();
+
+                if (!json.ContainsKey(id.ToString()))
+                {
+                    await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.NotFound);
+                    return;
+                }
+
+                CreateSessionWithId(id);
             }
 
             var session = sessions[id];
+            SpinWait.SpinUntil(() => session.HasUpstreamPlayersUpdateOnce);
+            await Task.Delay(400);
             await JoinSessionAsync(session);
         }).Wait();
     }

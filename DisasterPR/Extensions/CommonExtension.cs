@@ -29,4 +29,17 @@ public static class CommonExtension
 
         return -1;
     }
+
+    public static TValue? AddOrSet<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, TValue value)
+    {
+        if (dict.ContainsKey(key))
+        {
+            var old = dict[key];
+            dict[key] = value;
+            return old;
+        }
+        
+        dict.Add(key, value);
+        return default;
+    }
 }
