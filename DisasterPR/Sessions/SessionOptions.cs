@@ -8,7 +8,7 @@ public class SessionOptions
     /// <summary>
     /// 玩家是否可以鎖定卡片？
     /// </summary>
-    public bool CanLockCards { get; set; }
+    public bool CanLockCards { get; set; } = true;
     
     /// <summary>
     /// 玩家的勝利分數，介於 2~9 之間。
