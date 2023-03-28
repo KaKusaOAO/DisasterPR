@@ -4,6 +4,7 @@ using DisasterPR.Events;
 using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Sessions;
+using KaLib.Nbt;
 using KaLib.Utils;
 using KaLib.Utils.Extensions;
 
@@ -284,5 +285,21 @@ public class ServerSession : Session<ISessionPlayer>
     public static void RevertRoomId()
     {
         _occupiedRooms--;
+    }
+
+    public NbtCompound CreateSnapshot()
+    {
+        var tag = new NbtCompound();
+
+        var players = new NbtList();
+        foreach (var p in Players)
+        {
+            players.Add(p.CreateSnapshot());
+        }
+
+        tag.AddOrSet("Players", players);
+        tag.AddOrSet("State", ServerGameState.CreateSnapshot());
+        tag.AddOrSet("RoomId", new NbtInt(RoomId));
+        return tag;
     }
 }

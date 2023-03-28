@@ -4,7 +4,9 @@ using DisasterPR.Cards;
 using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Sessions;
+using KaLib.Nbt;
 using KaLib.Utils;
+using KaLib.Utils.Extensions;
 using ISession = DisasterPR.Sessions.ISession;
 using SessionOptions = DisasterPR.Sessions.SessionOptions;
 
@@ -287,6 +289,8 @@ public class ServerGameState : IGameState
         if (!await WaitForTimerAsync(time)) return;
         await PrepareNextRoundAsync();
     }
+    
+    public int CurrentTime { get; private set; }
 
     private async Task<bool> WaitForTimerAsync(int time)
     {
@@ -294,6 +298,7 @@ public class ServerGameState : IGameState
 
         void SendTimerUpdate()
         {
+            CurrentTime = time;
             foreach (var player in Session.Players)
             {
                 _ = player.UpdateTimerAsync(time);
@@ -366,9 +371,20 @@ public class ServerGameState : IGameState
             var id = pack.GetTopicIndex(CurrentTopic);
             var words = new List<HoldingWordCardEntry>();
             words.AddRange(p.HoldingCards.Where(w => w.IsLocked));
-            words.AddRange(p.CardPool.Items.Shuffled().Take(11)
+            
+            var shuffled = p.CardPool.Items.Shuffled().ToList();
+            var newWords = new List<HoldingWordCardEntry>();
+            newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Noun)
+                .Take(5)
                 .Select(w => new HoldingWordCardEntry(w, false)));
-
+            newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Verb)
+                .Take(4)
+                .Select(w => new HoldingWordCardEntry(w, false)));
+            newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Adjective)
+                .Take(2)
+                .Select(w => new HoldingWordCardEntry(w, false)));
+            words.AddRange(newWords.Shuffled());
+            
             p.HoldingCards.Clear();
             p.HoldingCards.AddRange(words.Take(11));
 
@@ -490,5 +506,50 @@ public class ServerGameState : IGameState
         RoundCycle = cycle;
         Logger.Verbose($"Current cycle count is now {cycle}");
         await Task.WhenAll(Session.Players.Select(p => p.UpdateRoundCycleAsync(cycle)));
+    }
+    
+    public NbtCompound CreateSnapshot()
+    {
+        var tag = new NbtCompound();
+        tag.AddOrSet("CurrentState", new NbtString(Enum.GetName(CurrentState)));
+        tag.AddOrSet("CurrentPlayerIndex", new NbtInt(CurrentPlayerIndex));
+
+        if (CurrentTopic != null!)
+        {
+            tag.AddOrSet("CurrentTopic", new NbtString(CurrentTopic.Texts.JoinStrings("____")));
+        }
+
+        if (CandidateTopics.HasValue)
+        {
+            var val = CandidateTopics.Value;
+            var ct = new NbtCompound();
+            ct.AddOrSet("Left", new NbtString(val.Left.Texts.JoinStrings("____")));
+            ct.AddOrSet("Right", new NbtString(val.Right.Texts.JoinStrings("____")));
+            tag.AddOrSet("CandidateTopics", ct);
+        }
+
+        var eList = new NbtList();
+        foreach (var entry in CurrentChosenWords)
+        {
+            var et = new NbtCompound();
+            et.AddOrSet("Player", new NbtString((entry.PlayerId ?? Guid.Empty).ToString()));
+
+            var wList = new NbtList();
+            foreach (var word in entry.Words)
+            {
+                var ct = new NbtCompound();
+                ct.AddOrSet("Label", new NbtString(word.Label));
+                ct.AddOrSet("Pos", new NbtString(Enum.GetName(word.PartOfSpeech)));
+                wList.Add(ct);
+            }
+
+            et.AddOrSet("Cards", wList);
+            eList.Add(et);
+        }
+        tag.AddOrSet("ChosenEntries", eList);
+
+        tag.AddOrSet("Time", new NbtInt(CurrentTime));
+
+        return tag;
     }
 }

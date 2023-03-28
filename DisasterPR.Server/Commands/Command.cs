@@ -100,7 +100,16 @@ public class Command
                 .AddWith(LiteralText.Of(input).SetColor(TextColor.Aqua))
                 .AddWith(Texts.OfSession(source.Session))
         );
-        await dispatcher.ExecuteAsync(result);
+
+        try
+        {
+            await dispatcher.ExecuteAsync(result);
+        }
+        catch (Exception ex)
+        {
+            await sender.SendErrorMessageAsync("執行指令時發生錯誤。");
+            Logger.Error(ex.ToString());
+        }
     }
     
     private static string GetUsageText(CommandDispatcher<CommandSource> dispatcher,

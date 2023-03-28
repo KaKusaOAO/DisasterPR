@@ -1,8 +1,13 @@
 ﻿using DisasterPR.Cards.Providers;
+using DisasterPR.Server.Commands.Arguments;
 using DisasterPR.Server.Commands.Senders;
+using DisasterPR.Server.Extensions;
 using DisasterPR.Sessions;
 using KaLib.Brigadier;
 using KaLib.Brigadier.Context;
+using KaLib.Nbt;
+using KaLib.Texts;
+using KaLib.Utils;
 using SessionOptions = DisasterPR.Sessions.SessionOptions;
 
 namespace DisasterPR.Server.Commands;
@@ -13,6 +18,14 @@ public class SessionCommand : Command, IRegisteredCommand
     {
         d.Register(Literal("session")
             .Requires(s => s.IsCapableOfSessionHostOperations())
+            // -> /session dump
+            .Then(Literal("dump")
+                .Requires(s => s.Sender is ConsoleCommandSender)
+                .Executes(c => ExecuteDumpAsync(c, false))
+                .Then(Argument("path", NbtPathArgument.Path())
+                    .Executes(c => ExecuteDumpAsync(c, true))
+                )
+            )
             // -> /session cardpack ...
             .Then(Literal("cardpack")
                 // -> /session cardpack reload
@@ -31,6 +44,32 @@ public class SessionCommand : Command, IRegisteredCommand
                 .Executes(ExecuteDisbandAsync)
             )
         );
+    }
+
+    private static async Task ExecuteDumpAsync(CommandContext<CommandSource> context, bool hasPath)
+    {
+        if (!await CheckSourceInSessionAsync(context)) return;
+        var session = context.GetSource().Session!;
+
+        var nbt = session.CreateSnapshot() as NbtTag;
+        if (hasPath)
+        {
+            try
+            {
+                var path = context.GetArgument<NbtPath>("path");
+                nbt = path.Navigate(nbt);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.ToString());
+                return;
+            }
+        }
+        
+        Logger.Info(TranslateText.Of("Data of %s is: ")
+            .AddWith(LiteralText.Of(hasPath ? context.GetArgument<NbtPath>("path").ToPathString() : "$")
+                .SetColor(TextColor.Aqua))
+            .AddExtra(nbt.ToText()));
     }
 
     private static async Task ExecuteDisbandAsync(CommandContext<CommandSource> context)
