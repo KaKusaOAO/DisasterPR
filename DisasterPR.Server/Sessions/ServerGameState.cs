@@ -305,10 +305,19 @@ public class ServerGameState : IGameState
             }
         }
 
+        Logger.Info("Starting timer...");
         while (time > 0)
         {
             SendTimerUpdate();
-            await Task.Delay(1000, _cts.Token);
+            try
+            {
+                await Task.Delay(1000, _cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                return false;
+            }
+
             if (_cts.IsCancellationRequested) return false;
             time--;
         }
@@ -409,6 +418,9 @@ public class ServerGameState : IGameState
         {
             throw new InvalidOperationException("Attempted to reveal a non-existing card");
         }
+        
+        Logger.Info($"Revealed card {chosen.Words.Select(w => w.Label).JoinStrings(", ")} " +
+                    $"by {chosen.Player?.Name ?? "<null>"}");
 
         chosen.IsRevealed = true;
         LastRevealedGuid = guid;

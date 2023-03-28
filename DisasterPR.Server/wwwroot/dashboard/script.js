@@ -39,34 +39,79 @@ function createPayload(buf) {
     ];
 }
 
+function jsonToHtml(json) {
+    if (json instanceof Array) {
+        return json.map(j => jsonToHtml(j)).join("");
+    }
+
+    var content = "";
+    if (json.text) {
+        content = json.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    if (json.translate) {
+        /** @type {string} */
+        var fm = json.translate.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        var regex = /%(?:(?:(\d*?)\$)?)s/g;
+        var i = 0;
+        content = fm.replace(regex, s => {
+            var matches = s.matchAll(regex);
+            var v = matches.next().value[1];
+            if (v == null) v = i++;
+            return jsonToHtml(json.with.map(e => {
+                e.color ??= json.color;
+                return e;
+            })[v]);
+        });
+    }
+
+    if (json.extra) {
+        content += jsonToHtml(json.extra.map(e => {
+            e.color ??= json.color;
+            return e;
+        }));
+    }
+
+    var color = json.color ?? "white";
+    return `<span style="color: ${color};">${content}</span>`;
+}
+
+function jsonToPlain(json) {
+    if (json instanceof Array) {
+        return json.map(j => jsonToPlain(j)).join("");
+    }
+
+    var content = "";
+    if (json.text) {
+        content = json.text;
+    }
+
+    if (json.translate) {
+        /** @type {string} */
+        var fm = json.translate;
+        var regex = /%(?:(?:(\d*?)\$)?)s/g;
+        var i = 0;
+        content = fm.replace(regex, s => {
+            var matches = s.matchAll(regex);
+            var v = matches.next().value[1];
+            if (v == null) v = i++;
+            return jsonToPlain(json.with[v]);
+        });
+    }
+
+    if (json.extra) {
+        content += jsonToPlain(json.extra);
+    }
+
+    return content;
+}
+
 (() => {
     /** @type {HTMLPreElement} */
     var output = document.getElementById("output");
 
     /** @type {HTMLInputElement} */
     var input = document.getElementById("cmd-input");
-
-    var gateway = new WebSocket("ws://127.0.0.1:5221/gateway");
-    gateway.onopen = _ => {
-        gateway.onmessage = e => {
-            console.log(e.data);
-        };
-        
-        // Handshake
-        gateway.send(new Int8Array(createPayload([
-            ...varIntBuf(0), // ServerboundHelloPacket
-            ...varIntBuf(1), // protocol version
-        ])));
-
-        // Login (state changed)
-        var name = "米糰";
-        var encoded = new TextEncoder().encode(name);
-        gateway.send(new Int8Array(createPayload([
-            ...varIntBuf(0), // ServerboundLoginPacket
-            ...varIntBuf(encoded.length),
-            ...encoded
-        ])));
-    };
 
     var ws = new WebSocket("ws://127.0.0.1:5221/api/dashboard");
     ws.onmessage = e => {
@@ -78,15 +123,25 @@ function createPayload(buf) {
             return result;
         });
 
-        elem.appendChild(t(data.timestamp + " - "));
-        var tag = t(`[${data.tag}]`);
-        tag.style.color = data.color;
-        elem.appendChild(tag);
+        var h = (s => {
+            var result = document.createElement("span");
+            result.innerHTML = s;
+            return result;
+        });
 
-        var pad = `${data.timestamp} - [${data.tag}] `;
+        elem.appendChild(t(data.timestamp + " - "));
+        data.tag.color = data.color;
+        var tagJson = {
+            translate: "[%s] ",
+            with: [data.tag],
+            color: data.tag.color
+        };
+        elem.appendChild(h(jsonToHtml(tagJson)));
+
+        var pad = `${data.timestamp} - ${jsonToPlain(tagJson)}`;
         pad = pad.split("").map(_ => " ").join("");
 
-        elem.appendChild(t(` ${data.content.split("\n").join(pad)}\n`));
+        elem.appendChild(h(jsonToHtml(data.content).split("\n").join("\n" + pad) + "\n"));
         output.appendChild(elem);
 
         output.parentElement.parentElement.scrollTo(0, output.scrollHeight);

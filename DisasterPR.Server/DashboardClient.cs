@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using DisasterPR.Events;
 using DisasterPR.Server.Commands;
+using DisasterPR.Server.Extensions;
 using KaLib.Utils;
 using KaLib.Utils.Extensions;
 using LogLevel = KaLib.Utils.LogLevel;
@@ -90,9 +91,9 @@ public class DashboardClient
             var payload = new JsonObject
             {
                 { "level", Enum.GetName(e.Level)!.ToLower() },
-                { "tag", e.Tag.ToPlainText() },
+                { "tag", e.Tag.ToJson() },
                 { "color", "#" + e.TagColor.Color.RGB.ToString("x6") },
-                { "content", e.Content.ToPlainText() },
+                { "content", e.Content.ToJson() },
                 { "timestamp", e.Timestamp.ToString("s") }
             };
 

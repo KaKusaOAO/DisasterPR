@@ -62,7 +62,8 @@ public static class NbtExtension
                     if (formatted) text.AddExtra(LiteralText.Of("\n" + "    ".Repeat(indent + 1)));
                     text.AddExtra(TranslateText.Of("%s: %s")
                         .AddWith(LiteralText.Of(key).SetColor(TextColor.Aqua))
-                        .AddExtra(value.ToText(formatted, indent + 1)));
+                        .AddWith(value.ToText(formatted, indent + 1))
+                    );
                     addComma = true;
                 }
 
