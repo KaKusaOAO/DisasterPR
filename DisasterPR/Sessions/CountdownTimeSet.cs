@@ -7,7 +7,7 @@ public class CountdownTimeSet
     public static readonly List<CountdownTimeSet> TimeSets =
         Enumerable.Range(1, 12).Select(n => new CountdownTimeSet(n * 5)).ToList();
 
-    public static CountdownTimeSet Default => TimeSets[2];  // 15, 45, 90
+    public static CountdownTimeSet Default => TimeSets.Find(w => w.TopicChooseTime == 15);  // 15, 45, 90
     
     /// <summary>
     /// The time in seconds a player has to choose a topic.

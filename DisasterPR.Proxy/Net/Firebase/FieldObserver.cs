@@ -82,7 +82,7 @@ public class FieldObserver : IDisposable
                                     foreach (var (key, value) in obj!)
                                     {
                                         var val = JsonNode.Parse(value?.ToJsonString() ?? "null");
-                                        _cached.AddOrSet(key, val);
+                                        _cached[key] = val;
                                     }
                                 }
                                 else
@@ -120,7 +120,7 @@ public class FieldObserver : IDisposable
                                         }
                                         else
                                         {
-                                            curr.AddOrSet(dir, obj);
+                                            curr[dir] = obj;
                                             curr = obj;
                                         }
 
@@ -130,25 +130,30 @@ public class FieldObserver : IDisposable
                                     itemName = dir;
                                 }
 
+                                if (itemName == null)
+                                {
+                                    throw new Exception("itemName is null");
+                                }
+
                                 var val = JsonNode.Parse(data?.ToJsonString() ?? "null");
-                                if (curr.ContainsKey(itemName!))
+                                if (curr.ContainsKey(itemName))
                                 {
                                     if (type == "put")
                                     {
-                                        if (val == null && curr.ContainsKey(itemName))
+                                        if (val == null)
                                         {
                                             curr.Remove(itemName);
                                         }
                                         else
                                         {
-                                            curr.AddOrSet(itemName, val);
+                                            curr[itemName] = val;
                                         }
                                     }
                                     else
                                     {
                                         if (val is JsonObject valp)
                                         {
-                                            var obj = curr[itemName].AsObject();
+                                            var obj = curr[itemName]!.AsObject();
                                             foreach (var (k, _) in valp)
                                             {
                                                 var v = JsonNode.Parse(valp[k]?.ToJsonString() ?? "null");
@@ -158,7 +163,7 @@ public class FieldObserver : IDisposable
                                                 }
                                                 else
                                                 {
-                                                    obj.AddOrSet(k, v);
+                                                    obj[k] = v;
                                                 }
                                             }
                                         }
@@ -168,7 +173,7 @@ public class FieldObserver : IDisposable
                                 {
                                     if (val != null)
                                     {
-                                        curr.AddOrSet(itemName, val);
+                                        curr[itemName] = val;
                                     }
                                 }
                                 

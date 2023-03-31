@@ -30,16 +30,20 @@ public static class CommonExtension
         return -1;
     }
 
+    /// <summary>
+    /// Add or set the value to the dictionary. Returns the previous value if exists. <br/>
+    /// If you are only updating the value, consider using the indexer instead.
+    /// </summary>
+    /// <param name="dict">The dictionary.</param>
+    /// <param name="key">The key of the value.</param>
+    /// <param name="value">The value to be set.</param>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
+    /// <typeparam name="TValue">The type of the value.</typeparam>
+    /// <returns>The previous set value if exists.</returns>
     public static TValue? AddOrSet<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key, TValue value)
     {
-        if (dict.ContainsKey(key))
-        {
-            var old = dict[key];
-            dict[key] = value;
-            return old;
-        }
-        
-        dict.Add(key, value);
-        return default;
+        dict.TryGetValue(key, out var result);
+        dict[key] = value;
+        return result;
     }
 }

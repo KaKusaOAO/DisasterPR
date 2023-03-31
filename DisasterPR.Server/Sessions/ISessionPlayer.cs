@@ -48,28 +48,29 @@ public static class SessionPlayerExtension
 {
     public static NbtCompound CreateSnapshot(this ISessionPlayer p)
     {
-        var pt = new NbtCompound();
-        pt.AddOrSet("Name", new NbtString(p.Name));
-        pt.AddOrSet("Id", new NbtString(p.Id.ToString()));
+        var pt = new NbtCompound
+        {
+            { "Name", new NbtString(p.Name) },
+            { "Id", new NbtString(p.Id.ToString()) },
+            { "Score", new NbtInt(p.Score) },
+            { "State", new NbtString(Enum.GetName(p.State)) }
+        };
 
         var hList = new NbtList();
         foreach (var h in p.HoldingCards)
         {
             var ht = new NbtCompound();
-            ht.AddOrSet("Locked", new NbtByte(h.IsLocked));
+            ht["Locked"] = new NbtByte(h.IsLocked);
 
             var ct = new NbtCompound();
-            ct.AddOrSet("Label", new NbtString(h.Card.Label));
-            ct.AddOrSet("Pos", new NbtString(Enum.GetName(h.Card.PartOfSpeech)));
-            ht.AddOrSet("Card", ct);
+            ct["Label"] = new NbtString(h.Card.Label);
+            ct["Pos"] = new NbtString(Enum.GetName(h.Card.PartOfSpeech));
+            ht["Card"] = ct;
             
             hList.Add(ht);
         }
-
-        pt.AddOrSet("HoldingCards", hList);
-        pt.AddOrSet("Score", new NbtInt(p.Score));
-        pt.AddOrSet("State", new NbtString(Enum.GetName(p.State)));
-
+        
+        pt["HoldingCards"] = hList;
         return pt;
     }
 }

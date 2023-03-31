@@ -1,3 +1,5 @@
+using DisasterPR.Attributes;
+
 namespace DisasterPR.Backends;
 
 public class DefaultBackend : IBackend
@@ -9,6 +11,7 @@ public class DefaultBackend : IBackend
         return result;
     }
 
+    [WebGlUnavailable(WebGlUnavailableReason.Multithreading)]
     public void GetHttpStreamAsync(Uri uri, Action<Stream> callback, Action<Exception>? onError = null)
     {
         _ = Task.Run(() =>

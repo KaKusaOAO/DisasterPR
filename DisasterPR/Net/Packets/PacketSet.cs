@@ -6,17 +6,35 @@ public class PacketSet
     private Dictionary<Type, int> _packetIdMap = new();
     private Dictionary<int, Func<MemoryStream, IPacket>> _deserializers = new();
 
-    [Obsolete("Using this is not supported on some platforms.")]
+    /// <summary>
+    /// Adds a packet to the set. <br/>
+    /// The packet type must have a constructor that takes a <see cref="MemoryStream"/> as its only parameter. <br/>
+    /// Note that in Unity, managed code stripping might remove the constructor, which will cause this method to fail.
+    /// </summary>
+    /// <typeparam name="T">The type of the packet.</typeparam>
+    /// <returns>This packet set for chain call.</returns>
     public PacketSet AddPacket<T>() where T : IPacket => AddPacket(typeof(T));
 
+    /// <summary>
+    /// Adds a packet to the set and specifies a custom deserializer. <br/>
+    /// This resolves the issue of managed code stripping in Unity removing the constructor of the packet type.
+    /// </summary>
+    /// <param name="deserializer">The deserializer of the packet type.</param>
+    /// <typeparam name="T">The packet type.</typeparam>
+    /// <returns>This packet set for chain call.</returns>
     public PacketSet AddPacket<T>(Func<MemoryStream, T> deserializer) where T : IPacket
     {
         AddPacket<T>();
         _deserializers.Add(_packetIdMap[typeof(T)], s => deserializer(s));
         return this;
     }
-
-    [Obsolete("Using this is not supported on some platforms.")]
+    
+    /// <summary>
+    /// Adds a packet to the set. <br/>
+    /// The packet type must have a constructor that takes a <see cref="MemoryStream"/> as its only parameter. <br/>
+    /// Note that in Unity, managed code stripping might remove the constructor, which will cause this method to fail.
+    /// </summary>
+    /// <returns>This packet set for chain call.</returns>
     public PacketSet AddPacket(Type type)
     {
         if (!typeof(IPacket).IsAssignableFrom(type))

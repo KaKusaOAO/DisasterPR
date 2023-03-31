@@ -5,7 +5,7 @@ using KaLib.Utils;
 
 namespace DisasterPR.Extensions;
 
-public static class vStreamExtension
+public static class StreamExtension
 {
     private const byte SegmentBits = 0x7f;
     private const byte ContinueBit = 0x80;

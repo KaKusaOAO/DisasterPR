@@ -15,28 +15,30 @@ public static class TextExtension
             extras.Add(e.ToJson());
         }
 
-        obj.AddOrSet("extra", extras);
+        obj["extra"] = extras;
 
         if (text.Color != null)
         {
-            obj.AddOrSet("color", "#" + text.Color.Color.RGB.ToString("x6"));
+            obj["color"] = "#" + text.Color.Color.RGB.ToString("x6");
         }
 
-        if (text is LiteralText literal)
+        switch (text)
         {
-            obj.AddOrSet("text", literal.Text);
-        }
-
-        if (text is TranslateText translate)
-        {
-            var withs = new JsonArray();
-            foreach (var w in translate.With)
+            case LiteralText literal:
+                obj["text"] = literal.Text;
+                break;
+            case TranslateText translate:
             {
-                withs.Add(w.ToJson());
+                var withs = new JsonArray();
+                foreach (var w in translate.With)
+                {
+                    withs.Add(w.ToJson());
+                }
+
+                obj["translate"] = translate.Translate;
+                obj["with"] = withs;
+                break;
             }
-            
-            obj.AddOrSet("translate", translate.Translate);
-            obj.AddOrSet("with", withs);
         }
 
         return obj;

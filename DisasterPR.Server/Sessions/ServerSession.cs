@@ -297,9 +297,9 @@ public class ServerSession : Session<ISessionPlayer>
             players.Add(p.CreateSnapshot());
         }
 
-        tag.AddOrSet("Players", players);
-        tag.AddOrSet("State", ServerGameState.CreateSnapshot());
-        tag.AddOrSet("RoomId", new NbtInt(RoomId));
+        tag["Players"] = players;
+        tag["State"] = ServerGameState.CreateSnapshot();
+        tag["RoomId"] = new NbtInt(RoomId);
         return tag;
     }
 }

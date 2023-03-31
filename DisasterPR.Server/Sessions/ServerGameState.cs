@@ -522,46 +522,52 @@ public class ServerGameState : IGameState
     
     public NbtCompound CreateSnapshot()
     {
-        var tag = new NbtCompound();
-        tag.AddOrSet("CurrentState", new NbtString(Enum.GetName(CurrentState)));
-        tag.AddOrSet("CurrentPlayerIndex", new NbtInt(CurrentPlayerIndex));
+        var tag = new NbtCompound
+        {
+            { "CurrentState", new NbtString(Enum.GetName(CurrentState)) },
+            { "CurrentPlayerIndex", new NbtInt(CurrentPlayerIndex) },
+            { "Time", new NbtInt(CurrentTime) }
+        };
 
         if (CurrentTopic != null!)
         {
-            tag.AddOrSet("CurrentTopic", new NbtString(CurrentTopic.Texts.JoinStrings("____")));
+            tag["CurrentTopic"] = new NbtString(CurrentTopic.Texts.JoinStrings("____"));
         }
 
         if (CandidateTopics.HasValue)
         {
             var val = CandidateTopics.Value;
-            var ct = new NbtCompound();
-            ct.AddOrSet("Left", new NbtString(val.Left.Texts.JoinStrings("____")));
-            ct.AddOrSet("Right", new NbtString(val.Right.Texts.JoinStrings("____")));
-            tag.AddOrSet("CandidateTopics", ct);
+            var ct = new NbtCompound
+            {
+                { "Left", new NbtString(val.Left.Texts.JoinStrings("____")) },
+                { "Right", new NbtString(val.Right.Texts.JoinStrings("____")) }
+            };
+            tag["CandidateTopics"] = ct;
         }
 
         var eList = new NbtList();
         foreach (var entry in CurrentChosenWords)
         {
-            var et = new NbtCompound();
-            et.AddOrSet("Player", new NbtString((entry.PlayerId ?? Guid.Empty).ToString()));
+            var et = new NbtCompound
+            {
+                { "Player", new NbtString((entry.PlayerId ?? Guid.Empty).ToString()) }
+            };
 
             var wList = new NbtList();
-            foreach (var word in entry.Words)
+            foreach (var ct in entry.Words.Select(word => new NbtCompound
+                     {
+                         { "Label", new NbtString(word.Label) },
+                         { "Pos", new NbtString(Enum.GetName(word.PartOfSpeech)) }
+                     }))
             {
-                var ct = new NbtCompound();
-                ct.AddOrSet("Label", new NbtString(word.Label));
-                ct.AddOrSet("Pos", new NbtString(Enum.GetName(word.PartOfSpeech)));
                 wList.Add(ct);
             }
 
-            et.AddOrSet("Cards", wList);
+            et["Cards"] = wList;
             eList.Add(et);
         }
-        tag.AddOrSet("ChosenEntries", eList);
-
-        tag.AddOrSet("Time", new NbtInt(CurrentTime));
-
+        
+        tag["ChosenEntries"] = eList;
         return tag;
     }
 }
