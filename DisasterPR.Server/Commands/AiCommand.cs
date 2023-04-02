@@ -1,9 +1,9 @@
 ﻿using DisasterPR.Server.Commands.Senders;
 using DisasterPR.Server.Sessions;
 using DisasterPR.Sessions;
-using KaLib.Brigadier;
-using KaLib.Brigadier.Builder;
-using KaLib.Brigadier.Context;
+using Mochi.Brigadier;
+using Mochi.Brigadier.Builder;
+using Mochi.Brigadier.Context;
 
 namespace DisasterPR.Server.Commands;
 
@@ -19,7 +19,7 @@ public class AiCommand : Command, IRegisteredCommand
 
     private static async Task ExecuteAsync(CommandContext<CommandSource> context)
     {
-        var source = context.GetSource();
+        var source = context.Source;
         var session = source.Session;
         if (session == null)
         {

@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ServerboundChooseWordPacket : IPacket<IServerPlayPacketHandler>
         Indices = indices;
     }
 
-    public ServerboundChooseWordPacket(MemoryStream stream)
+    public ServerboundChooseWordPacket(BufferReader stream)
     {
         Indices = stream.ReadList(s => s.ReadVarInt()).ToHashSet();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteList(Indices.ToList(), (s, i) => s.WriteVarInt(i));
     }

@@ -2,6 +2,7 @@ using System.Reflection;
 using DisasterPR.Net.Packets.Handshake;
 using DisasterPR.Net.Packets.Login;
 using DisasterPR.Net.Packets.Play;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets;
 
@@ -122,9 +123,9 @@ public class ConnectionProtocol
         return _flows[flow];
     }
     
-    public IPacket CreatePacket(PacketFlow flow, int id, MemoryStream stream)
+    public IPacket CreatePacket(PacketFlow flow, int id, BufferReader stream)
         => GetPacketSetFromFlow(flow).CreatePacket(id, stream);
 
-    public T CreatePacket<T>(PacketFlow flow, int id, MemoryStream stream) where T : IPacket
+    public T CreatePacket<T>(PacketFlow flow, int id, BufferReader stream) where T : IPacket
         => GetPacketSetFromFlow(flow).CreatePacket<T>(id, stream);
 }

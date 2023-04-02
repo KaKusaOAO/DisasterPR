@@ -5,7 +5,7 @@ using DisasterPR.Server.Commands.Senders;
 using DisasterPR.Server.Sessions;
 using DisasterPR.Sessions;
 using ISession = DisasterPR.Sessions.ISession;
-using LogLevel = KaLib.Utils.LogLevel;
+using LogLevel = Mochi.Utils.LogLevel;
 
 namespace DisasterPR.Server;
 

@@ -1,14 +1,16 @@
+using Mochi.IO;
+
 namespace DisasterPR.Net.Packets;
 
 public class PacketSet
 {
     private Dictionary<int, Type> _packetMap = new();
     private Dictionary<Type, int> _packetIdMap = new();
-    private Dictionary<int, Func<MemoryStream, IPacket>> _deserializers = new();
+    private Dictionary<int, Func<BufferReader, IPacket>> _deserializers = new();
 
     /// <summary>
     /// Adds a packet to the set. <br/>
-    /// The packet type must have a constructor that takes a <see cref="MemoryStream"/> as its only parameter. <br/>
+    /// The packet type must have a constructor that takes a <see cref="BufferReader"/> as its only parameter. <br/>
     /// Note that in Unity, managed code stripping might remove the constructor, which will cause this method to fail.
     /// </summary>
     /// <typeparam name="T">The type of the packet.</typeparam>
@@ -22,7 +24,7 @@ public class PacketSet
     /// <param name="deserializer">The deserializer of the packet type.</param>
     /// <typeparam name="T">The packet type.</typeparam>
     /// <returns>This packet set for chain call.</returns>
-    public PacketSet AddPacket<T>(Func<MemoryStream, T> deserializer) where T : IPacket
+    public PacketSet AddPacket<T>(Func<BufferReader, T> deserializer) where T : IPacket
     {
         AddPacket<T>();
         _deserializers.Add(_packetIdMap[typeof(T)], s => deserializer(s));
@@ -58,7 +60,7 @@ public class PacketSet
         return _packetMap[id];
     }
     
-    public Func<MemoryStream, IPacket> GetDeserializerById(int id)
+    public Func<BufferReader, IPacket> GetDeserializerById(int id)
     {
         if (_deserializers.ContainsKey(id))
         {
@@ -66,7 +68,7 @@ public class PacketSet
         }
         
         var type = GetPacketTypeById(id);
-        var ctor = type.GetConstructor(new[] { typeof(MemoryStream) });
+        var ctor = type.GetConstructor(new[] { typeof(BufferReader) });
         if (ctor == null)
         {
             throw new NotSupportedException($"The MemoryStream constructor in type {type} is not defined");
@@ -86,8 +88,8 @@ public class PacketSet
         return _packetIdMap[type];
     }
 
-    public IPacket CreatePacket(int id, MemoryStream stream) => GetDeserializerById(id)(stream);
+    public IPacket CreatePacket(int id, BufferReader stream) => GetDeserializerById(id)(stream);
 
-    public T CreatePacket<T>(int id, MemoryStream stream) where T : IPacket =>
+    public T CreatePacket<T>(int id, BufferReader stream) where T : IPacket =>
         (T) CreatePacket(id, stream);
 }

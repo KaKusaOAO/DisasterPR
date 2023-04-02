@@ -1,5 +1,5 @@
 ﻿using DisasterPR.Server.Commands.Senders;
-using KaLib.Brigadier;
+using Mochi.Brigadier;
 
 namespace DisasterPR.Server.Commands;
 

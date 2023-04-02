@@ -1,5 +1,6 @@
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -19,7 +20,7 @@ public class ClientboundUpdateSessionOptionsPacket : IPacket<IClientPlayPacketHa
         EnabledCategories = options.EnabledCategories.Select(c => c.Guid).ToList();
     }
 
-    public ClientboundUpdateSessionOptionsPacket(MemoryStream stream)
+    public ClientboundUpdateSessionOptionsPacket(BufferReader stream)
     {
         CanLockCards = stream.ReadBool();
         WinScore = stream.ReadVarInt();
@@ -27,7 +28,7 @@ public class ClientboundUpdateSessionOptionsPacket : IPacket<IClientPlayPacketHa
         EnabledCategories = stream.ReadList(s => s.ReadGuid());
     }
 
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteBool(CanLockCards);
         stream.WriteVarInt(WinScore);

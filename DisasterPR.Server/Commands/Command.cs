@@ -1,11 +1,10 @@
 ﻿using DisasterPR.Server.Commands.Senders;
-using KaLib.Brigadier;
-using KaLib.Brigadier.Arguments;
-using KaLib.Brigadier.Builder;
-using KaLib.Brigadier.Context;
-using KaLib.Texts;
-using KaLib.Utils;
-using KaLib.Utils.Extensions;
+using Mochi.Brigadier;
+using Mochi.Brigadier.Arguments;
+using Mochi.Brigadier.Builder;
+using Mochi.Brigadier.Context;
+using Mochi.Texts;
+using Mochi.Utils;
 
 namespace DisasterPR.Server.Commands;
 
@@ -39,10 +38,10 @@ public class Command
         string input, int cursorOffset)
     {
         var dispatcher = GameServer.Instance.Dispatcher;
-        var source = result.GetContext().GetSource();
+        var source = result.Context.GetSource();
         var sender = source.Sender;
 
-        var exceptions = result.GetExceptions().Values;
+        var exceptions = result.Exceptions.Values;
         if (exceptions.Any())
         {
             var err = exceptions.First();
@@ -58,7 +57,7 @@ public class Command
             return;
         }
 
-        var reader = result.GetReader();
+        var reader = result.Reader;
         if (reader.CanRead())
         {
             var read = reader.GetRead().Length;
@@ -70,7 +69,7 @@ public class Command
 
             async Task Run()
             {
-                var context = result.GetContext().GetLastChild();
+                var context = result.Context.GetLastChild();
                 var usage = GetUsageText(dispatcher!, context, input, cursorOffset);
                 if (!string.IsNullOrEmpty(usage))
                 {
@@ -82,7 +81,7 @@ public class Command
             return;
         }
 
-        var context = result.GetContext().GetLastChild();
+        var context = result.Context.GetLastChild();
         if (context.GetCommand() == null)
         {
             var ctx = context.GetLastChild();
@@ -121,13 +120,13 @@ public class Command
         var node = nodes[^1];
         var parent = nodes.Count > 1 ? nodes[^2] : null;
         cursorOffset += node.GetRange().GetStart();
-        var usage = dispatcher.GetSmartUsage(parent?.GetNode() ?? dispatcher.GetRoot(), context.GetSource());
+        var usage = dispatcher.GetSmartUsage(parent?.GetNode() ?? dispatcher.Root, context.GetSource());
         return input[..cursorOffset] + usage[node.GetNode()];
     }
 
     protected static async Task<bool> CheckSourceInSessionAsync(CommandContext<CommandSource> context)
     {
-        var source = context.GetSource();
+        var source = context.Source;
         var session = source.Session;
         if (session == null)
         {

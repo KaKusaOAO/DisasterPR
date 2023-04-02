@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ServerboundChatPacket : IPacket<IServerPlayPacketHandler>
         Content = content;
     }
     
-    public ServerboundChatPacket(MemoryStream stream)
+    public ServerboundChatPacket(BufferReader stream)
     {
         Content = stream.ReadUtf8String();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteUtf8String(Content);
     }

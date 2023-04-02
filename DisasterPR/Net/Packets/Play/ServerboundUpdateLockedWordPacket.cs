@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -13,13 +14,13 @@ public class ServerboundUpdateLockedWordPacket : IPacket<IServerPlayPacketHandle
         IsLocked = locked;
     }
 
-    public ServerboundUpdateLockedWordPacket(MemoryStream stream)
+    public ServerboundUpdateLockedWordPacket(BufferReader stream)
     {
         Index = stream.ReadVarInt();
         IsLocked = stream.ReadBool();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Index);
         stream.WriteBool(IsLocked);

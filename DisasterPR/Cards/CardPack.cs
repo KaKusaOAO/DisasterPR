@@ -1,6 +1,7 @@
 ﻿using DisasterPR.Attributes;
 using DisasterPR.Cards.Providers;
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Cards;
 
@@ -36,30 +37,30 @@ public class CardPack
         
     }
 
-    public static CardPack Deserialize(Stream stream)
+    public static CardPack Deserialize(BufferReader reader)
     {
-        var guid = stream.ReadGuid();
+        var guid = reader.ReadGuid();
         if (guid == Guid.Empty) return GetUpstream();
         
         var pack = new CardPack
         {
             Guid = guid,
-            Categories = stream.ReadList(CardCategory.Deserialize).ToArray()
+            Categories = reader.ReadList(CardCategory.Deserialize).ToArray()
         };
 
-        pack.Topics = stream.ReadList(s => TopicCard.Deserialize(pack, s)).ToArray();
-        pack.Words = stream.ReadList(s => WordCard.Deserialize(pack, s)).ToArray();
+        pack.Topics = reader.ReadList(s => TopicCard.Deserialize(pack, s)).ToArray();
+        pack.Words = reader.ReadList(s => WordCard.Deserialize(pack, s)).ToArray();
         return pack;
     }
 
-    public void Serialize(Stream stream)
+    public void Serialize(BufferWriter writer)
     {
-        stream.WriteGuid(Guid);
+        writer.WriteGuid(Guid);
         if (IsUpstream) return;
         
-        stream.WriteList(Categories.ToList(), (s, i) => i.Serialize(s));
-        stream.WriteList(Topics.ToList(), (s, i) => i.Serialize(s));
-        stream.WriteList(Words.ToList(), (s, i) => i.Serialize(s));
+        writer.WriteList(Categories.ToList(), (s, i) => i.Serialize(s));
+        writer.WriteList(Topics.ToList(), (s, i) => i.Serialize(s));
+        writer.WriteList(Words.ToList(), (s, i) => i.Serialize(s));
     }
 
     public List<TopicCard> FilteredTopicsByEnabledCategories(List<CardCategory> categories) =>

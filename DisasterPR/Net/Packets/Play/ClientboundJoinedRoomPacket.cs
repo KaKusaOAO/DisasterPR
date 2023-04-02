@@ -1,5 +1,6 @@
 ﻿using DisasterPR.Extensions;
 using DisasterPR.Sessions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -23,17 +24,17 @@ public class ClientboundJoinedRoomPacket : IPacket<IClientPlayPacketHandler>
         }).ToList();
     }
 
-    public ClientboundJoinedRoomPacket(MemoryStream stream)
+    public ClientboundJoinedRoomPacket(BufferReader stream)
     {
         RoomId = stream.ReadVarInt();
         SelfIndex = stream.ReadNullable(s => s.ReadVarInt());
         Players = stream.ReadList(s => s.ReadAddPlayerEntry());
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(RoomId);
-        stream.WriteNullable(SelfIndex, (s, v) => s.WriteVarInt(v));
+        stream.WriteOptional(SelfIndex, (s, v) => s.WriteVarInt(v));
         stream.WriteList(Players, (s, p) => s.WriteAddPlayerEntry(p));
     }
 

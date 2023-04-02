@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ClientboundUpdateRoundCyclePacket : IPacket<IClientPlayPacketHandle
         Count = time;
     }
 
-    public ClientboundUpdateRoundCyclePacket(MemoryStream stream)
+    public ClientboundUpdateRoundCyclePacket(BufferReader stream)
     {
         Count = stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Count);
     }

@@ -1,6 +1,7 @@
 ﻿using DisasterPR.Cards;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -25,14 +26,14 @@ public class ServerboundUpdateSessionOptionsPacket : IPacket<IServerPlayPacketHa
         EnabledCategories = categories.Select(c => c.Guid).ToList();
     }
 
-    public ServerboundUpdateSessionOptionsPacket(MemoryStream stream)
+    public ServerboundUpdateSessionOptionsPacket(BufferReader stream)
     {
         WinScore = stream.ReadVarInt();
         CountdownTimeSet = CountdownTimeSet.Deserialize(stream);
         EnabledCategories = stream.ReadList(s => s.ReadGuid());
     }
 
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(WinScore);
         CountdownTimeSet.Serialize(stream);

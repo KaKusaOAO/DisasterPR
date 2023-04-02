@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ClientboundUpdateTimerPacket : IPacket<IClientPlayPacketHandler>
         RemainTime = time;
     }
 
-    public ClientboundUpdateTimerPacket(MemoryStream stream)
+    public ClientboundUpdateTimerPacket(BufferReader stream)
     {
         RemainTime = stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(RemainTime);
     }

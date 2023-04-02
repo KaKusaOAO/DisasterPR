@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ClientboundSetWinnerPlayerPacket : IPacket<IClientPlayPacketHandler
         PlayerId = id;
     }
 
-    public ClientboundSetWinnerPlayerPacket(MemoryStream stream)
+    public ClientboundSetWinnerPlayerPacket(BufferReader stream)
     {
         PlayerId = stream.ReadGuid();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteGuid(PlayerId);
     }

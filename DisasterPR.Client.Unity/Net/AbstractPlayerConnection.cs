@@ -1,13 +1,12 @@
 using System.Diagnostics;
 using DisasterPR.Client.Unity.Backends.WebSockets;
 using DisasterPR.Events;
-using DisasterPR.Extensions;
 using DisasterPR.Net;
 using DisasterPR.Net.Packets;
 using DisasterPR.Net.Packets.Login;
 using DisasterPR.Net.Packets.Play;
-using KaLib.Texts;
-using KaLib.Utils;
+using Mochi.IO;
+using Mochi.Utils;
 
 namespace DisasterPR.Client.Unity.Net;
 
@@ -79,7 +78,7 @@ public abstract class AbstractPlayerConnection
 
     private void RawPacketIOOnOnPacketReceived(List<MemoryStream> packets)
     {
-        foreach (var stream in packets)
+        foreach (var stream in packets.Select(s => new BufferReader(s)))
         {
             var id = stream.ReadVarInt();
             var protocol = ConnectionProtocol.OfState(CurrentState);

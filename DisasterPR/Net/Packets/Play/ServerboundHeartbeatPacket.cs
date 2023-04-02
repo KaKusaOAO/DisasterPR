@@ -1,4 +1,6 @@
-﻿namespace DisasterPR.Net.Packets.Play;
+﻿using Mochi.IO;
+
+namespace DisasterPR.Net.Packets.Play;
 
 public class ServerboundHeartbeatPacket : IPacket<IServerPlayPacketHandler>
 {
@@ -7,12 +9,12 @@ public class ServerboundHeartbeatPacket : IPacket<IServerPlayPacketHandler>
         
     }
     
-    public ServerboundHeartbeatPacket(MemoryStream stream)
+    public ServerboundHeartbeatPacket(BufferReader stream)
     {
         
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         
     }

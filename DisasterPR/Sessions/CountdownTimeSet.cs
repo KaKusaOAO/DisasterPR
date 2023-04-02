@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Sessions;
 
@@ -38,14 +39,14 @@ public class CountdownTimeSet
         FinalChooseTime = topicChoose * 6;
     }
 
-    public void Serialize(Stream stream)
+    public void Serialize(BufferWriter stream)
     {
         stream.WriteVarInt(TopicChooseTime);
         stream.WriteVarInt(AnswerChooseTime);
         stream.WriteVarInt(FinalChooseTime);
     }
 
-    public static CountdownTimeSet Deserialize(Stream stream)
+    public static CountdownTimeSet Deserialize(BufferReader stream)
     {
         return new CountdownTimeSet(
             stream.ReadVarInt(),

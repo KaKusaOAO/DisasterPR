@@ -3,11 +3,11 @@ using DisasterPR.Server.Commands.Arguments;
 using DisasterPR.Server.Commands.Senders;
 using DisasterPR.Server.Extensions;
 using DisasterPR.Sessions;
-using KaLib.Brigadier;
-using KaLib.Brigadier.Context;
-using KaLib.Nbt;
-using KaLib.Texts;
-using KaLib.Utils;
+using Mochi.Brigadier;
+using Mochi.Brigadier.Context;
+using Mochi.Nbt;
+using Mochi.Texts;
+using Mochi.Utils;
 using SessionOptions = DisasterPR.Sessions.SessionOptions;
 
 namespace DisasterPR.Server.Commands;
@@ -49,7 +49,7 @@ public class SessionCommand : Command, IRegisteredCommand
     private static async Task ExecuteDumpAsync(CommandContext<CommandSource> context, bool hasPath)
     {
         if (!await CheckSourceInSessionAsync(context)) return;
-        var session = context.GetSource().Session!;
+        var session = context.Source.Session!;
 
         var nbt = session.CreateSnapshot() as NbtTag;
         if (hasPath)
@@ -76,7 +76,7 @@ public class SessionCommand : Command, IRegisteredCommand
     {
         if (!await CheckSourceInSessionAsync(context)) return;
 
-        var source = context.GetSource();
+        var source = context.Source;
         var session = source.Session!;
         var state = session.GameState.CurrentState;
         if (state != StateOfGame.Waiting)
@@ -97,7 +97,7 @@ public class SessionCommand : Command, IRegisteredCommand
     {
         if (!await CheckSourceInSessionAsync(context)) return;
 
-        var source = context.GetSource();
+        var source = context.Source;
         var session = source.Session!;
         var state = session.GameState.CurrentState;
         if (state != StateOfGame.Waiting)
@@ -125,8 +125,8 @@ public class SessionCommand : Command, IRegisteredCommand
     private static async Task ExecuteReloadAsync(CommandContext<CommandSource> context)
     {
         if (!await CheckSourceInSessionAsync(context)) return;
-        
-        var source = context.GetSource();
+
+        var source = context.Source;
         var session = source.Session!;
         var state = session.GameState.CurrentState;
         if (state != StateOfGame.Waiting)

@@ -1,8 +1,10 @@
+using Mochi.IO;
+
 namespace DisasterPR.Net.Packets;
 
 public interface IPacket
 {
-    public void Write(MemoryStream stream);
+    public void Write(BufferWriter writer);
     public void Handle(IPacketHandler handler);
 }
 

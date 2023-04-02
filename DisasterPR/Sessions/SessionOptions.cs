@@ -1,5 +1,6 @@
 using DisasterPR.Cards;
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Sessions;
 
@@ -22,13 +23,13 @@ public class SessionOptions
 
     public List<CardCategory> EnabledCategories { get; set; } = new();
 
-    public void Serialize(Stream stream)
+    public void Serialize(BufferWriter stream)
     {
         stream.WriteVarInt(WinScore);
         CountdownTimeSet.Serialize(stream);
     }
 
-    public static SessionOptions Deserialize(Stream stream)
+    public static SessionOptions Deserialize(BufferReader stream)
     {
         var winScore = Math.Clamp(stream.ReadVarInt(), 2, 9);
         var timeSet = CountdownTimeSet.Deserialize(stream);

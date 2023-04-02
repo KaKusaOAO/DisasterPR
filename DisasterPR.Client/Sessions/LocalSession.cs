@@ -1,6 +1,6 @@
 ﻿using DisasterPR.Net.Packets.Play;
 using DisasterPR.Sessions;
-using KaLib.Utils;
+using Mochi.Utils;
 
 namespace DisasterPR.Client.Sessions;
 

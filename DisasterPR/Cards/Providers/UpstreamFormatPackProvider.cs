@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
-using KaLib.Utils;
 
 namespace DisasterPR.Cards.Providers;
 
@@ -79,7 +78,7 @@ public class UpstreamFormatPackProvider : IPackProvider
             builder.AddTopic(categories, new[] {a, b, c});
         }
 
-        foreach (var (key, value) in words)
+        foreach (var (_, value) in words)
         {
             if (value is not JsonObject) continue;
             

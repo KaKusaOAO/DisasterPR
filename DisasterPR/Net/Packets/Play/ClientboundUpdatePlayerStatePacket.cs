@@ -1,6 +1,7 @@
 ﻿using DisasterPR.Cards;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -15,13 +16,13 @@ public class ClientboundUpdatePlayerStatePacket : IPacket<IClientPlayPacketHandl
         State = player.State;
     }
 
-    public ClientboundUpdatePlayerStatePacket(MemoryStream stream)
+    public ClientboundUpdatePlayerStatePacket(BufferReader stream)
     {
         Id = stream.ReadGuid();
         State = (PlayerState)stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteGuid(Id);
         stream.WriteVarInt((int) State);

@@ -1,3 +1,5 @@
+using Mochi.IO;
+
 namespace DisasterPR.Net.Packets.Play;
 
 public class ServerboundHostRoomPacket : IPacket<IServerPlayPacketHandler>
@@ -7,12 +9,12 @@ public class ServerboundHostRoomPacket : IPacket<IServerPlayPacketHandler>
         
     }
     
-    public ServerboundHostRoomPacket(MemoryStream stream)
+    public ServerboundHostRoomPacket(BufferReader stream)
     {
         
     } 
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         // throw new NotImplementedException();
     }

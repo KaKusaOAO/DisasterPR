@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ClientboundRevealChosenWordEntryPacket : IPacket<IClientPlayPacketH
         Guid = guid;
     }
 
-    public ClientboundRevealChosenWordEntryPacket(MemoryStream stream)
+    public ClientboundRevealChosenWordEntryPacket(BufferReader stream)
     {
         Guid = stream.ReadGuid();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteGuid(Guid);
     }

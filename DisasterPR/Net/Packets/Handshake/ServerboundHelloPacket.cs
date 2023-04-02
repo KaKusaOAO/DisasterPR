@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Handshake;
 
@@ -11,12 +12,12 @@ public class ServerboundHelloPacket : IPacket<IServerHandshakePacketHandler>
         Version = version;
     }
     
-    public ServerboundHelloPacket(MemoryStream stream)
+    public ServerboundHelloPacket(BufferReader stream)
     {
         Version = stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Version);
     }

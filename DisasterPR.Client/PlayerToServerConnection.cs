@@ -2,8 +2,7 @@ using System.Net.WebSockets;
 using DisasterPR.Client.Net.Packets.Login;
 using DisasterPR.Client.Net.Packets.Play;
 using DisasterPR.Net;
-using DisasterPR.Net.Packets;
-using KaLib.Utils;
+using Mochi.Utils;
 
 namespace DisasterPR.Client;
 

@@ -1,4 +1,6 @@
-﻿namespace DisasterPR.Net.Packets.Play;
+﻿using Mochi.IO;
+
+namespace DisasterPR.Net.Packets.Play;
 
 public class ServerboundRequestRoomStartPacket : IPacket<IServerPlayPacketHandler>
 {
@@ -7,12 +9,12 @@ public class ServerboundRequestRoomStartPacket : IPacket<IServerPlayPacketHandle
         
     }
 
-    public ServerboundRequestRoomStartPacket(MemoryStream stream)
+    public ServerboundRequestRoomStartPacket(BufferReader stream)
     {
         
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         
     }

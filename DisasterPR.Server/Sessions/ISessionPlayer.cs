@@ -1,8 +1,7 @@
 ﻿using DisasterPR.Cards;
 using DisasterPR.Events;
-using DisasterPR.Extensions;
 using DisasterPR.Sessions;
-using KaLib.Nbt;
+using Mochi.Nbt;
 using ISession = DisasterPR.Sessions.ISession;
 
 namespace DisasterPR.Server.Sessions;
@@ -50,10 +49,10 @@ public static class SessionPlayerExtension
     {
         var pt = new NbtCompound
         {
-            { "Name", new NbtString(p.Name) },
-            { "Id", new NbtString(p.Id.ToString()) },
-            { "Score", new NbtInt(p.Score) },
-            { "State", new NbtString(Enum.GetName(p.State)) }
+            { "Name", p.Name },
+            { "Id", p.Id.ToString() },
+            { "Score", p.Score },
+            { "State", Enum.GetName(p.State) }
         };
 
         var hList = new NbtList();
@@ -63,8 +62,8 @@ public static class SessionPlayerExtension
             ht["Locked"] = new NbtByte(h.IsLocked);
 
             var ct = new NbtCompound();
-            ct["Label"] = new NbtString(h.Card.Label);
-            ct["Pos"] = new NbtString(Enum.GetName(h.Card.PartOfSpeech));
+            ct["Label"] = h.Card.Label;
+            ct["Pos"] = Enum.GetName(h.Card.PartOfSpeech);
             ht["Card"] = ct;
             
             hList.Add(ht);

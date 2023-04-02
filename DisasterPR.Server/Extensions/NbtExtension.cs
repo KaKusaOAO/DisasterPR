@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using KaLib.Nbt;
-using KaLib.Texts;
-using KaLib.Utils;
+using Mochi.Nbt;
+using Mochi.Texts;
+using Mochi.Utils;
 
 namespace DisasterPR.Server.Extensions;
 

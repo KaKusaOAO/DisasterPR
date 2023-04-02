@@ -1,8 +1,8 @@
 using DisasterPR.Client.Sessions;
 using DisasterPR.Events;
 using DisasterPR.Net.Packets.Play;
-using KaLib.Utils;
-using KaLib.Utils.Extensions;
+using Mochi.Utils;
+using Mochi.Utils.Extensions;
 
 namespace DisasterPR.Client.Net.Packets.Play;
 

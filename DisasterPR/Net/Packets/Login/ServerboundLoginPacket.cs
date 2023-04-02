@@ -1,5 +1,6 @@
 using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Login;
 
@@ -12,12 +13,12 @@ public class ServerboundLoginPacket : IPacket<IServerLoginPacketHandler>
         PlayerName = name;
     }
 
-    public ServerboundLoginPacket(MemoryStream stream)
+    public ServerboundLoginPacket(BufferReader stream)
     {
         PlayerName = stream.ReadUtf8String();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteUtf8String(PlayerName);
     }

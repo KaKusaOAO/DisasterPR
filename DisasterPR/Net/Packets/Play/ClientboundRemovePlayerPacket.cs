@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -16,12 +17,12 @@ public class ClientboundRemovePlayerPacket : IPacket<IClientPlayPacketHandler>
         PlayerId = player.Id;
     }
 
-    public ClientboundRemovePlayerPacket(MemoryStream stream)
+    public ClientboundRemovePlayerPacket(BufferReader stream)
     {
         PlayerId = stream.ReadGuid();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteGuid(PlayerId);
     }

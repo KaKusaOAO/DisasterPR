@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Login;
 
@@ -11,12 +12,12 @@ public class ClientboundAckPacket : IPacket<IClientLoginPacketHandler>
         Id = id;
     }
     
-    public ClientboundAckPacket(MemoryStream stream)
+    public ClientboundAckPacket(BufferReader stream)
     {
         Id = stream.ReadGuid();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteGuid(Id);
     }

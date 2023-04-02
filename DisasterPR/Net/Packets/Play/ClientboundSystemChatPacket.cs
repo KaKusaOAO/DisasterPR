@@ -1,5 +1,5 @@
-using DisasterPR.Extensions;
-using KaLib.Utils;
+using Mochi.IO;
+using Mochi.Utils;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -14,13 +14,13 @@ public class ClientboundSystemChatPacket : IPacket<IClientPlayPacketHandler>
         Content = content;
     }
     
-    public ClientboundSystemChatPacket(MemoryStream stream)
+    public ClientboundSystemChatPacket(BufferReader stream)
     {
         Level = stream.ReadEnum<LogLevel>();
         Content = stream.ReadUtf8String();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteEnum(Level);
         stream.WriteUtf8String(Content);

@@ -1,6 +1,7 @@
 ﻿using DisasterPR.Cards;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -17,7 +18,7 @@ public class ClientboundAddChosenWordEntryPacket : IPacket<IClientPlayPacketHand
         Words = words;
     }
 
-    public ClientboundAddChosenWordEntryPacket(MemoryStream stream)
+    public ClientboundAddChosenWordEntryPacket(BufferReader stream)
     {
         Id = stream.ReadGuid();
         if (stream.ReadBool())
@@ -28,7 +29,7 @@ public class ClientboundAddChosenWordEntryPacket : IPacket<IClientPlayPacketHand
         Words = stream.ReadList(s => s.ReadVarInt());
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteGuid(Id);
         stream.WriteBool(PlayerId.HasValue);

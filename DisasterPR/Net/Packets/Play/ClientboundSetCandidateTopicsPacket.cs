@@ -1,5 +1,6 @@
 ﻿using DisasterPR.Cards;
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -14,13 +15,13 @@ public class ClientboundSetCandidateTopicsPacket : IPacket<IClientPlayPacketHand
         Right = right;
     }
 
-    public ClientboundSetCandidateTopicsPacket(MemoryStream stream)
+    public ClientboundSetCandidateTopicsPacket(BufferReader stream)
     {
         Left = stream.ReadVarInt();
         Right = stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Left);
         stream.WriteVarInt(Right);

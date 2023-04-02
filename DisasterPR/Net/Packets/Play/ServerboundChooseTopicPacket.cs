@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ServerboundChooseTopicPacket : IPacket<IServerPlayPacketHandler>
         Side = side;
     }
 
-    public ServerboundChooseTopicPacket(MemoryStream stream)
+    public ServerboundChooseTopicPacket(BufferReader stream)
     {
         Side = (HorizontalSide) stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt((int) Side);
     }

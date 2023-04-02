@@ -1,8 +1,7 @@
 using System.Text;
 using DisasterPR.Server.Commands.Senders;
-using KaLib.Brigadier;
-using KaLib.Brigadier.Context;
-using KaLib.Utils;
+using Mochi.Brigadier;
+using Mochi.Brigadier.Context;
 
 namespace DisasterPR.Server.Commands;
 
@@ -16,8 +15,8 @@ public class HelpCommand : Command, IRegisteredCommand
     private static async Task ExecuteAsync(CommandContext<CommandSource> c)
     {
         var d = GameServer.Instance.Dispatcher;
-        var source = c.GetSource();
-        var usages = d.GetSmartUsage(d.GetRoot(), source);
+        var source = c.Source;
+        var usages = d.GetSmartUsage(d.Root, source);
         var sb = new StringBuilder();
         foreach (var str in usages.Values)
         {

@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Cards;
 
@@ -42,48 +43,48 @@ public class CardCategory
 
     public static List<CardCategory> Builtins => _map.Values.ToList();
 
-    public static CardCategory Deserialize(Stream stream)
+    public static CardCategory Deserialize(BufferReader reader)
     {
-        var isBuiltin = stream.ReadBool();
+        var isBuiltin = reader.ReadBoolean();
         if (isBuiltin)
         {
-            var id = stream.ReadVarInt();
+            var id = reader.ReadVarInt();
             return _map[id];
         }
 
-        var guid = stream.ReadGuid();
-        var label = stream.ReadUtf8String();
+        var guid = reader.ReadGuid();
+        var label = reader.ReadUtf8String();
         return new CardCategory(guid, label);
     }
     
-    public static CardCategory DeserializeNoLabel(Stream stream, CardPack pack) => 
-        DeserializeNoLabel(stream, pack.Categories.ToList());
+    public static CardCategory DeserializeNoLabel(BufferReader reader, CardPack pack) => 
+        DeserializeNoLabel(reader, pack.Categories.ToList());
 
-    public static CardCategory DeserializeNoLabel(Stream stream, List<CardCategory> categories)
+    public static CardCategory DeserializeNoLabel(BufferReader reader, List<CardCategory> categories)
     {
-        var isBuiltin = stream.ReadBool();
+        var isBuiltin = reader.ReadBoolean();
         if (isBuiltin)
         {
-            var id = stream.ReadVarInt();
+            var id = reader.ReadVarInt();
             return _map[id];
         }
 
-        var guid = stream.ReadGuid();
+        var guid = reader.ReadGuid();
         return categories.First(c => c.Guid == guid);
     }
 
-    public void Serialize(Stream stream, bool writeLabel = true)
+    public void Serialize(BufferWriter writer, bool writeLabel = true)
     {
-        stream.WriteBool(IsBuiltin);
+        writer.WriteBool(IsBuiltin);
         if (IsBuiltin)
         {
-            stream.WriteVarInt(Id);
+            writer.WriteVarInt(Id);
             return;
         }
         
-        stream.WriteGuid(Guid);
+        writer.WriteGuid(Guid);
         
         if (!writeLabel) return;
-        stream.WriteUtf8String(Label);
+        writer.WriteUtf8String(Label);
     }
 }

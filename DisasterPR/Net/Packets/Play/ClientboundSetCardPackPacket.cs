@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Cards;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ClientboundSetCardPackPacket : IPacket<IClientPlayPacketHandler>
         CardPack = pack;
     }
 
-    public ClientboundSetCardPackPacket(MemoryStream stream)
+    public ClientboundSetCardPackPacket(BufferReader stream)
     {
         CardPack = CardPack.Deserialize(stream);
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         CardPack.Serialize(stream);
     }

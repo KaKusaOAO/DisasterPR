@@ -1,6 +1,6 @@
-using KaLib.Utils;
 using Microsoft.AspNetCore;
-using LogLevel = KaLib.Utils.LogLevel;
+using Mochi.Utils;
+using LogLevel = Mochi.Utils.LogLevel;
 
 namespace DisasterPR.Server;
 

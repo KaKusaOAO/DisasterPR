@@ -1,19 +1,18 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Diagnostics;
-using DisasterPR.Cards;
-using DisasterPR.Cards.Providers;
-using DisasterPR.Extensions;
-using KaLib.Utils;
+using Mochi.IO;
+using Mochi.Utils;
 
 Logger.Level = LogLevel.Verbose;
 Logger.Logged += Logger.LogToEmulatedTerminalAsync;
 Logger.RunThreaded();
 
 var buffer = new MemoryStream();
-buffer.WriteEnum(LogLevel.Fatal);
+var writer = new BufferWriter(buffer);
+writer.WriteEnum(LogLevel.Fatal);
 buffer.Position = 0;
 
-var read = buffer.ReadEnum<LogLevel>();
+var reader = new BufferReader(buffer);
+var read = reader.ReadEnum<LogLevel>();
 Logger.Info($"Test passed");
 await Logger.FlushAsync();

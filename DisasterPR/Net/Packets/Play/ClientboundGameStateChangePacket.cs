@@ -1,5 +1,6 @@
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -12,12 +13,12 @@ public class ClientboundGameStateChangePacket : IPacket<IClientPlayPacketHandler
         State = state;
     }
 
-    public ClientboundGameStateChangePacket(MemoryStream stream)
+    public ClientboundGameStateChangePacket(BufferReader stream)
     {
         State = (StateOfGame) stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt((int) State);
     }

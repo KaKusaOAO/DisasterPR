@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -9,7 +10,7 @@ public class ClientboundSetWordsPacket : IPacket<IClientPlayPacketHandler>
         public bool IsLocked { get; set; }
         public int Index { get; set; }
 
-        public static Entry Deserialize(Stream stream)
+        public static Entry Deserialize(BufferReader stream)
         {
             return new Entry
             {
@@ -18,7 +19,7 @@ public class ClientboundSetWordsPacket : IPacket<IClientPlayPacketHandler>
             };
         }
 
-        public void Serialize(Stream stream)
+        public void Serialize(BufferWriter stream)
         {
             stream.WriteBool(IsLocked);
             stream.WriteVarInt(Index);
@@ -32,12 +33,12 @@ public class ClientboundSetWordsPacket : IPacket<IClientPlayPacketHandler>
         Entries = entries;
     }
 
-    public ClientboundSetWordsPacket(MemoryStream stream)
+    public ClientboundSetWordsPacket(BufferReader stream)
     {
         Entries = stream.ReadList(Entry.Deserialize);
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteList(Entries, (s, i) => i.Serialize(s));
     }

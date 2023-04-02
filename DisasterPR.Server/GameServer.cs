@@ -1,11 +1,9 @@
 using DisasterPR.Server.Commands;
 using DisasterPR.Server.Commands.Senders;
 using DisasterPR.Server.Sessions;
-using KaLib.Brigadier;
-using KaLib.Brigadier.Exceptions;
-using KaLib.Brigadier.TerminalHelper;
-using KaLib.Texts;
-using KaLib.Utils;
+using Mochi.Brigadier;
+using Mochi.Brigadier.Bridge;
+using Mochi.Utils;
 
 namespace DisasterPR.Server;
 

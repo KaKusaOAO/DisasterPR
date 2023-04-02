@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ServerboundJoinRoomPacket : IPacket<IServerPlayPacketHandler>
         RoomId = roomId;
     }
 
-    public ServerboundJoinRoomPacket(MemoryStream stream)
+    public ServerboundJoinRoomPacket(BufferReader stream)
     {
         RoomId = stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(RoomId);
     }

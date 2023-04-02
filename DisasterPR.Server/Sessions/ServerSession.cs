@@ -4,9 +4,9 @@ using DisasterPR.Events;
 using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Sessions;
-using KaLib.Nbt;
-using KaLib.Utils;
-using KaLib.Utils.Extensions;
+using Mochi.Nbt;
+using Mochi.Utils;
+using Mochi.Utils.Extensions;
 
 namespace DisasterPR.Server.Sessions;
 
@@ -299,7 +299,7 @@ public class ServerSession : Session<ISessionPlayer>
 
         tag["Players"] = players;
         tag["State"] = ServerGameState.CreateSnapshot();
-        tag["RoomId"] = new NbtInt(RoomId);
+        tag["RoomId"] = RoomId;
         return tag;
     }
 }

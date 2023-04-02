@@ -1,6 +1,6 @@
 using System.Text;
-using KaLib.Nbt;
 using Microsoft.Extensions.Primitives;
+using Mochi.Nbt;
 
 namespace DisasterPR.Server.Commands.Arguments;
 
@@ -56,10 +56,4 @@ public class ConditionalOperation : PathOperation
     {
         return "?" + Operation.ToPathString();
     }
-}
-
-public abstract class PathOperation
-{
-    public abstract NbtTag Navigate(NbtTag tag);
-    public abstract string ToPathString();
 }

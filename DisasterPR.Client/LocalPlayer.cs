@@ -5,7 +5,7 @@ using DisasterPR.Net.Packets;
 using DisasterPR.Net.Packets.Handshake;
 using DisasterPR.Net.Packets.Login;
 using DisasterPR.Net.Packets.Play;
-using KaLib.Utils;
+using Mochi.Utils;
 
 namespace DisasterPR.Client;
 

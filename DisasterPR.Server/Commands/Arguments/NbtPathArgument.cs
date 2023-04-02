@@ -1,7 +1,6 @@
 ﻿using System.Text;
-using KaLib.Brigadier.Arguments;
-using KaLib.Brigadier.Exceptions;
-using StringReader = KaLib.Brigadier.StringReader;
+using Mochi.Brigadier.Arguments;
+using StringReader = Mochi.Brigadier.StringReader;
 
 namespace DisasterPR.Server.Commands.Arguments;
 

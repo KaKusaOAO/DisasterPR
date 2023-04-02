@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -11,12 +12,12 @@ public class ClientboundSetFinalPacket : IPacket<IClientPlayPacketHandler>
         Index = index;
     }
 
-    public ClientboundSetFinalPacket(MemoryStream stream)
+    public ClientboundSetFinalPacket(BufferReader stream)
     {
         Index = stream.ReadVarInt();
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Index);
     }

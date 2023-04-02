@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Login;
 
@@ -18,7 +19,7 @@ public class ClientboundDisconnectPacket : IPacket<IClientLoginPacketHandler>
         Reason = reason;
     }
 
-    public ClientboundDisconnectPacket(MemoryStream stream)
+    public ClientboundDisconnectPacket(BufferReader stream)
     {
         Reason = (PlayerKickReason)stream.ReadVarInt();
         if (Reason == PlayerKickReason.Custom)
@@ -27,7 +28,7 @@ public class ClientboundDisconnectPacket : IPacket<IClientLoginPacketHandler>
         }
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt((int)Reason);
         if (Reason == PlayerKickReason.Custom)

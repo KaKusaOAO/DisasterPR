@@ -1,4 +1,5 @@
 using DisasterPR.Extensions;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
@@ -27,17 +28,17 @@ public class ClientboundRoomDisconnectedPacket : IPacket<IClientPlayPacketHandle
     public static ClientboundRoomDisconnectedPacket RoomPlaying => new(RoomDisconnectReason.RoomPlaying);
     public static ClientboundRoomDisconnectedPacket GuidDuplicate => new(RoomDisconnectReason.GuidDuplicate);
 
-    public ClientboundRoomDisconnectedPacket(MemoryStream stream)
+    public ClientboundRoomDisconnectedPacket(BufferReader reader)
     {
-        Reason = (RoomDisconnectReason) stream.ReadVarInt();
+        Reason = (RoomDisconnectReason) reader.ReadVarInt();
         
         if (Reason == RoomDisconnectReason.Custom)
         {
-            Message = stream.ReadUtf8String();
+            Message = reader.ReadUtf8String();
         }
     }
     
-    public void Write(MemoryStream stream)
+    public void Write(BufferWriter stream)
     {
         stream.WriteVarInt((int) Reason);
         if (Reason == RoomDisconnectReason.Custom)
