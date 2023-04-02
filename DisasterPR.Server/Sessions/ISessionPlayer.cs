@@ -59,7 +59,7 @@ public static class SessionPlayerExtension
         foreach (var h in p.HoldingCards)
         {
             var ht = new NbtCompound();
-            ht["Locked"] = new NbtByte(h.IsLocked);
+            ht["Locked"] = h.IsLocked;
 
             var ct = new NbtCompound();
             ct["Label"] = h.Card.Label;

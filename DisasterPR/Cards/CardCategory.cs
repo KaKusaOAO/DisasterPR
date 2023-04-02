@@ -45,7 +45,7 @@ public class CardCategory
 
     public static CardCategory Deserialize(BufferReader reader)
     {
-        var isBuiltin = reader.ReadBoolean();
+        var isBuiltin = reader.ReadBool();
         if (isBuiltin)
         {
             var id = reader.ReadVarInt();
@@ -62,7 +62,7 @@ public class CardCategory
 
     public static CardCategory DeserializeNoLabel(BufferReader reader, List<CardCategory> categories)
     {
-        var isBuiltin = reader.ReadBoolean();
+        var isBuiltin = reader.ReadBool();
         if (isBuiltin)
         {
             var id = reader.ReadVarInt();

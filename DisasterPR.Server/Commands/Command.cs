@@ -38,7 +38,7 @@ public class Command
         string input, int cursorOffset)
     {
         var dispatcher = GameServer.Instance.Dispatcher;
-        var source = result.Context.GetSource();
+        var source = result.Context.Source;
         var sender = source.Sender;
 
         var exceptions = result.Exceptions.Values;
@@ -69,7 +69,7 @@ public class Command
 
             async Task Run()
             {
-                var context = result.Context.GetLastChild();
+                var context = result.Context.LastChild;
                 var usage = GetUsageText(dispatcher!, context, input, cursorOffset);
                 if (!string.IsNullOrEmpty(usage))
                 {
@@ -81,10 +81,10 @@ public class Command
             return;
         }
 
-        var context = result.Context.GetLastChild();
-        if (context.GetCommand() == null)
+        var context = result.Context.LastChild;
+        if (context.Command == null)
         {
-            var ctx = context.GetLastChild();
+            var ctx = context.LastChild;
             var usage = GetUsageText(dispatcher, ctx, input, cursorOffset);
             if (!string.IsNullOrEmpty(usage))
             {
@@ -114,14 +114,14 @@ public class Command
     private static string GetUsageText(CommandDispatcher<CommandSource> dispatcher,
         CommandContextBuilder<CommandSource> context, string input, int cursorOffset)
     {
-        var nodes = context.GetNodes();
+        var nodes = context.Nodes;
         if (!nodes.Any()) return "";
         
         var node = nodes[^1];
         var parent = nodes.Count > 1 ? nodes[^2] : null;
-        cursorOffset += node.GetRange().GetStart();
-        var usage = dispatcher.GetSmartUsage(parent?.GetNode() ?? dispatcher.Root, context.GetSource());
-        return input[..cursorOffset] + usage[node.GetNode()];
+        cursorOffset += node.Range.Start;
+        var usage = dispatcher.GetSmartUsage(parent?.Node ?? dispatcher.Root, context.Source);
+        return input[..cursorOffset] + usage[node.Node];
     }
 
     protected static async Task<bool> CheckSourceInSessionAsync(CommandContext<CommandSource> context)

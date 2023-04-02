@@ -22,9 +22,9 @@ public static class NbtExtension
     {
         if (tag == null!) return LiteralText.Of("<null>").SetColor(TextColor.Red);
 
-        switch (tag.RawType)
+        switch (tag.Type)
         {
-            case (int) NbtTag.TagType.List:
+            case NbtTag.TagType.List:
             {
                 var text = LiteralText.Of("[");
                 var addComma = false;
@@ -42,17 +42,17 @@ public static class NbtExtension
                 return text;
             }
 
-            case (int) NbtTag.TagType.Byte:
+            case NbtTag.TagType.Byte:
             {
                 return Text.Represent(((NbtByte) tag).Value);
             }
 
-            case (int) NbtTag.TagType.Int:
+            case NbtTag.TagType.Int:
             {
                 return Text.Represent(((NbtInt) tag).Value);
             }
 
-            case (int) NbtTag.TagType.Compound:
+            case NbtTag.TagType.Compound:
             {
                 var text = LiteralText.Of("{");
                 var addComma = false;
@@ -73,14 +73,14 @@ public static class NbtExtension
                 return text;
             }
 
-            case (int) NbtTag.TagType.String:
+            case NbtTag.TagType.String:
             {
                 return Text.Represent(((NbtString) tag).Value);
             }
 
             default:
             {
-                Logger.Warn($"Text converted not implemented for type {tag.RawType}");
+                Logger.Warn($"Text converted not implemented for type {tag.Type}");
                 return LiteralText.Of(tag.ToString());
             }
         }
