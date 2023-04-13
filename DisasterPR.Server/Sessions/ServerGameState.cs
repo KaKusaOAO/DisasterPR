@@ -312,15 +312,6 @@ public class ServerGameState : IGameState
             try
             {
                 await Task.Delay(1000, _cts.Token);
-
-                if (CurrentState == StateOfGame.ChoosingWord)
-                {
-                    foreach (var p in Session.Players.OfType<ServerPlayer>())
-                    {
-                        ((ISessionPlayer) p).ShuffleHoldingCards();
-                        await p.UpdateHoldingWordsAsync(p.HoldingCards);
-                    }
-                }
             }
             catch (TaskCanceledException)
             {
