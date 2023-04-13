@@ -1,5 +1,6 @@
 ﻿using DisasterPR.Cards;
 using DisasterPR.Events;
+using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 using Mochi.Nbt;
 using ISession = DisasterPR.Sessions.ISession;
@@ -15,6 +16,8 @@ public interface ISessionPlayer : IPlayer
     public new ServerSession? Session { get; set; }
     ISession? IPlayer.Session => Session;
     public ShuffledPool<WordCard> CardPool { get; set; }
+    
+    public bool IsManuallyShuffled { get; set; }
 
     public Task SetCardPackAsync(CardPack pack);
     public Task UpdateSessionOptions(ServerSession session);
@@ -41,6 +44,33 @@ public interface ISessionPlayer : IPlayer
     public Task UpdateFinalWordCardAsync(int index);
     public Task UpdateRoundCycleAsync(int cycle);
     public Task SendToastAsync(string message);
+
+    public void ShuffleHoldingCards()
+    {
+        DefaultShuffleHoldingCards(this);
+    }
+
+    protected static void DefaultShuffleHoldingCards(ISessionPlayer p)
+    {
+        var words = new List<HoldingWordCardEntry>();
+        words.AddRange(p.HoldingCards.Where(w => w.IsLocked));
+            
+        var shuffled = p.CardPool.Items.Shuffled().ToList();
+        var newWords = new List<HoldingWordCardEntry>();
+        newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Noun)
+            .Take(5)
+            .Select(w => new HoldingWordCardEntry(w, false)));
+        newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Verb)
+            .Take(4)
+            .Select(w => new HoldingWordCardEntry(w, false)));
+        newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Adjective)
+            .Take(2)
+            .Select(w => new HoldingWordCardEntry(w, false)));
+        words.AddRange(newWords.Shuffled());
+            
+        p.HoldingCards.Clear();
+        p.HoldingCards.AddRange(words.Take(11));
+    }
 }
 
 public static class SessionPlayerExtension

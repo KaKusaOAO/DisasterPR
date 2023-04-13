@@ -1,5 +1,6 @@
 using DisasterPR.Cards;
 using DisasterPR.Events;
+using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Server.Commands.Senders;
 using DisasterPR.Server.Sessions;
@@ -32,6 +33,7 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
     public PlayerState State { get; set; }
 
     public ShuffledPool<WordCard>? CardPool { get; set; }
+    public bool IsManuallyShuffled { get; set; }
     public ServerToPlayerConnection Connection { get; }
 
     public ServerPlayer(ServerToPlayerConnection connection)

@@ -12,6 +12,7 @@ public class AIPlayer : ISessionPlayer
     public string OriginalName { get; }
     public ServerSession? Session { get; set; }
     public ShuffledPool<WordCard> CardPool { get; set; }
+    public bool IsManuallyShuffled { get; set; }
 
     public AIPlayer(ISessionPlayer player)
     {

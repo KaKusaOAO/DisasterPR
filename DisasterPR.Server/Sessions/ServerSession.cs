@@ -3,6 +3,7 @@ using DisasterPR.Cards.Providers;
 using DisasterPR.Events;
 using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
+using DisasterPR.Server.Extensions;
 using DisasterPR.Sessions;
 using Mochi.Nbt;
 using Mochi.Utils;
@@ -84,7 +85,7 @@ public class ServerSession : Session<ISessionPlayer>
     {
         if (GameState.CurrentState != StateOfGame.Waiting)
         {
-            var aiPlayers = Players.Where(s => s is AIPlayer).Cast<AIPlayer>().ToList();
+            var aiPlayers = Players.OfType<AIPlayer>().ToList();
             var ai = aiPlayers.Find(a => a.OriginalName == player.Name);
             if (ai == null)
             {
@@ -300,6 +301,8 @@ public class ServerSession : Session<ISessionPlayer>
         tag["Players"] = players;
         tag["State"] = ServerGameState.CreateSnapshot();
         tag["RoomId"] = RoomId;
+        tag["Options"] = Options.CreateSnapshot();
+
         return tag;
     }
 }

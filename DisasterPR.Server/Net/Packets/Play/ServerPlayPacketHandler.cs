@@ -335,4 +335,32 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             await Player.Connection.SendPacketAsync(new ClientboundUpdateLockedWordPacket(packet.Index, packet.IsLocked));
         }).Wait();
     }
+
+    public void HandleRequestShuffleWords(ServerboundRequestShuffleWordsPacket packet)
+    {
+        if (Player.Session == null)
+        {
+            Logger.Warn("Attempt to shuffle words while not in a session");
+            return;
+        }
+
+        if (Player.Session.GameState.CurrentState != StateOfGame.ChoosingWord)
+        {
+            Logger.Warn("Attempt to shuffle words at the wrong time");
+            return;
+        }
+        
+        Task.Run(async () =>
+        {
+            if (Player.IsManuallyShuffled)
+            {
+                await Player.SendErrorMessageAsync("你已經洗過牌了。");
+                return;
+            }
+            
+            ((ISessionPlayer) Player).ShuffleHoldingCards();
+            await Player.UpdateHoldingWordsAsync(Player.HoldingCards);
+            Player.IsManuallyShuffled = true;
+        }).Wait();
+    }
 }

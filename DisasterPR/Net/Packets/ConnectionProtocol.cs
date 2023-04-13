@@ -69,6 +69,7 @@ public class ConnectionProtocol
             .AddPacket(s => new ServerboundRequestKickPlayerPacket(s))
             .AddPacket(s => new ServerboundUpdatePlayerStatePacket(s))
             .AddPacket(s => new ServerboundUpdateLockedWordPacket(s))
+            .AddPacket(s => new ServerboundRequestShuffleWordsPacket(s))
         )
     );
     

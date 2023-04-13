@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using DisasterPR.Cards;
 using DisasterPR.Extensions;
+using DisasterPR.Net.Packets.Play;
 using DisasterPR.Sessions;
 using Mochi.Nbt;
 using Mochi.Utils;
@@ -171,6 +172,7 @@ public class ServerGameState : IGameState
         foreach (var p in Session.Players)
         {
             p.State = PlayerState.InGame;
+            p.HoldingCards.Clear();
             await Task.WhenAll(Session.Players.Select(async p2 =>
             {
                 await p2.OnOtherPlayerUpdateStateAsync(p);
@@ -310,6 +312,15 @@ public class ServerGameState : IGameState
             try
             {
                 await Task.Delay(1000, _cts.Token);
+
+                if (CurrentState == StateOfGame.ChoosingWord)
+                {
+                    foreach (var p in Session.Players.OfType<ServerPlayer>())
+                    {
+                        ((ISessionPlayer) p).ShuffleHoldingCards();
+                        await p.UpdateHoldingWordsAsync(p.HoldingCards);
+                    }
+                }
             }
             catch (TaskCanceledException)
             {
@@ -376,25 +387,9 @@ public class ServerGameState : IGameState
         {
             var pack = Session.CardPack!;
             var id = pack.GetTopicIndex(CurrentTopic);
-            var words = new List<HoldingWordCardEntry>();
-            words.AddRange(p.HoldingCards.Where(w => w.IsLocked));
-            
-            var shuffled = p.CardPool.Items.Shuffled().ToList();
-            var newWords = new List<HoldingWordCardEntry>();
-            newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Noun)
-                .Take(5)
-                .Select(w => new HoldingWordCardEntry(w, false)));
-            newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Verb)
-                .Take(4)
-                .Select(w => new HoldingWordCardEntry(w, false)));
-            newWords.AddRange(shuffled.Where(w => w.PartOfSpeech == PartOfSpeech.Adjective)
-                .Take(2)
-                .Select(w => new HoldingWordCardEntry(w, false)));
-            words.AddRange(newWords.Shuffled());
-            
-            p.HoldingCards.Clear();
-            p.HoldingCards.AddRange(words.Take(11));
 
+            p.IsManuallyShuffled = false;
+            p.ShuffleHoldingCards();
             await p.UpdateCurrentTopicAsync(id);
             await p.UpdateHoldingWordsAsync(p.HoldingCards);
         }

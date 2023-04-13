@@ -1,7 +1,9 @@
 ﻿using System.Text;
+using DisasterPR.Sessions;
 using Mochi.Nbt;
 using Mochi.Texts;
 using Mochi.Utils;
+using SessionOptions = DisasterPR.Sessions.SessionOptions;
 
 namespace DisasterPR.Server.Extensions;
 
@@ -84,5 +86,26 @@ public static class NbtExtension
                 return LiteralText.Of(tag.ToString());
             }
         }
+    }
+
+    public static NbtCompound CreateSnapshot(this CountdownTimeSet timeSet)
+    {
+        return new NbtCompound
+        {
+            {"TopicChooseTime", timeSet.TopicChooseTime},
+            {"AnswerChooseTime", timeSet.AnswerChooseTime},
+            {"FinalChooseTime", timeSet.FinalChooseTime}
+        };
+    }
+
+    public static NbtCompound CreateSnapshot(this SessionOptions options)
+    {
+        return new NbtCompound
+        {
+            {"GoalScore", options.WinScore},
+            {"EnabledCategories", options.EnabledCategories.Select(c => c.Id).ToArray()},
+            {"CanLockCards", options.CanLockCards},
+            {"CountdownTimeSet", options.CountdownTimeSet.CreateSnapshot()}
+        };
     }
 }
