@@ -82,7 +82,7 @@ public class Command
         }
 
         var context = result.Context.LastChild;
-        if (context.Command == null)
+        if (context.Command == null!)
         {
             var ctx = context.LastChild;
             var usage = GetUsageText(dispatcher, ctx, input, cursorOffset);

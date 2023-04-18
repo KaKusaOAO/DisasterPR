@@ -19,7 +19,7 @@ public class ConnectionProtocol
     public static readonly ConnectionProtocol Login = new(PacketState.Login, Protocol()
         .AddFlow(PacketFlow.Clientbound, new PacketSet()
             .AddPacket(s => new ClientboundDisconnectPacket(s))
-            .AddPacket(s => new ClientboundAckPacket(s))
+            .AddPacket(s => new ClientboundAckLoginPacket(s))
         )
         .AddFlow(PacketFlow.Serverbound, new PacketSet()
             .AddPacket(s => new ServerboundLoginPacket(s))

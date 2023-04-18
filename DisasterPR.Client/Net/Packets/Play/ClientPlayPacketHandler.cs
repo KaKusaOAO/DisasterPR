@@ -258,4 +258,9 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
     {
         Player.HoldingCards[packet.Index].IsLocked = packet.IsLocked;
     }
+
+    public void HandleUpdatePlayerName(ClientboundUpdatePlayerNamePacket packet)
+    {
+        Player.Name = packet.Name;
+    }
 }

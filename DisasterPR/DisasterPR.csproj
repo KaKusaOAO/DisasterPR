@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Mochi" Version="1.1.2" />
+      <PackageReference Include="Mochi" Version="1.1.3" />
       <PackageReference Include="System.Text.Json" Version="7.0.2" />
     </ItemGroup>
 

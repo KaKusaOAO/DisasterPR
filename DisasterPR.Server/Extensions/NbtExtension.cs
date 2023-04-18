@@ -80,9 +80,25 @@ public static class NbtExtension
                 return Text.Represent(((NbtString) tag).Value);
             }
 
+            case NbtTag.TagType.IntArray:
+            {
+                // [I; 1, 2, 3]
+                var text = LiteralText.Of("[I; ");
+                var addComma = false;
+                foreach (var item in ((NbtIntArray) tag).Value)
+                {
+                    if (addComma) text.AddExtra(LiteralText.Of(", "));
+                    text.AddExtra(Text.Represent(item));
+                    addComma = true;
+                }
+                
+                text.AddExtra(LiteralText.Of("]"));
+                return text;
+            }
+
             default:
             {
-                Logger.Warn($"Text converted not implemented for type {tag.Type}");
+                Logger.Warn($"Text converter not implemented for type {tag.Type}");
                 return LiteralText.Of(tag.ToString());
             }
         }

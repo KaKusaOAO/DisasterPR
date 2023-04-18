@@ -4,6 +4,7 @@ using DisasterPR.Extensions;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Sessions;
 using Mochi.Nbt;
+using Mochi.Texts;
 using Mochi.Utils;
 using Mochi.Utils.Extensions;
 using ISession = DisasterPR.Sessions.ISession;
@@ -116,7 +117,10 @@ public class ServerGameState : IGameState
 
         CurrentState = state;
         _cts.Cancel();
-        Logger.Verbose($"Current state changed to {state}");
+        Logger.Verbose(TranslateText.Of("Current state changed to %s")
+            .AddWith(LiteralText.Of(state.ToString()).SetColor(TextColor.Green))
+        );
+
         await Task.WhenAll(Session.Players.Select(p => p.UpdateSessionGameStateAsync(state)));
     }
 
@@ -129,7 +133,10 @@ public class ServerGameState : IGameState
         }
 
         CurrentPlayerIndex = index;
-        Logger.Verbose($"Current player is now {CurrentPlayer.Name} ({CurrentPlayer.Id})");
+        Logger.Verbose(TranslateText.Of("Current player is now %s %s")
+            .AddWith(LiteralText.Of(CurrentPlayer.Name).SetColor(TextColor.Aqua))
+            .AddWith(LiteralText.Of($"({CurrentPlayer.Id})").SetColor(TextColor.DarkGray))
+        );
         await Task.WhenAll(Session.Players.Select(p => p.UpdateCurrentPlayerIndexAsync(index)));
     }
 
@@ -236,19 +243,25 @@ public class ServerGameState : IGameState
         
         if (cards.Any(card => card.IsLocked))
         {
-            Logger.Warn($"Player {player.Name} is choosing locked cards!");
+            Logger.Warn(TranslateText.Of("Player %s is choosing locked cards!")
+                .AddWith(LiteralText.Of(player.Name).SetColor(TextColor.Aqua))
+            );
             return;
         }
 
         if (cards.Any(card => !player.HoldingCards.Contains(card)))
         {
-            Logger.Warn($"Player {player.Name} is choosing non-existing card!");
+            Logger.Warn(TranslateText.Of("Player %s is choosing non-existing card!")
+                .AddWith(LiteralText.Of(player.Name).SetColor(TextColor.Aqua))
+            );
             return;
         }
 
         if (CurrentChosenWords.Any(c => c.Player == player))
         {
-            Logger.Warn($"Player {player.Name} has already chosen their card!");
+            Logger.Warn(TranslateText.Of("Player %s has already chosen their card!")
+                .AddWith(LiteralText.Of(player.Name).SetColor(TextColor.Aqua))
+            );
             return;
         }
 
@@ -273,7 +286,10 @@ public class ServerGameState : IGameState
             var count = Session.Players
                 .Where(p => p != CurrentPlayer)
                 .Count(p => CurrentChosenWords.Find(w => w.Player == p) != null);
-            Logger.Info($"Now has {count}/{Session.Players.Count - 1} chosen words, still need more.");
+            Logger.Info(TranslateText.Of("Now has %s/%s chosen words, still need more.")
+                .AddWith(LiteralText.Of(count.ToString()).SetColor(TextColor.Green))
+                .AddWith(LiteralText.Of((Session.Players.Count - 1).ToString()))
+            );
         }
     }
 
@@ -372,6 +388,9 @@ public class ServerGameState : IGameState
             throw new InvalidOperationException("Attempted to choose topic when it's not the time to do it");
         }
 
+        Logger.Info(TranslateText.Of("Chosen topic: %s")
+            .AddWith(LiteralText.Of(topic.Texts.JoinStrings("____")).SetColor(TextColor.Gold))
+        );
         CurrentTopic = topic;
 
         async Task SendTopicAndWordsAsync(ISessionPlayer p)
@@ -402,9 +421,11 @@ public class ServerGameState : IGameState
         {
             throw new InvalidOperationException("Attempted to reveal a non-existing card");
         }
-        
-        Logger.Info($"Revealed card {chosen.Words.Select(w => w.Label).JoinStrings(", ")} " +
-                    $"by {chosen.Player?.Name ?? "<null>"}");
+
+        Logger.Info(TranslateText.Of("Revealed card %s by %s")
+            .AddWith(LiteralText.Of(chosen.Words.Select(w => w.Label).JoinStrings(", ")).SetColor(TextColor.Gold))
+            .AddWith(LiteralText.Of(chosen.Player?.Name ?? "<null>").SetColor(TextColor.Aqua))
+        );
 
         chosen.IsRevealed = true;
         LastRevealedGuid = guid;

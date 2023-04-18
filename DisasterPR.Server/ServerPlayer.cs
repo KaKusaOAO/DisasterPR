@@ -129,4 +129,13 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
 
     public Task SendToastAsync(string message) =>
         Connection.SendPacketAsync(new ClientboundSystemChatPacket(message));
+
+    public async Task UpdateNameAsync(string name)
+    {
+        name = ProcessPlayerName(name);
+        Name = name;
+        await Connection.SendPacketAsync(new ClientboundUpdatePlayerNamePacket(name));
+    }
+
+    public static string ProcessPlayerName(string name) => name.Trim();
 }

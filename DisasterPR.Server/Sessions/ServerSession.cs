@@ -85,6 +85,8 @@ public class ServerSession : Session<ISessionPlayer>
     {
         if (GameState.CurrentState != StateOfGame.Waiting)
         {
+            // Check if there is an existing AI player with the same name,
+            // if so, replace it with the new player.
             var aiPlayers = Players.OfType<AIPlayer>().ToList();
             var ai = aiPlayers.Find(a => a.OriginalName == player.Name);
             if (ai == null)
@@ -93,6 +95,7 @@ public class ServerSession : Session<ISessionPlayer>
                 return false;
             }
 
+            // Replace the AI player with the new player.
             player.Id = ai.Id;
             await player.Connection.SendPacketAsync(new ClientboundUpdatePlayerGuidPacket(ai.Id));
             

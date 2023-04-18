@@ -9,7 +9,7 @@
     <ItemGroup>
       <PackageReference Include="Google.Cloud.Diagnostics.AspNetCore" Version="4.4.0" />
       <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-      <PackageReference Include="Mochi.Brigadier" Version="1.1.1" />
+      <PackageReference Include="Mochi.Brigadier" Version="1.1.2" />
       <PackageReference Include="Mochi.Brigadier.Bridge" Version="1.1.1" />
       <PackageReference Include="Mochi.Nbt" Version="1.1.1" />
     </ItemGroup>

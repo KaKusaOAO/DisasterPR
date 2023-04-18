@@ -15,7 +15,7 @@ public class ClientLoginPacketHandler : IClientLoginPacketHandler
         Connection = connection;
     }
 
-    public void HandleAck(ClientboundAckPacket packet)
+    public void HandleAckLogin(ClientboundAckLoginPacket packet)
     {
         Logger.Verbose($"Player {Player.Name} ID is {packet.Id}");
         Player.Id = packet.Id;

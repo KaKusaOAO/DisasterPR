@@ -30,7 +30,7 @@ public class LocalPlayer : AbstractClientPlayer
         Task OnConnectionOnReceivedPacket(ReceivedPacketEventArgs args)
         {
             var pk = args.Packet;
-            if (pk is ClientboundDisconnectPacket or ClientboundAckPacket)
+            if (pk is ClientboundDisconnectPacket or ClientboundAckLoginPacket)
             {
                 received = pk;
             }

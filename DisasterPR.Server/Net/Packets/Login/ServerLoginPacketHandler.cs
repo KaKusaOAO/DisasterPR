@@ -46,9 +46,12 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             if (shouldDisconnect) return;
         }
 
-        Player.Name = packet.PlayerName;
-        Logger.Verbose($"Player {Player.Name} ID is {Player.Id}");
-        await Connection.SendPacketAsync(new ClientboundAckPacket(Player.Id));
+        var name = ServerPlayer.ProcessPlayerName(packet.PlayerName);
+        // Maybe we can process the name here
+        Player.Name = name;
+        
+        Logger.Verbose($"Player {name} ID is {Player.Id}");
+        await Connection.SendPacketAsync(new ClientboundAckLoginPacket(name, Player.Id));
         Connection.CurrentState = PacketState.Play;
     }
 }
