@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.WebSockets;
 using DisasterPR.Net.Packets;
 using Mochi.IO;
@@ -58,7 +59,10 @@ public class RawPacketIO
             buf.Write(buffer, 0, len);
 
             if (WebSocket.CloseStatus.HasValue) return;
-            await WebSocket.SendAsync(new ArraySegment<byte>(buf.GetBuffer()), WebSocketMessageType.Binary, true,
+
+            var arr = new byte[buf.Position];
+            Array.Copy(buf.GetBuffer(), 0, arr, 0, arr.Length);
+            await WebSocket.SendAsync(new ArraySegment<byte>(arr), WebSocketMessageType.Binary, true,
                 token);
         });
     }

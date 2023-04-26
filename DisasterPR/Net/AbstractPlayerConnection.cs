@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using DisasterPR.Events;
 using DisasterPR.Net.Packets;
 using DisasterPR.Net.Packets.Play;
+using Mochi.Texts;
 using Mochi.Utils;
 
 namespace DisasterPR.Net;
@@ -110,8 +111,8 @@ public abstract class AbstractPlayerConnection
                     var protocol = ConnectionProtocol.OfState(CurrentState);
                     var packet = protocol.CreatePacket(ReceivingFlow, id, stream);
                     
-                    /* Logger.Verbose(TranslateText.Of("Received packet: %s")
-                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold))); */
+                    Logger.Verbose(TranslateText.Of("Received packet: %s")
+                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
 
                     try
                     {
@@ -162,8 +163,8 @@ public abstract class AbstractPlayerConnection
         var protocol = ConnectionProtocol.OfState(CurrentState);
         await RawPacketIO.SendPacketAsync(protocol, ReceivingFlow.Opposite(), packet, token);
         
-        /* Logger.Verbose(TranslateText.Of("Sent packet: %s")
-            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold))); */
+        Logger.Verbose(TranslateText.Of("Sent packet: %s")
+            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
     }
 
     public async Task SendPacketAsync(IPacket packet) => await SendPacketAsync(packet, CancellationToken.None);
