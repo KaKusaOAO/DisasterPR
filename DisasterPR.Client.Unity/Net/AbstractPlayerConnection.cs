@@ -6,6 +6,7 @@ using DisasterPR.Net.Packets;
 using DisasterPR.Net.Packets.Login;
 using DisasterPR.Net.Packets.Play;
 using Mochi.IO;
+using Mochi.Texts;
 using Mochi.Utils;
 
 namespace DisasterPR.Client.Unity.Net;
@@ -80,26 +81,33 @@ public abstract class AbstractPlayerConnection
     {
         foreach (var stream in packets.Select(s => new BufferReader(s)))
         {
-            var id = stream.ReadVarInt();
-            var protocol = ConnectionProtocol.OfState(CurrentState);
-            var packet = protocol.CreatePacket(PacketFlow.Clientbound, id, stream);
-                    
-            /* Logger.Verbose(TranslateText.Of("Received packet: %s")
-                .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold))); */
-                    
-            var handler = Handlers[CurrentState];
-            packet.Handle(handler);
+            try
+            {
+                var id = stream.ReadVarInt();
+                var protocol = ConnectionProtocol.OfState(CurrentState);
+                var packet = protocol.CreatePacket(PacketFlow.Clientbound, id, stream);
 
-            var type = packet.GetType();
-            if (_typedPacketHandlers.ContainsKey(type))
-            {
-                _typedPacketHandlers[type].Invoke(packet);
+                Logger.Verbose(TranslateText.Of("Received packet: %s")
+                    .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
+
+                var handler = Handlers[CurrentState];
+                packet.Handle(handler);
+
+                var type = packet.GetType();
+                if (_typedPacketHandlers.ContainsKey(type))
+                {
+                    _typedPacketHandlers[type].Invoke(packet);
+                }
+
+                ReceivedPacket?.Invoke(new ReceivedPacketEventArgs
+                {
+                    Packet = packet
+                });
             }
-                    
-            ReceivedPacket?.Invoke(new ReceivedPacketEventArgs
+            catch (Exception ex)
             {
-                Packet = packet
-            });
+                Logger.Error(ex);
+            }
         }
     }
 
@@ -123,8 +131,8 @@ public abstract class AbstractPlayerConnection
         var protocol = ConnectionProtocol.OfState(CurrentState);
         RawPacketIO.SendPacket(protocol, PacketFlow.Serverbound, packet);
         
-        /* Logger.Verbose(TranslateText.Of("Sent packet: %s")
-            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold))); */
+        Logger.Verbose(TranslateText.Of("Sent packet: %s")
+            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
     }
 
     public void HandleDisconnect(ClientboundDisconnectPacket packet)
