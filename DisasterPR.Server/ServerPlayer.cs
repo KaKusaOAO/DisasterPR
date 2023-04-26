@@ -137,5 +137,15 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
         await Connection.SendPacketAsync(new ClientboundUpdatePlayerNamePacket(name));
     }
 
-    public static string ProcessPlayerName(string name) => name.Trim();
+    public static string ProcessPlayerName(string name)
+    {
+        // Discard the leading and trailing space characters.
+        return name.Trim();
+    }
+    
+    public static bool IsValidPlayerName(string name)
+    {
+        var processed = ProcessPlayerName(name);
+        return processed.Length is >= 1 and <= 16;
+    }
 }

@@ -1,6 +1,7 @@
 using System.Net.WebSockets;
 using DisasterPR.Net;
 using DisasterPR.Net.Packets.Login;
+using Mochi.Texts;
 using Mochi.Utils;
 
 namespace DisasterPR.Server.Net.Packets.Login;
@@ -19,39 +20,55 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
     {
         var version = Connection.ProtocolVersion;
         var shouldDisconnect = false;
+
+        async Task DisconnectAsync(PlayerKickReason reason)
+        {
+            shouldDisconnect = true;
+            await Connection.SendPacketAsync(new ClientboundDisconnectPacket(reason));
+            await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+        }
         
         try
         {
             if (version > Constants.ProtocolVersion)
             {
-                shouldDisconnect = true;
                 Logger.Warn("The server is too old!");
-                await Connection.SendPacketAsync(new ClientboundDisconnectPacket(PlayerKickReason.ServerTooOld));
-                await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                await DisconnectAsync(PlayerKickReason.ServerTooOld);
                 return;
             }
 
             if (version < Constants.ProtocolVersion)
             {
-                shouldDisconnect = true;
                 Logger.Warn("The client is too old!");
-                await Connection.SendPacketAsync(new ClientboundDisconnectPacket(PlayerKickReason.ClientTooOld));
-                await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                await DisconnectAsync(PlayerKickReason.ClientTooOld);
+                return;
+            }
+
+            if (!ServerPlayer.IsValidPlayerName(packet.PlayerName))
+            {
+                Logger.Warn("The player name is invalid!");
+                await DisconnectAsync(PlayerKickReason.InvalidName);
                 return;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Why exceptions???
+            // Discard exceptions if we have already disconnected
             if (shouldDisconnect) return;
+
+            // Otherwise, log the exception because something is definitely broken
+            Logger.Warn("Failed to validate player!");
+            Logger.Warn(ex);
         }
 
         var name = ServerPlayer.ProcessPlayerName(packet.PlayerName);
-        // Maybe we can process the name here
         Player.Name = name;
         
-        Logger.Verbose($"Player {name} ID is {Player.Id}");
-        await Connection.SendPacketAsync(new ClientboundAckLoginPacket(name, Player.Id));
+        Logger.Verbose(TranslateText.Of("Player %s ID is %s")
+            .AddWith(LiteralText.Of(name).SetColor(TextColor.Gold))
+            .AddWith(LiteralText.Of(Player.Id.ToString()).SetColor(TextColor.Green))
+        );
+        await Connection.SendPacketAsync(new ClientboundAckLoginPacket(Player.Id, name));
         Connection.CurrentState = PacketState.Play;
     }
 }

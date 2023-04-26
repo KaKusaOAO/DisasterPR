@@ -13,4 +13,9 @@ public static class PacketExtension
         packet.Write(writer);
         return new DataSize(buffer.Position);
     }
+
+    public static async Task HandleAsync<T>(this IPacket<T> packet, T handler) where T : IPacketHandler
+    {
+        await Task.Run(() => packet.Handle(handler));
+    }
 }
