@@ -4,9 +4,9 @@ public static class CommonExtension
 {
     public static List<T> Shuffled<T>(this IEnumerable<T> arr, int? seed = null)
     {
-        var shuffled = arr.ToArray();
+        var shuffled = arr.ToList();
         shuffled.Shuffle(seed);
-        return shuffled.ToList();
+        return shuffled;
     }
     
     public static void Shuffle<T>(this T[] arr, int? seed = null)
@@ -18,6 +18,23 @@ public static class CommonExtension
             var j = random.Next(arr.Length);
             (arr[i], arr[j]) = (arr[j], arr[i]);
         }
+    }
+    
+    public static void Shuffle<T>(this IList<T> arr, int? seed = null)
+    {
+        var random = seed.HasValue ? new Random(seed.Value) : new Random();
+        
+        for (var i = 0; i < arr.Count; i++)
+        {
+            var j = random.Next(arr.Count);
+            (arr[i], arr[j]) = (arr[j], arr[i]);
+        }
+    }
+
+    public static T Random<T>(this IList<T> arr, int? seed = null)
+    {
+        var random = seed.HasValue ? new Random(seed.Value) : new Random();
+        return arr[random.Next(arr.Count)];
     }
     
     public static int IndexOf<T>(this T[] arr, T obj)

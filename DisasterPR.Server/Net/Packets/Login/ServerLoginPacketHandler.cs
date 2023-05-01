@@ -44,7 +44,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
                 return;
             }
 
-            if (!ServerPlayer.IsValidPlayerName(packet.PlayerName))
+            if (!PlayerName.IsValid(packet.PlayerName))
             {
                 Logger.Warn("The player name is invalid!");
                 await DisconnectAsync(PlayerKickReason.InvalidName);
@@ -60,8 +60,8 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             Logger.Warn("Failed to validate player!");
             Logger.Warn(ex);
         }
-
-        var name = ServerPlayer.ProcessPlayerName(packet.PlayerName);
+        
+        var name = PlayerName.ProcessName(packet.PlayerName);
         Player.Name = name;
         
         Logger.Verbose(TranslateText.Of("Player %s ID is %s")
@@ -70,5 +70,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
         );
         await Connection.SendPacketAsync(new ClientboundAckLoginPacket(Player.Id, name));
         Connection.CurrentState = PacketState.Play;
+        
+        await Player.SendToastAsync($"歡迎，{name}！");
     }
 }

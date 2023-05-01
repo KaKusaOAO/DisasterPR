@@ -17,12 +17,12 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
     
     public async Task SendMessageAsync(string content)
     {
-        await Connection.SendPacketAsync(new ClientboundSystemChatPacket(content));
+        await SendToastAsync(content);
     }
 
     public async Task SendErrorMessageAsync(string content)
     {
-        await Connection.SendPacketAsync(new ClientboundSystemChatPacket(content, LogLevel.Error));
+        await SendToastAsync(content, LogLevel.Error);
     }
 
     public ServerSession? Session { get; set; }
@@ -127,25 +127,13 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
     public Task UpdateRoundCycleAsync(int cycle) =>
         Connection.SendPacketAsync(new ClientboundUpdateRoundCyclePacket(cycle));
 
-    public Task SendToastAsync(string message) =>
-        Connection.SendPacketAsync(new ClientboundSystemChatPacket(message));
+    public Task SendToastAsync(string message, LogLevel level = LogLevel.Info) =>
+        Connection.SendPacketAsync(new ClientboundSystemChatPacket(message, level));
 
     public async Task UpdateNameAsync(string name)
     {
-        name = ProcessPlayerName(name);
+        name = PlayerName.ProcessName(name);
         Name = name;
         await Connection.SendPacketAsync(new ClientboundUpdatePlayerNamePacket(name));
-    }
-
-    public static string ProcessPlayerName(string name)
-    {
-        // Discard the leading and trailing space characters.
-        return name.Trim();
-    }
-    
-    public static bool IsValidPlayerName(string name)
-    {
-        var processed = ProcessPlayerName(name);
-        return processed.Length is >= 1 and <= 16;
     }
 }

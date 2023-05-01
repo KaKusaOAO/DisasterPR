@@ -2,6 +2,7 @@
 using DisasterPR.Events;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
+using LogLevel = Mochi.Utils.LogLevel;
 
 namespace DisasterPR.Server.Sessions;
 
@@ -36,7 +37,7 @@ public class AIPlayer : ISessionPlayer
     public AIPlayer()
     {
         Id = Guid.NewGuid();
-        Name = "AI-#" + Random.Shared.Next(1000);
+        Name = PlayerName.GenerateRandomName(); // "AI-#" + Random.Shared.Next(1000);
     }
 
     public Task SetCardPackAsync(CardPack pack) => Task.CompletedTask;
@@ -133,7 +134,7 @@ public class AIPlayer : ISessionPlayer
     public Task UpdateFinalWordCardAsync(int index) => Task.CompletedTask;
 
     public Task UpdateRoundCycleAsync(int cycle) => Task.CompletedTask;
-    public Task SendToastAsync(string message) => Task.CompletedTask;
+    public Task SendToastAsync(string message, LogLevel level = LogLevel.Info) => Task.CompletedTask;
 
     public int Score { get; set; }
     public List<HoldingWordCardEntry> HoldingCards { get; } = new();

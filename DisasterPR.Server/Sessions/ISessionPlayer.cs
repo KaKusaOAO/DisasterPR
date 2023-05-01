@@ -4,6 +4,7 @@ using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 using Mochi.Nbt;
 using ISession = DisasterPR.Sessions.ISession;
+using LogLevel = Mochi.Utils.LogLevel;
 
 namespace DisasterPR.Server.Sessions;
 
@@ -43,7 +44,7 @@ public interface ISessionPlayer : IPlayer
     public Task RevealChosenWordEntryAsync(Guid id);
     public Task UpdateFinalWordCardAsync(int index);
     public Task UpdateRoundCycleAsync(int cycle);
-    public Task SendToastAsync(string message);
+    public Task SendToastAsync(string message, LogLevel level = LogLevel.Info);
 
     public void ShuffleHoldingCards()
     {

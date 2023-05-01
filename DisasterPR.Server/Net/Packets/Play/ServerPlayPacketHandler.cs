@@ -305,7 +305,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             await Task.Yield();
 
             if (Player != session.HostPlayer) return;
-            foreach (var p in session.Players.Where(p => p.Id == packet.PlayerId))
+            foreach (var p in session.Players.Where(p => p.Id == packet.PlayerId).ToList())
             {
                 await session.KickPlayerAsync(p);
             }
@@ -349,6 +349,12 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             Logger.Warn("Attempt to shuffle words at the wrong time");
             return;
         }
+
+        if (Player.Session.GameState.CurrentPlayer == Player)
+        {
+            Logger.Warn("The current player cannot shuffle words.");
+            return;
+        }
         
         Task.Run(async () =>
         {
@@ -360,6 +366,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             
             ((ISessionPlayer) Player).ShuffleHoldingCards();
             await Player.UpdateHoldingWordsAsync(Player.HoldingCards);
+            await Player.SendToastAsync("已完成洗牌！");
             Player.IsManuallyShuffled = true;
         }).Wait();
     }

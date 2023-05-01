@@ -315,7 +315,9 @@ public class ServerGameState : IGameState
         void SendTimerUpdate()
         {
             CurrentTime = time;
-            foreach (var player in Session.Players)
+            
+            // Use shuffled to prevent the same player always being the first to receive the update
+            foreach (var player in Session.Players.Shuffled())
             {
                 _ = player.UpdateTimerAsync(time);
             }
