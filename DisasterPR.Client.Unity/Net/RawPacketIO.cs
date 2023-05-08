@@ -52,7 +52,10 @@ public class RawPacketIO
         buf.Write(buffer, 0, len);
 
         if (_closed) return;
-        WebSocket.Send(buf.GetBuffer());
+
+        var arr = new byte[buf.Position];
+        Array.Copy(buf.GetBuffer(), 0, arr, 0, arr.Length);
+        WebSocket.Send(arr);
     }
 
     public void SendPacket(ConnectionProtocol protocol, PacketFlow flow, IPacket packet)
