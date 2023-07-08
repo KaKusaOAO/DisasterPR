@@ -7,5 +7,5 @@ public class WordChoice
 {
     public List<WordCard> Words { get; set; } = new();
 
-    public override string ToString() => "[" + Words.Select(w => w.Label).JoinStrings(", ") + "]";
+    public override string ToString() => "[" + string.Join(", ", Words.Select(w => w.Label)) + "]";
 }

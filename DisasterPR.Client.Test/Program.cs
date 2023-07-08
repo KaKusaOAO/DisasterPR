@@ -80,8 +80,8 @@ public static class Program
                         if (session.LocalGameState.CandidateTopics.HasValue)
                         {
                             var topics = session.LocalGameState.CandidateTopics.Value;
-                            Logger.Info($"Left: {topics.Left.Texts.JoinStrings("____")}");
-                            Logger.Info($"Right: {topics.Right.Texts.JoinStrings("____")}");
+                            Logger.Info($"Left: {string.Join("____", topics.Left.Texts)}");
+                            Logger.Info($"Right: {string.Join("____", topics.Right.Texts)}");
 
                             Logger.Info("Choosing left topic...");
                             await session.LocalGameState.ChooseTopicAsync(HorizontalSide.Left);
@@ -110,8 +110,8 @@ public static class Program
 
                             var topic = session.LocalGameState.CurrentTopic;
                             var words = player.HoldingCards;
-                            Logger.Info($"Topic: {topic.Texts.JoinStrings("____")}");
-                            Logger.Info($"Holding words: {words.Select(w => w.Card.Label).JoinStrings(", ")}");
+                            Logger.Info($"Topic: {string.Join("____", topic.Texts)}");
+                            Logger.Info($"Holding words: {string.Join(", ", words.Select(w => w.Card.Label))}");
 
                             var shuffledWords = Enumerable.Range(0, words.Count).Shuffled().ToList();
                             var cardCount = topic.AnswerCount;
@@ -122,7 +122,7 @@ public static class Program
                             }
 
                             var chosenWords = chosen.Select(i => words[i]);
-                            Logger.Info($"Choosing word: {chosenWords.Select(w => w.Card.Label).JoinStrings(", ")}");
+                            Logger.Info($"Choosing word: {string.Join(", ", chosenWords.Select(w => w.Card.Label))}");
                             await session.LocalGameState.ChooseWordAsync(chosen.ToHashSet());
 
                             Logger.Info("Waiting for all the players to choose the words...");

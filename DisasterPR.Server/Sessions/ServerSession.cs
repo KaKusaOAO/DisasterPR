@@ -193,7 +193,7 @@ public class ServerSession : Session<ISessionPlayer>
             var hasRevealed = false;
             foreach (var chosen in ServerGameState.CurrentChosenWords)
             {
-                var desc = "[" + chosen.Words.Select(w => w.Label).JoinStrings(", ") + "]";
+                var desc = "[" + string.Join(", ", chosen.Words.Select(w => w.Label)) + "]";
                 Logger.Info($"Sending chosen words: {desc}");
                 await player.AddChosenWordEntryAsync(chosen.Id, chosen.PlayerId,
                     chosen.Words.Select(w => CardPack!.GetWordIndex(w)).ToList());

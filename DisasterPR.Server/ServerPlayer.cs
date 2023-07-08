@@ -40,6 +40,7 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
     {
         Id = Guid.NewGuid();
         Connection = connection;
+        Name = "<unknown>";
     }
 
     public event DisconnectedEventDelegate? Disconnected

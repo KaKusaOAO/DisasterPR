@@ -391,7 +391,7 @@ public class ServerGameState : IGameState
         }
 
         Logger.Info(TranslateText.Of("Chosen topic: %s")
-            .AddWith(LiteralText.Of(topic.Texts.JoinStrings("____")).SetColor(TextColor.Gold))
+            .AddWith(LiteralText.Of(string.Join("____", topic.Texts)).SetColor(TextColor.Gold))
         );
         CurrentTopic = topic;
 
@@ -425,7 +425,7 @@ public class ServerGameState : IGameState
         }
 
         Logger.Info(TranslateText.Of("Revealed card %s by %s")
-            .AddWith(LiteralText.Of(chosen.Words.Select(w => w.Label).JoinStrings(", ")).SetColor(TextColor.Gold))
+            .AddWith(LiteralText.Of(string.Join(", ", chosen.Words.Select(w => w.Label))).SetColor(TextColor.Gold))
             .AddWith(LiteralText.Of(chosen.Player?.Name ?? "<null>").SetColor(TextColor.Aqua))
         );
 
@@ -538,7 +538,7 @@ public class ServerGameState : IGameState
 
         if (CurrentTopic != null!)
         {
-            tag["CurrentTopic"] = new NbtString(CurrentTopic.Texts.JoinStrings("____"));
+            tag["CurrentTopic"] = new NbtString(string.Join("____", CurrentTopic.Texts));
         }
 
         if (CandidateTopics.HasValue)
@@ -546,8 +546,8 @@ public class ServerGameState : IGameState
             var val = CandidateTopics.Value;
             var ct = new NbtCompound
             {
-                { "Left", new NbtString(val.Left.Texts.JoinStrings("____")) },
-                { "Right", new NbtString(val.Right.Texts.JoinStrings("____")) }
+                { "Left", new NbtString(string.Join("____", val.Left.Texts)) },
+                { "Right", new NbtString(string.Join("____", val.Right.Texts)) }
             };
             tag["CandidateTopics"] = ct;
         }

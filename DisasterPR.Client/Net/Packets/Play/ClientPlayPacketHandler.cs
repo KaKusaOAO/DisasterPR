@@ -170,7 +170,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         var state = session.LocalGameState;
         var chosen = state.CurrentChosenWords.Find(w => w.Id == packet.Guid);
         chosen.IsRevealed = true;
-        Logger.Info($"Revealed chosen word: {chosen.Words.Select(w => w.Label).JoinStrings(", ")}");
+        Logger.Info($"Revealed chosen word: {string.Join(", ", chosen.Words.Select(w => w.Label))}");
     }
 
     public async void HandleSetFinal(ClientboundSetFinalPacket packet)
@@ -182,7 +182,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         var state = session.LocalGameState;
         var chosen = state.CurrentChosenWords[packet.Index];
         session.LocalGameState.FinalChosenWord = chosen;
-        Logger.Info($"Chosen final word: {chosen.Words.Select(w => w.Label).JoinStrings(", ")}");
+        Logger.Info($"Chosen final word: {string.Join(", ", chosen.Words.Select(w => w.Label))}");
     }
 
     public async void HandleUpdatePlayerScore(ClientboundUpdatePlayerScorePacket packet)
