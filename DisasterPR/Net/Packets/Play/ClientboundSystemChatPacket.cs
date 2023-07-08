@@ -3,7 +3,7 @@ using Mochi.Utils;
 
 namespace DisasterPR.Net.Packets.Play;
 
-public class ClientboundSystemChatPacket : IPacket<IClientPlayPacketHandler>
+public class ClientboundSystemChatPacket : IPacket<IClientSystemChatHandler>
 {
     public LogLevel Level { get; set; }
     public string Content { get; set; }
@@ -26,5 +26,5 @@ public class ClientboundSystemChatPacket : IPacket<IClientPlayPacketHandler>
         stream.WriteUtf8String(Content);
     }
 
-    public void Handle(IClientPlayPacketHandler handler) => handler.HandleSystemChat(this);
+    public void Handle(IClientSystemChatHandler handler) => handler.HandleSystemChat(this);
 }

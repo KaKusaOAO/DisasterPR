@@ -1,5 +1,7 @@
+using System.Net.WebSockets;
 using DisasterPR.Net;
 using DisasterPR.Net.Packets.Handshake;
+using DisasterPR.Net.Packets.Login;
 using Mochi.Texts;
 using Mochi.Utils;
 
@@ -21,5 +23,17 @@ public class ServerHandshakePacketHandler : IServerHandshakePacketHandler
         );
         Connection.ProtocolVersion = packet.Version;
         Connection.CurrentState = PacketState.Login;
+
+        if (packet.Version < 6)
+        {
+            // Version 6: Start supporting different login types. (eg. Discord)
+            // The login packet is incompatible with the current protocol.
+            // We must disconnect them now so we don't get a malformed login packet.
+            Task.Run(async () =>
+            {
+                await Connection.SendPacketAsync(new ClientboundDisconnectPacket(PlayerKickReason.ClientTooOld));
+                await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+            }).Wait();
+        }
     }
 }

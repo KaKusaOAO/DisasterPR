@@ -1,6 +1,6 @@
 namespace DisasterPR.Net.Packets.Play;
 
-public interface IClientPlayPacketHandler : IClientPacketHandler
+public interface IClientPlayPacketHandler : IClientSystemChatHandler
 {
     public void HandleAddPlayer(ClientboundAddPlayerPacket packet);
     public void HandleRemovePlayer(ClientboundRemovePlayerPacket packet);
@@ -25,7 +25,6 @@ public interface IClientPlayPacketHandler : IClientPacketHandler
     public void HandleUpdatePlayerState(ClientboundUpdatePlayerStatePacket packet);
     public void HandleReplacePlayer(ClientboundReplacePlayerPacket packet);
     public void HandleUpdatePlayerGuid(ClientboundUpdatePlayerGuidPacket packet);
-    public void HandleSystemChat(ClientboundSystemChatPacket packet);
     public void HandleUpdateLockedWord(ClientboundUpdateLockedWordPacket packet);
     public void HandleUpdatePlayerName(ClientboundUpdatePlayerNamePacket packet);
 }

@@ -58,19 +58,23 @@ public class DiscordAuthorizeController : ControllerBase
                 RedirectUri = DiscordApiConstants.RedirectUri
             }))!;
         var payload = new FormUrlEncodedContent(content);
+        
         var result = await client.PostAsync("https://discord.com/api/oauth2/token", payload);
-        var response = (await result.Content.ReadFromJsonAsync<AccessTokenResponsePayload>())!;
-
-        Response.Cookies.Append("access_token", response.AccessToken, new CookieOptions
+        if (result.IsSuccessStatusCode)
         {
-            MaxAge = TimeSpan.FromSeconds(response.ExpiresIn)
-        });
+            var response = (await result.Content.ReadFromJsonAsync<AccessTokenResponsePayload>())!;
+            Response.Cookies.Append("access_token", response.AccessToken, new CookieOptions
+            {
+                MaxAge = TimeSpan.FromSeconds(5) // response.ExpiresIn)
+            });
+        }
 
         var body = Response.Body;
         var writer = new StreamWriter(body);
         await writer.WriteLineAsync("<script>");
         await writer.WriteLineAsync("history.replaceState({}, null, '?');");
-        await writer.WriteLineAsync("location.href = 'http://play.kakaouo.com/disasterpr/discord/authorized';");
+        await writer.WriteLineAsync("location.href = 'http://play.kakaouo.com/disasterpr/discord/" +
+                                    (result.IsSuccessStatusCode ? "authorized" : "auth_failed") + "';");
         await writer.WriteLineAsync("</script>");
         await writer.FlushAsync();
     }

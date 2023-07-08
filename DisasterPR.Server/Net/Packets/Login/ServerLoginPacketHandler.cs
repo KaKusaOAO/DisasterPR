@@ -5,6 +5,7 @@ using DisasterPR.Net;
 using DisasterPR.Net.Packets.Login;
 using Mochi.Texts;
 using Mochi.Utils;
+using LogLevel = Mochi.Utils.LogLevel;
 
 namespace DisasterPR.Server.Net.Packets.Login;
 
@@ -92,8 +93,21 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             var token = packet.GetContent<DiscordLoginContent>()!.AccessToken;
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var user = (await client.GetFromJsonAsync<DiscordUserModel>("https://discord.com/api/users/@me"))!;
 
+            var payload = await client.GetAsync("https://discord.com/api/users/@me");
+            if (!payload.IsSuccessStatusCode)
+            {
+                Logger.Warn("Authentication failed!");
+
+                var str = await payload.Content.ReadAsStringAsync();
+                Logger.Warn(str);
+                await Player.SendToastAsync("Discord 登入資訊驗證失敗！請清除 Cookie 後重新嘗試登入。", LogLevel.Error);
+                await Connection.SendPacketAsync(new ClientboundDisconnectPacket("驗證失敗！"));
+                await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                return;
+            }
+
+            var user = (await payload.Content.ReadFromJsonAsync<DiscordUserModel>())!;
             if (user.Discriminator is null or "0")
             {
                 name = user.GlobalName ?? user.Username;

@@ -16,6 +16,12 @@ public class ClientboundDisconnectPacket : IPacket<IClientLoginPacketHandler>
 
     public ClientboundDisconnectPacket(PlayerKickReason reason)
     {
+        if (reason == PlayerKickReason.Custom)
+        {
+            throw new ArgumentException(
+                "If you want to send custom reason messages, use new ClientboundDisconnectPacket(string).");
+        }
+        
         Reason = reason;
     }
 
@@ -33,7 +39,7 @@ public class ClientboundDisconnectPacket : IPacket<IClientLoginPacketHandler>
         stream.WriteVarInt((int)Reason);
         if (Reason == PlayerKickReason.Custom)
         {
-            stream.WriteUtf8String(Message);
+            stream.WriteUtf8String(Message!);
         }
     }
 

@@ -20,6 +20,7 @@ public class ConnectionProtocol
         .AddFlow(PacketFlow.Clientbound, new PacketSet()
             .AddPacket(s => new ClientboundDisconnectPacket(s))
             .AddPacket(s => new ClientboundAckLoginPacket(s))
+            .AddPacket(s => new ClientboundSystemChatPacket(s))
         )
         .AddFlow(PacketFlow.Serverbound, new PacketSet()
             .AddPacket(s => new ServerboundLoginPacket(s))
