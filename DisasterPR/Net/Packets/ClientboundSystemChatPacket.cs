@@ -1,7 +1,7 @@
 using Mochi.IO;
 using Mochi.Utils;
 
-namespace DisasterPR.Net.Packets.Play;
+namespace DisasterPR.Net.Packets;
 
 public class ClientboundSystemChatPacket : IPacket<IClientSystemChatHandler>
 {

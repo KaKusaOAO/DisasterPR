@@ -97,7 +97,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             var payload = await client.GetAsync("https://discord.com/api/users/@me");
             if (!payload.IsSuccessStatusCode)
             {
-                Logger.Warn("Authentication failed!");
+                Logger.Warn("Discord authentication failed!");
 
                 var str = await payload.Content.ReadAsStringAsync();
                 Logger.Warn(str);
@@ -108,14 +108,18 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             }
 
             var user = (await payload.Content.ReadFromJsonAsync<DiscordUserModel>())!;
+            var tag = user.Username;
             if (user.Discriminator is null or "0")
             {
+                tag = user.GlobalName + " (" + tag + ")";
                 name = user.GlobalName ?? user.Username;
-            }
-            else
+            } else
             {
+                tag += "#" + user.Discriminator;
                 name = user.Username;
             }
+            Logger.Info(TranslateText.Of("Discord user logged in as %s")
+                .AddWith(LiteralText.Of(tag).SetColor(TextColor.Gold)));
 
             var a = BitConverter.GetBytes(user.Id);
             var arr = new byte[16];
@@ -127,6 +131,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             throw new ArgumentOutOfRangeException(nameof(packet.Type), packet.Type, null);
         }
 
+        Player.Name = name;
         Logger.Verbose(TranslateText.Of("Player %s ID is %s")
             .AddWith(LiteralText.Of(name).SetColor(TextColor.Gold))
             .AddWith(LiteralText.Of(Player.Id.ToString()).SetColor(TextColor.Green))

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Mochi.Utils;
 
 namespace DisasterPR.Server.Controllers;
 
@@ -48,6 +49,7 @@ public class DiscordAuthorizeController : ControllerBase
         // Make a request to exchange for the access token
         var client = new HttpClient();
 
+        Logger.Log("Exchanging Discord access token with OAuth code...");
         var content = JsonSerializer.Deserialize<Dictionary<string, string>>(JsonSerializer.Serialize(
             new AccessTokenExchangePayload
             {
@@ -62,11 +64,17 @@ public class DiscordAuthorizeController : ControllerBase
         var result = await client.PostAsync("https://discord.com/api/oauth2/token", payload);
         if (result.IsSuccessStatusCode)
         {
+            Logger.Log("Success!");
+            
             var response = (await result.Content.ReadFromJsonAsync<AccessTokenResponsePayload>())!;
             Response.Cookies.Append("access_token", response.AccessToken, new CookieOptions
             {
                 MaxAge = TimeSpan.FromSeconds(5) // response.ExpiresIn)
             });
+        }
+        else
+        {
+            Logger.Warn("Invalid Discord OAuth code! Maybe it is expired or malformed?");
         }
 
         var body = Response.Body;
