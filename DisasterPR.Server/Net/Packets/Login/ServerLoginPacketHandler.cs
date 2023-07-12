@@ -1,8 +1,10 @@
 using System.Net.Http.Headers;
 using System.Net.WebSockets;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using DisasterPR.Net;
 using DisasterPR.Net.Packets.Login;
+using DisasterPR.Server.Controllers;
 using Mochi.Texts;
 using Mochi.Utils;
 using LogLevel = Mochi.Utils.LogLevel;
@@ -11,6 +13,42 @@ namespace DisasterPR.Server.Net.Packets.Login;
 
 public class ServerLoginPacketHandler : IServerLoginPacketHandler
 {
+    private class AccessTokenExchangePayload
+    {
+        [JsonPropertyName("client_id")]
+        public string ClientId { get; set; }
+        
+        [JsonPropertyName("client_secret")]
+        public string ClientSecret { get; set; }
+        
+        [JsonPropertyName("grant_type")]
+        public string GrantType { get; set; }
+        
+        [JsonPropertyName("code")]
+        public string Code { get; set; }
+        
+        [JsonPropertyName("redirect_uri")]
+        public string RedirectUri { get; set; }
+    }
+
+    private class AccessTokenResponsePayload
+    {
+        [JsonPropertyName("access_token")]
+        public string AccessToken { get; set; }
+        
+        [JsonPropertyName("token_type")]
+        public string TokenType { get; set; }
+        
+        [JsonPropertyName("expires_in")]
+        public long ExpiresIn { get; set; }
+        
+        [JsonPropertyName("refresh_token")]
+        public string RefreshToken { get; set; }
+        
+        [JsonPropertyName("scope")]
+        public string Scope { get; set; }
+    }
+    
     public ServerToPlayerConnection Connection { get; }
     public ServerPlayer Player => Connection.Player;
 
@@ -90,8 +128,36 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             Player.Name = name;
         } else if (packet.Type == ServerboundLoginPacket.LoginType.Discord)
         {
-            var token = packet.GetContent<DiscordLoginContent>()!.AccessToken;
+            var code = packet.GetContent<DiscordLoginContent>()!.AccessToken;
             var client = new HttpClient();
+            
+            Logger.Log("Exchanging Discord access token with OAuth code...");
+            var content = JsonSerializer.Deserialize<Dictionary<string, string>>(JsonSerializer.Serialize(
+                new AccessTokenExchangePayload
+                {
+                    ClientId = DiscordApiConstants.ClientId.ToString(),
+                    ClientSecret = DiscordApiConstants.ClientSecret,
+                    GrantType = "authorization_code",
+                    Code = code,
+                    RedirectUri = DiscordApiConstants.RedirectUri
+                }))!;
+            var codePayload = new FormUrlEncodedContent(content);
+        
+            var result = await client.PostAsync("https://discord.com/api/oauth2/token", codePayload);
+            if (!result.IsSuccessStatusCode)
+            {
+                Logger.Warn("Invalid Discord OAuth code! Maybe it is expired or malformed?");
+                await Player.SendToastAsync("Discord 登入資訊驗證失敗！請重新嘗試登入。", LogLevel.Error);
+                await Connection.SendPacketAsync(new ClientboundDisconnectPacket("驗證失敗！"));
+                await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                return;
+            }
+            
+            Logger.Log("Success!");
+            var response = (await result.Content.ReadFromJsonAsync<AccessTokenResponsePayload>())!;
+            var token = response.AccessToken;
+            
+            // Add the fetched token to the header
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var payload = await client.GetAsync("https://discord.com/api/users/@me");
