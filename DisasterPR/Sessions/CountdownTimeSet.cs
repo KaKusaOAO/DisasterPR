@@ -1,4 +1,5 @@
-﻿using DisasterPR.Extensions;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Extensions;
 using Mochi.IO;
 
 namespace DisasterPR.Sessions;
@@ -46,12 +47,31 @@ public class CountdownTimeSet
         stream.WriteVarInt(FinalChooseTime);
     }
 
+    public JsonObject SerializeToJson()
+    {
+        return new JsonObject
+        {
+            ["topic"] = TopicChooseTime,
+            ["answer"] = AnswerChooseTime,
+            ["final"] = FinalChooseTime
+        };
+    }
+
     public static CountdownTimeSet Deserialize(BufferReader stream)
     {
         return new CountdownTimeSet(
             stream.ReadVarInt(),
             stream.ReadVarInt(),
             stream.ReadVarInt()
+        );
+    }
+    
+    public static CountdownTimeSet Deserialize(JsonObject obj)
+    {
+        return new CountdownTimeSet(
+            obj["topic"]!.GetValue<int>(),
+            obj["answer"]!.GetValue<int>(),
+            obj["final"]!.GetValue<int>()
         );
     }
 }

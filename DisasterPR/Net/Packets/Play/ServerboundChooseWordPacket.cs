@@ -1,4 +1,5 @@
-﻿using DisasterPR.Extensions;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Extensions;
 using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
@@ -20,6 +21,11 @@ public class ServerboundChooseWordPacket : IPacket<IServerPlayPacketHandler>
     public void Write(BufferWriter stream)
     {
         stream.WriteList(Indices.ToList(), (s, i) => s.WriteVarInt(i));
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["indices"] = Indices.Select(i => JsonValue.Create(i)).ToJsonArray();
     }
 
     public void Handle(IServerPlayPacketHandler handler) => handler.HandleChooseWord(this);

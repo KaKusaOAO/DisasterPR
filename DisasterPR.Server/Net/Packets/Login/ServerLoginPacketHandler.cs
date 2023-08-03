@@ -5,6 +5,8 @@ using System.Text.Json.Serialization;
 using DisasterPR.Net;
 using DisasterPR.Net.Packets.Login;
 using DisasterPR.Server.Controllers;
+using DisasterPR.Server.Platforms;
+using DisasterPR.Server.Platforms.Discord;
 using Mochi.Texts;
 using Mochi.Utils;
 using LogLevel = Mochi.Utils.LogLevel;
@@ -57,22 +59,6 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
         Connection = connection;
     }
 
-    private class DiscordUserModel
-    {
-        [JsonPropertyName("id")]
-        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-        public ulong Id { get; set; }
-        
-        [JsonPropertyName("username")]
-        public string Username { get; set; }
-        
-        [JsonPropertyName("global_name")]
-        public string? GlobalName { get; set; }
-        
-        [JsonPropertyName("discriminator")]
-        public string? Discriminator { get; set; }
-    }
-
     public async void HandleLogin(ServerboundLoginPacket packet)
     {
         var version = Connection.ProtocolVersion;
@@ -84,7 +70,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             await Connection.SendPacketAsync(new ClientboundDisconnectPacket(reason));
             await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
         }
-        
+
         try
         {
             if (version > Constants.ProtocolVersion)
@@ -101,7 +87,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
                 return;
             }
 
-            if (packet.Type == ServerboundLoginPacket.LoginType.Plain)
+            if (packet.Type == PlayerPlatform.Plain)
             {
                 if (!PlayerName.IsValid(packet.GetContent<PlainLoginContent>()!.PlayerName))
                 {
@@ -122,11 +108,12 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
         }
 
         string name;
-        if (packet.Type == ServerboundLoginPacket.LoginType.Plain)
+        if (packet.Type == PlayerPlatform.Plain)
         {
             name = PlayerName.ProcessName(packet.GetContent<PlainLoginContent>()!.PlayerName);
             Player.Name = name;
-        } else if (packet.Type == ServerboundLoginPacket.LoginType.Discord)
+            Player.PlatformData = new PlainPlatformData(Player);
+        } else if (packet.Type == PlayerPlatform.Discord)
         {
             var code = packet.GetContent<DiscordLoginContent>()!.AccessToken;
             var client = new HttpClient();
@@ -174,6 +161,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             }
 
             var user = (await payload.Content.ReadFromJsonAsync<DiscordUserModel>())!;
+            Player.PlatformData = new DiscordPlatformData(user);
             var tag = user.Username;
             if (user.Discriminator is null or "0")
             {
@@ -197,6 +185,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             throw new ArgumentOutOfRangeException(nameof(packet.Type), packet.Type, null);
         }
 
+        Player.LoginType = packet.Type;
         Player.Name = name;
         Logger.Verbose(TranslateText.Of("Player %s ID is %s")
             .AddWith(LiteralText.Of(name).SetColor(TextColor.Gold))

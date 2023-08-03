@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -23,11 +24,25 @@ public class ClientboundReplacePlayerPacket : IPacket<IClientPlayPacketHandler>
         PlayerName = stream.ReadUtf8String();
     }
     
+    public ClientboundReplacePlayerPacket(JsonObject payload)
+    {
+        Index = payload["index"]!.GetValue<int>();
+        PlayerId = Guid.Parse(payload["id"]!.GetValue<string>());
+        PlayerName = payload["name"]!.GetValue<string>();
+    }
+    
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Index);
         stream.WriteGuid(PlayerId);
         stream.WriteUtf8String(PlayerName);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["index"] = Index;
+        obj["id"] = PlayerId.ToString();
+        obj["name"] = PlayerName;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleReplacePlayer(this);

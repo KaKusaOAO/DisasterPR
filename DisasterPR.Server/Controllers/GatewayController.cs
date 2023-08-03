@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DisasterPR.Net.Packets;
+using Microsoft.AspNetCore.Mvc;
 using Mochi.Utils;
 
 namespace DisasterPR.Server.Controllers;
@@ -18,7 +19,14 @@ public class GatewayController : ControllerBase
         var webSocket = await context.WebSockets.AcceptWebSocketAsync();
         var server = GameServer.Instance;
         var info = context.Connection;
-        var connection = new ServerToPlayerConnection(webSocket, info);
+
+        var type = PacketContentType.Binary;
+        if (context.Request.Query.TryGetValue("encoding", out var encoding) && encoding == "json")
+        {
+            type = PacketContentType.Json;
+        }
+        
+        var connection = new ServerToPlayerConnection(webSocket, info, type);
         server.Players.Add(connection.Player);
         Logger.Info($"A player is connecting from {info.RemoteIpAddress}:{info.RemotePort}...");
 

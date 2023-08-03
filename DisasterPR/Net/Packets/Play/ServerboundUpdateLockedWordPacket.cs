@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -24,6 +25,12 @@ public class ServerboundUpdateLockedWordPacket : IPacket<IServerPlayPacketHandle
     {
         stream.WriteVarInt(Index);
         stream.WriteBool(IsLocked);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["index"] = Index;
+        obj["locked"] = IsLocked;
     }
 
     public void Handle(IServerPlayPacketHandler handler) => handler.HandleUpdateLockedWord(this);

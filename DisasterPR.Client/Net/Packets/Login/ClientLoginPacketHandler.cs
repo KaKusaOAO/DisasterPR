@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using DisasterPR.Net;
+using DisasterPR.Net.Packets;
 using DisasterPR.Net.Packets.Login;
 using Mochi.Utils;
 
@@ -26,5 +27,10 @@ public class ClientLoginPacketHandler : IClientLoginPacketHandler
     public async void HandleDisconnect(ClientboundDisconnectPacket packet)
     {
         await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+    }
+
+    public void HandleSystemChat(ClientboundSystemChatPacket packet)
+    {
+        
     }
 }

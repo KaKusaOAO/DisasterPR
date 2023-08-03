@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
@@ -15,6 +16,11 @@ public class ServerboundLeaveRoomPacket : IPacket<IServerPlayPacketHandler>
     }
     
     public void Write(BufferWriter stream)
+    {
+        
+    }
+
+    public void Write(JsonObject obj)
     {
         
     }

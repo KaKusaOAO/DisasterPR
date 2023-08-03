@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -16,10 +17,20 @@ public class ClientboundUpdateTimerPacket : IPacket<IClientPlayPacketHandler>
     {
         RemainTime = stream.ReadVarInt();
     }
-    
+
+    public ClientboundUpdateTimerPacket(JsonObject payload)
+    {
+        RemainTime = payload["time"]!.GetValue<int>();
+    }
+
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(RemainTime);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["time"] = RemainTime;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdateTimer(this);

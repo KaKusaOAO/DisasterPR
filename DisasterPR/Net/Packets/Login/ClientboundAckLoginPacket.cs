@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -14,16 +15,32 @@ public class ClientboundAckLoginPacket : IPacket<IClientLoginPacketHandler>
         Name = name;
     }
     
-    public ClientboundAckLoginPacket(BufferReader stream)
+    public ClientboundAckLoginPacket(PacketContent content)
     {
-        Id = stream.ReadGuid();
-        Name = stream.ReadUtf8String();
+        if (content.Type == PacketContentType.Binary)
+        {
+            var stream = content.GetAsBufferReader();
+            Id = stream.ReadGuid();
+            Name = stream.ReadUtf8String();
+        }
+        else // if (content.Type == PacketContentType.Json)
+        {
+            var obj = content.GetAsJsonObject();
+            Id = Guid.Parse(obj["id"]!.GetValue<string>());
+            Name = obj["name"]!.GetValue<string>();
+        }
     }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteGuid(Id);
         stream.WriteUtf8String(Name);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["id"] = Id.ToString();
+        obj["name"] = Name;
     }
 
     public void Handle(IClientLoginPacketHandler handler) => handler.HandleAckLogin(this);

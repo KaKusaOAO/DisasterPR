@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -20,10 +21,22 @@ public class ClientboundChatPacket : IPacket<IClientPlayPacketHandler>
         Content = stream.ReadUtf8String();
     }
     
+    public ClientboundChatPacket(JsonObject payload)
+    {
+        Player = payload["playerName"]!.GetValue<string>();
+        Content = payload["content"]!.GetValue<string>();
+    }
+    
     public void Write(BufferWriter stream)
     {
         stream.WriteUtf8String(Player);
         stream.WriteUtf8String(Content);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["playerName"] = Player;
+        obj["content"] = Content;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleChat(this);

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Nodes;
 using DisasterPR.Net.Packets.Handshake;
 using DisasterPR.Net.Packets.Login;
 using DisasterPR.Net.Packets.Play;
@@ -29,31 +30,31 @@ public class ConnectionProtocol
     
     public static readonly ConnectionProtocol Play = new(PacketState.Play, Protocol()
         .AddFlow(PacketFlow.Clientbound, new PacketSet()
-            .AddPacket(s => new ClientboundRoomDisconnectedPacket(s))
+            .AddPacket(s => new ClientboundRoomDisconnectedPacket(s), s => new ClientboundRoomDisconnectedPacket(s))
             .AddPacket(s => new ClientboundHeartbeatPacket(s))
-            .AddPacket(s => new ClientboundChatPacket(s))
-            .AddPacket(s => new ClientboundAddPlayerPacket(s))
-            .AddPacket(s => new ClientboundRemovePlayerPacket(s))
-            .AddPacket(s => new ClientboundJoinedRoomPacket(s))
-            .AddPacket(s => new ClientboundSetCardPackPacket(s))
-            .AddPacket(s => new ClientboundSetCandidateTopicsPacket(s))
-            .AddPacket(s => new ClientboundSetTopicPacket(s))
-            .AddPacket(s => new ClientboundSetWordsPacket(s))
+            .AddPacket(s => new ClientboundChatPacket(s), s => new ClientboundChatPacket(s))
+            .AddPacket(s => new ClientboundAddPlayerPacket(s), s => new ClientboundAddPlayerPacket(s))
+            .AddPacket(s => new ClientboundRemovePlayerPacket(s), s => new ClientboundRemovePlayerPacket(s))
+            .AddPacket(s => new ClientboundJoinedRoomPacket(s), s => new ClientboundJoinedRoomPacket(s))
+            .AddPacket(s => new ClientboundSetCardPackPacket(s), s => new ClientboundSetCardPackPacket(s))
+            .AddPacket(s => new ClientboundSetCandidateTopicsPacket(s), s => new ClientboundSetCandidateTopicsPacket(s))
+            .AddPacket(s => new ClientboundSetTopicPacket(s), s => new ClientboundSetTopicPacket(s))
+            .AddPacket(s => new ClientboundSetWordsPacket(s), s => new ClientboundSetWordsPacket(s))
             .AddPacket(s => new ClientboundRevealChosenWordEntryPacket(s))
-            .AddPacket(s => new ClientboundSetFinalPacket(s))
-            .AddPacket(s => new ClientboundSetWinnerPlayerPacket(s))
-            .AddPacket(s => new ClientboundGameStateChangePacket(s))
+            .AddPacket(s => new ClientboundSetFinalPacket(s), s => new ClientboundSetFinalPacket(s))
+            .AddPacket(s => new ClientboundSetWinnerPlayerPacket(s), s => new ClientboundSetWinnerPlayerPacket(s))
+            .AddPacket(s => new ClientboundGameStateChangePacket(s), s => new ClientboundGameStateChangePacket(s))
             .AddPacket(s => new ClientboundGameCurrentPlayerChangePacket(s))
-            .AddPacket(s => new ClientboundAddChosenWordEntryPacket(s))
-            .AddPacket(s => new ClientboundUpdateSessionOptionsPacket(s))
-            .AddPacket(s => new ClientboundUpdatePlayerScorePacket(s))
-            .AddPacket(s => new ClientboundUpdateTimerPacket(s))
-            .AddPacket(s => new ClientboundUpdateRoundCyclePacket(s))
-            .AddPacket(s => new ClientboundUpdatePlayerStatePacket(s))
-            .AddPacket(s => new ClientboundReplacePlayerPacket(s))
-            .AddPacket(s => new ClientboundUpdatePlayerGuidPacket(s))
-            .AddPacket(s => new ClientboundSystemChatPacket(s))
-            .AddPacket(s => new ClientboundUpdateLockedWordPacket(s))
+            .AddPacket(s => new ClientboundAddChosenWordEntryPacket(s), s => new ClientboundAddChosenWordEntryPacket(s))
+            .AddPacket(s => new ClientboundUpdateSessionOptionsPacket(s), s => new ClientboundUpdateSessionOptionsPacket(s))
+            .AddPacket(s => new ClientboundUpdatePlayerScorePacket(s), s => new ClientboundUpdatePlayerScorePacket(s))
+            .AddPacket(s => new ClientboundUpdateTimerPacket(s), s => new ClientboundUpdateTimerPacket(s))
+            .AddPacket(s => new ClientboundUpdateRoundCyclePacket(s), s => new ClientboundUpdateRoundCyclePacket(s))
+            .AddPacket(s => new ClientboundUpdatePlayerStatePacket(s), s => new ClientboundUpdatePlayerStatePacket(s))
+            .AddPacket(s => new ClientboundReplacePlayerPacket(s), s => new ClientboundReplacePlayerPacket(s))
+            .AddPacket(s => new ClientboundUpdatePlayerGuidPacket(s), s => new ClientboundUpdatePlayerGuidPacket(s))
+            .AddPacket(s => new ClientboundSystemChatPacket(s), s => new ClientboundSystemChatPacket(s))
+            .AddPacket(s => new ClientboundUpdateLockedWordPacket(s), s => new ClientboundUpdateLockedWordPacket(s))
         )
         .AddFlow(PacketFlow.Serverbound, new PacketSet()
             .AddPacket(s => new ServerboundHeartbeatPacket(s))
@@ -127,7 +128,13 @@ public class ConnectionProtocol
     
     public IPacket CreatePacket(PacketFlow flow, int id, BufferReader stream)
         => GetPacketSetFromFlow(flow).CreatePacket(id, stream);
+    
+    public IPacket CreatePacket(PacketFlow flow, int id, JsonObject stream)
+        => GetPacketSetFromFlow(flow).CreatePacket(id, stream);
 
     public T CreatePacket<T>(PacketFlow flow, int id, BufferReader stream) where T : IPacket
+        => GetPacketSetFromFlow(flow).CreatePacket<T>(id, stream);
+    
+    public T CreatePacket<T>(PacketFlow flow, int id, JsonObject stream) where T : IPacket
         => GetPacketSetFromFlow(flow).CreatePacket<T>(id, stream);
 }

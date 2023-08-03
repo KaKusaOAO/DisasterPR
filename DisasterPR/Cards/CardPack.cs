@@ -1,4 +1,5 @@
-﻿using DisasterPR.Attributes;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Attributes;
 using DisasterPR.Cards.Providers;
 using DisasterPR.Extensions;
 using Mochi.IO;
@@ -53,6 +54,23 @@ public class CardPack
         return pack;
     }
 
+    public static CardPack Deserialize(JsonObject obj)
+    {
+        if (obj.TryGetPropertyValue("upstream", out var node) && node!.GetValue<bool>())
+            return GetUpstream();
+
+        var guid = Guid.Parse(obj["id"]!.GetValue<string>());
+        var pack = new CardPack
+        {
+            Guid = guid,
+            Categories = obj["categories"]!.AsArray(CardCategory.Deserialize).ToArray()
+        };
+
+        pack.Topics = obj["topics"]!.AsArray(s => TopicCard.Deserialize(pack, s)).ToArray();
+        pack.Words = obj["words"]!.AsArray(s => WordCard.Deserialize(pack, s)).ToArray();
+        return pack;
+    }
+
     public void Serialize(BufferWriter writer)
     {
         writer.WriteGuid(Guid);
@@ -61,6 +79,21 @@ public class CardPack
         writer.WriteList(Categories.ToList(), (s, i) => i.Serialize(s));
         writer.WriteList(Topics.ToList(), (s, i) => i.Serialize(s));
         writer.WriteList(Words.ToList(), (s, i) => i.Serialize(s));
+    }
+
+    public JsonObject SerializeToJson()
+    {
+        var obj = new JsonObject();
+        if (IsUpstream)
+        {
+            obj["upstream"] = true;
+            return obj;
+        }
+
+        obj["categories"] = Categories.Select(i => i.SerializeToJson()).ToJsonArray();
+        obj["topics"] = Topics.Select(i => i.SerializeToJson()).ToJsonArray();
+        obj["words"] = Words.Select(i => i.SerializeToJson()).ToJsonArray();
+        return obj;
     }
 
     public List<TopicCard> FilteredTopicsByEnabledCategories(List<CardCategory> categories) =>

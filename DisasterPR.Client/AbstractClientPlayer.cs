@@ -8,6 +8,8 @@ public abstract class AbstractClientPlayer : IPlayer
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
+    public byte[]? AvatarData { get; set; }
+    public string Identifier { get; set; }
     public LocalSession? Session { get; set;  }
     ISession? IPlayer.Session => Session;
     

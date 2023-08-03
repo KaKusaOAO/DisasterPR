@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -12,14 +13,27 @@ public class ServerboundHelloPacket : IPacket<IServerHandshakePacketHandler>
         Version = version;
     }
     
-    public ServerboundHelloPacket(BufferReader stream)
+    public ServerboundHelloPacket(PacketContent content)
     {
-        Version = stream.ReadVarInt();
+        if (content.Type == PacketContentType.Binary)
+        {
+            var stream = content.GetAsBufferReader();
+            Version = stream.ReadVarInt();    
+        } else // if (content.Type == PacketContentType.Json)
+        {
+            var payload = content.GetAsJsonObject();
+            Version = payload["version"]!.GetValue<int>();
+        }
     }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Version);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["version"] = Version;
     }
 
     public void Handle(IServerHandshakePacketHandler handler) => handler.HandleHello(this);

@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -37,13 +38,31 @@ public class ClientboundRoomDisconnectedPacket : IPacket<IClientPlayPacketHandle
             Message = reader.ReadUtf8String();
         }
     }
+
+    public ClientboundRoomDisconnectedPacket(JsonObject obj)
+    {
+        Reason = (RoomDisconnectReason) obj["reasonCode"]!.GetValue<int>();
+        if (Reason == RoomDisconnectReason.Custom)
+        {
+            Message = obj["message"]!.GetValue<string>();
+        }
+    }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt((int) Reason);
         if (Reason == RoomDisconnectReason.Custom)
         {
-            stream.WriteUtf8String(Message);
+            stream.WriteUtf8String(Message!);
+        }
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["reasonCode"] = (int) Reason;
+        if (Reason == RoomDisconnectReason.Custom)
+        {
+            obj["message"] = Message;
         }
     }
 

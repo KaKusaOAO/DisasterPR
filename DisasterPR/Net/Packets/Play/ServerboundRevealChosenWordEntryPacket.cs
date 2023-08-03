@@ -1,4 +1,5 @@
-﻿using DisasterPR.Extensions;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Extensions;
 using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
@@ -20,6 +21,11 @@ public class ServerboundRevealChosenWordEntryPacket : IPacket<IServerPlayPacketH
     public void Write(BufferWriter stream)
     {
         stream.WriteGuid(Guid);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["id"] = Guid.ToString();
     }
 
     public void Handle(IServerPlayPacketHandler handler) => handler.HandleRevealChosenWordEntry(this);

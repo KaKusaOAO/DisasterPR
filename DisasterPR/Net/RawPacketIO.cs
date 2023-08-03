@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Net.WebSockets;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using DisasterPR.Net.Packets;
 using Mochi.IO;
 using Mochi.Utils;
@@ -9,13 +11,15 @@ namespace DisasterPR.Net;
 public class RawPacketIO
 {
     public WebSocket WebSocket { get; }
+    public PacketContentType ContentType { get; }
     private MemoryStream _buffer = new();
     private readonly SemaphoreSlim _writeLock = new(1, 1);
     private readonly SemaphoreSlim _readLock = new(1, 1);
 
-    public RawPacketIO(WebSocket webSocket)
+    public RawPacketIO(WebSocket webSocket, PacketContentType contentType = PacketContentType.Binary)
     {
         WebSocket = webSocket;
+        ContentType = contentType;
     }
 
     public async Task<List<BufferReader>> ReadRawPacketsAsync(CancellationToken token)
@@ -34,9 +38,12 @@ public class RawPacketIO
             }
 
             var list = new List<BufferReader>();
-            while (CanReadPacket())
+            if (ContentType == PacketContentType.Binary || result.EndOfMessage)
             {
-                list.Add(new BufferReader(ReadRawPacket()));
+                while (CanReadPacket())
+                {
+                    list.Add(new BufferReader(ReadRawPacket()));
+                }
             }
 
             return list;
@@ -55,14 +62,19 @@ public class RawPacketIO
             var buffer = stream.GetBuffer();
             var buf = new MemoryStream();
             var writer = new BufferWriter(buf);
-            writer.WriteVarInt(len);
+            if (ContentType == PacketContentType.Binary)
+            {
+                writer.WriteVarInt(len);
+            }
+
             buf.Write(buffer, 0, len);
 
             if (WebSocket.CloseStatus.HasValue) return;
 
             var arr = new byte[buf.Position];
             Array.Copy(buf.GetBuffer(), 0, arr, 0, arr.Length);
-            await WebSocket.SendAsync(new ArraySegment<byte>(arr), WebSocketMessageType.Binary, true,
+            await WebSocket.SendAsync(new ArraySegment<byte>(arr), ContentType == PacketContentType.Binary ? 
+                    WebSocketMessageType.Binary : WebSocketMessageType.Text, true,
                 token);
         });
     }
@@ -70,10 +82,24 @@ public class RawPacketIO
     public async Task SendPacketAsync(ConnectionProtocol protocol, PacketFlow flow, IPacket packet, CancellationToken token)
     {
         var buffer = new MemoryStream();
-        var writer = new BufferWriter(buffer);
         var id = protocol.GetPacketId(flow, packet);
-        writer.WriteVarInt(id);
-        packet.Write(writer);
+
+        if (ContentType == PacketContentType.Binary)
+        {
+            var writer = new BufferWriter(buffer);
+            writer.WriteVarInt(id);
+            packet.Write(writer);
+        } else if (ContentType == PacketContentType.Json)
+        {
+            var obj = new JsonObject();
+            obj["op"] = id;
+
+            var data = new JsonObject();
+            packet.Write(data);
+            obj["d"] = data;
+            
+            await JsonSerializer.SerializeAsync(buffer, obj, cancellationToken: token);
+        }
 
         await SendRawPacketAsync(buffer, token);
     }
@@ -82,6 +108,7 @@ public class RawPacketIO
     {
         var total = _buffer.Position;
         if (total == 0) return false;
+        if (ContentType == PacketContentType.Json) return true;
 
         var reader = new BufferReader(_buffer);
         _buffer.Position = 0;
@@ -97,12 +124,13 @@ public class RawPacketIO
     public MemoryStream ReadRawPacket()
     {
         var reader = new BufferReader(_buffer);
+        var total = _buffer.Position;
         
         // Reset the cursor to 0
         _buffer.Position = 0;
         
         // Read the packet length
-        var len = reader.ReadVarInt();
+        var len = ContentType == PacketContentType.Json ? (int) total : reader.ReadVarInt();
 
         // Read the packet content
         var buffer = new byte[len];

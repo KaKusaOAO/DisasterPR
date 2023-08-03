@@ -2,7 +2,7 @@
 
 namespace DisasterPR.Net.Packets.Play;
 
-public class ServerboundRequestShuffleWordsPacket : IPacket<IServerPlayPacketHandler>
+public class ServerboundRequestShuffleWordsPacket : IPacketNoContent<IServerPlayPacketHandler>
 {
 
     public ServerboundRequestShuffleWordsPacket()
@@ -10,10 +10,6 @@ public class ServerboundRequestShuffleWordsPacket : IPacket<IServerPlayPacketHan
     }
 
     public ServerboundRequestShuffleWordsPacket(BufferReader stream)
-    {
-    }
-    
-    public void Write(BufferWriter stream)
     {
     }
 

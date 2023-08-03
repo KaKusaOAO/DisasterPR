@@ -1,4 +1,5 @@
-﻿using DisasterPR.Cards;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Cards;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 using Mochi.IO;
@@ -38,6 +39,13 @@ public class ServerboundUpdateSessionOptionsPacket : IPacket<IServerPlayPacketHa
         stream.WriteVarInt(WinScore);
         CountdownTimeSet.Serialize(stream);
         stream.WriteList(EnabledCategories, (s, g) => s.WriteGuid(g));
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["winScore"] = WinScore;
+        obj["timeSet"] = CountdownTimeSet.SerializeToJson();
+        obj["categories"] = EnabledCategories.Select(s => JsonValue.Create(s.ToString())!).ToJsonArray();
     }
 
     public void Handle(IServerPlayPacketHandler handler) => handler.HandleUpdateSessionOptions(this);

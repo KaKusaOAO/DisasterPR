@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -25,12 +26,25 @@ public class ClientboundDisconnectPacket : IPacket<IClientLoginPacketHandler>
         Reason = reason;
     }
 
-    public ClientboundDisconnectPacket(BufferReader stream)
+    public ClientboundDisconnectPacket(PacketContent content)
     {
-        Reason = (PlayerKickReason)stream.ReadVarInt();
-        if (Reason == PlayerKickReason.Custom)
+        if (content.Type == PacketContentType.Binary)
         {
-            Message = stream.ReadUtf8String();
+            var stream = content.GetAsBufferReader();
+            Reason = (PlayerKickReason) stream.ReadVarInt();
+            if (Reason == PlayerKickReason.Custom)
+            {
+                Message = stream.ReadUtf8String();
+            }
+        }
+        else
+        {
+            var obj = content.GetAsJsonObject();
+            Reason = (PlayerKickReason) obj["reasonCode"]!.GetValue<int>();
+            if (Reason == PlayerKickReason.Custom)
+            {
+                Message = obj["message"]!.GetValue<string>();
+            }
         }
     }
     
@@ -40,6 +54,15 @@ public class ClientboundDisconnectPacket : IPacket<IClientLoginPacketHandler>
         if (Reason == PlayerKickReason.Custom)
         {
             stream.WriteUtf8String(Message!);
+        }
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["reasonCode"] = (int) Reason;
+        if (Reason == PlayerKickReason.Custom)
+        {
+            obj["message"] = Message;
         }
     }
 

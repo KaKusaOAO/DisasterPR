@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -20,6 +21,11 @@ public class ServerboundChatPacket : IPacket<IServerPlayPacketHandler>
     public void Write(BufferWriter stream)
     {
         stream.WriteUtf8String(Content);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["content"] = Content;
     }
 
     public void Handle(IServerPlayPacketHandler handler) => handler.HandleChat(this);

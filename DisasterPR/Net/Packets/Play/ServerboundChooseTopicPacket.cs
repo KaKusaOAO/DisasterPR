@@ -1,4 +1,5 @@
-﻿using DisasterPR.Extensions;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Extensions;
 using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
@@ -20,6 +21,11 @@ public class ServerboundChooseTopicPacket : IPacket<IServerPlayPacketHandler>
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt((int) Side);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["side"] = (int) Side;
     }
 
     public void Handle(IServerPlayPacketHandler handler) => handler.HandleChooseTopic(this);

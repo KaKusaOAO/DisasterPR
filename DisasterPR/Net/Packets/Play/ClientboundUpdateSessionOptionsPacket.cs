@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 using Mochi.IO;
@@ -28,12 +29,28 @@ public class ClientboundUpdateSessionOptionsPacket : IPacket<IClientPlayPacketHa
         EnabledCategories = stream.ReadList(s => s.ReadGuid());
     }
 
+    public ClientboundUpdateSessionOptionsPacket(JsonObject payload)
+    {
+        CanLockCards = payload["canLockCards"]!.GetValue<bool>();
+        WinScore = payload["winScore"]!.GetValue<int>();
+        CountdownTimeSet = CountdownTimeSet.Deserialize(payload["timeSet"]!.AsObject());
+        EnabledCategories = payload["categories"]!.AsArray(s => Guid.Parse(s!.GetValue<string>())).ToList();
+    }
+
     public void Write(BufferWriter stream)
     {
         stream.WriteBool(CanLockCards);
         stream.WriteVarInt(WinScore);
         CountdownTimeSet.Serialize(stream);
         stream.WriteList(EnabledCategories, (s, g) => s.WriteGuid(g));
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["canLockCards"] = CanLockCards;
+        obj["winScore"] = WinScore;
+        obj["timeSet"] = CountdownTimeSet.SerializeToJson();
+        obj["categories"] = EnabledCategories.Select(s => JsonValue.Create(s.ToString())!).ToJsonArray();
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdateSessionOptions(this);

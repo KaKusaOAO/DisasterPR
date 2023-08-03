@@ -2,7 +2,7 @@
 
 namespace DisasterPR.Net.Packets.Play;
 
-public class ServerboundRequestRoomStartPacket : IPacket<IServerPlayPacketHandler>
+public class ServerboundRequestRoomStartPacket : IPacketNoContent<IServerPlayPacketHandler>
 {
     public ServerboundRequestRoomStartPacket()
     {
@@ -10,11 +10,6 @@ public class ServerboundRequestRoomStartPacket : IPacket<IServerPlayPacketHandle
     }
 
     public ServerboundRequestRoomStartPacket(BufferReader stream)
-    {
-        
-    }
-    
-    public void Write(BufferWriter stream)
     {
         
     }

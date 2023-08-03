@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 using Mochi.IO;
@@ -18,9 +19,19 @@ public class ClientboundGameStateChangePacket : IPacket<IClientPlayPacketHandler
         State = (StateOfGame) stream.ReadVarInt();
     }
     
+    public ClientboundGameStateChangePacket(JsonObject payload)
+    {
+        State = (StateOfGame) payload["state"]!.GetValue<int>();
+    }
+    
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt((int) State);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["state"] = (int) State;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleGameStateChange(this);

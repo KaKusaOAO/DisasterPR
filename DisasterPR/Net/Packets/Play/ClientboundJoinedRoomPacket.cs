@@ -1,4 +1,5 @@
-﻿using DisasterPR.Extensions;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 using Mochi.IO;
 
@@ -31,11 +32,26 @@ public class ClientboundJoinedRoomPacket : IPacket<IClientPlayPacketHandler>
         Players = stream.ReadList(s => s.ReadAddPlayerEntry());
     }
     
+    public ClientboundJoinedRoomPacket(JsonObject payload)
+    {
+        RoomId = payload["roomId"]!.GetValue<int>();
+        if (payload.TryGetPropertyValue("selfIndex", out var index)) 
+            SelfIndex = index!.GetValue<int>();
+        Players = payload["players"]!.AsArray(AddPlayerEntry.Deserialize).ToList();
+    }
+    
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(RoomId);
         stream.WriteOptional(SelfIndex, (s, v) => s.WriteVarInt(v));
         stream.WriteList(Players, (s, p) => s.WriteAddPlayerEntry(p));
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["roomId"] = RoomId;
+        if (SelfIndex.HasValue) obj["selfIndex"] = SelfIndex.Value;
+        obj["players"] = Players.Select(i => i.SerializeToJson()).ToJsonArray();
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleJoinedRoom(this);

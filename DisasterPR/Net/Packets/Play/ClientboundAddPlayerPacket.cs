@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -20,10 +21,22 @@ public class ClientboundAddPlayerPacket : IPacket<IClientPlayPacketHandler>
         PlayerName = stream.ReadUtf8String();
     }
     
+    public ClientboundAddPlayerPacket(JsonObject payload)
+    {
+        PlayerId = Guid.Parse(payload["id"]!.GetValue<string>());
+        PlayerName = payload["name"]!.GetValue<string>();
+    }
+    
     public void Write(BufferWriter stream)
     {
         stream.WriteGuid(PlayerId);
         stream.WriteUtf8String(PlayerName);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["id"] = PlayerId.ToString();
+        obj["name"] = PlayerName;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleAddPlayer(this);

@@ -13,7 +13,8 @@ public class ServerToPlayerConnection : AbstractPlayerConnection
     public ConnectionInfo ConnectionInfo { get; }
     public int ProtocolVersion { get; set; }
 
-    public ServerToPlayerConnection(WebSocket webSocket, ConnectionInfo connection) : base(webSocket, PacketFlow.Serverbound)
+    public ServerToPlayerConnection(WebSocket webSocket, ConnectionInfo connection, PacketContentType type) : base(
+        webSocket, PacketFlow.Serverbound, type)
     {
         ConnectionInfo = connection;
         Player = new ServerPlayer(this);

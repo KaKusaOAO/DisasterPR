@@ -1,4 +1,5 @@
-﻿using DisasterPR.Cards;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Cards;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 using Mochi.IO;
@@ -29,6 +30,17 @@ public class ClientboundAddChosenWordEntryPacket : IPacket<IClientPlayPacketHand
         Words = stream.ReadList(s => s.ReadVarInt());
     }
     
+    public ClientboundAddChosenWordEntryPacket(JsonObject payload)
+    {
+        Id = Guid.Parse(payload["id"]!.GetValue<string>());
+        if (payload.TryGetPropertyValue("playerId", out var value))
+        {
+            PlayerId = Guid.Parse(value!.GetValue<string>());
+        }
+
+        Words = payload["words"]!.AsArray().Select(v => v!.GetValue<int>()).ToList();
+    }
+    
     public void Write(BufferWriter stream)
     {
         stream.WriteGuid(Id);
@@ -39,6 +51,19 @@ public class ClientboundAddChosenWordEntryPacket : IPacket<IClientPlayPacketHand
         }
 
         stream.WriteList(Words, (s, i) => s.WriteVarInt(i));
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["id"] = Id.ToString();
+        if (PlayerId.HasValue)
+        {
+            obj["playerId"] = PlayerId.Value;
+        }
+
+        var arr = new JsonArray();
+        foreach (var word in Words) arr.Add(word);
+        obj["words"] = arr;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleAddChosenWordEntry(this);

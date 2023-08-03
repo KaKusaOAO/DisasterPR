@@ -2,8 +2,10 @@ using DisasterPR.Cards;
 using DisasterPR.Events;
 using DisasterPR.Extensions;
 using DisasterPR.Net.Packets;
+using DisasterPR.Net.Packets.Login;
 using DisasterPR.Net.Packets.Play;
 using DisasterPR.Server.Commands.Senders;
+using DisasterPR.Server.Platforms;
 using DisasterPR.Server.Sessions;
 using DisasterPR.Sessions;
 using ISession = DisasterPR.Sessions.ISession;
@@ -13,8 +15,14 @@ namespace DisasterPR.Server;
 
 public class ServerPlayer : ISessionPlayer, ICommandSender
 {
+    public PlayerPlatform LoginType { get; set; }
+    public IPlatformData PlatformData { get; set; }
+    public string Identifier => PlatformData.Identifier;
+    public byte[]? AvatarData => PlatformData.AvatarData;
     public Guid Id { get; set; }
     public string Name { get; set; }
+
+    public T GetPlatformDataAs<T>() where T : IPlatformData => (T) PlatformData;
     
     public async Task SendMessageAsync(string content)
     {

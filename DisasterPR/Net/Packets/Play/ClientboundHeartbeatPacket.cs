@@ -1,20 +1,16 @@
-﻿using Mochi.IO;
+﻿using System.Text.Json.Nodes;
+using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
-public class ClientboundHeartbeatPacket : IPacket<IClientPlayPacketHandler>
+public class ClientboundHeartbeatPacket : IPacketNoContent<IClientPlayPacketHandler>
 {
     public ClientboundHeartbeatPacket()
     {
         
     }
     
-    public ClientboundHeartbeatPacket(BufferReader stream)
-    {
-        
-    }
-    
-    public void Write(BufferWriter stream)
+    public ClientboundHeartbeatPacket(PacketContent stream)
     {
         
     }

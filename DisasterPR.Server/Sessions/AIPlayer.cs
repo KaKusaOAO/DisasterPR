@@ -10,6 +10,8 @@ public class AIPlayer : ISessionPlayer
 {
     public Guid Id { get; }
     public string Name { get; }
+    public byte[]? AvatarData => null;
+    public string Identifier => $"#ai:{Id}";
     public string OriginalName { get; }
     public ServerSession? Session { get; set; }
     public ShuffledPool<WordCard> CardPool { get; set; }

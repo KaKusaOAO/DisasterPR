@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -12,14 +13,28 @@ public class ClientboundGameCurrentPlayerChangePacket : IPacket<IClientPlayPacke
         Index = index;
     }
 
-    public ClientboundGameCurrentPlayerChangePacket(BufferReader stream)
+    public ClientboundGameCurrentPlayerChangePacket(PacketContent content)
     {
-        Index = stream.ReadVarInt();
+        if (content.Type == PacketContentType.Binary)
+        {
+            var stream = content.GetAsBufferReader();
+            Index = stream.ReadVarInt();
+        }
+        else
+        {
+            var payload = content.GetAsJsonObject();
+            Index = payload["index"]!.GetValue<int>();
+        }
     }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Index);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["index"] = Index;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleGameCurrentPlayerChange(this);

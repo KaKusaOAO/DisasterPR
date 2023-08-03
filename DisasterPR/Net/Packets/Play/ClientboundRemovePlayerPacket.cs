@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -22,9 +23,19 @@ public class ClientboundRemovePlayerPacket : IPacket<IClientPlayPacketHandler>
         PlayerId = stream.ReadGuid();
     }
     
+    public ClientboundRemovePlayerPacket(JsonObject payload)
+    {
+        PlayerId = Guid.Parse(payload["id"]!.GetValue<string>());
+    }
+    
     public void Write(BufferWriter stream)
     {
         stream.WriteGuid(PlayerId);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["id"] = PlayerId.ToString();
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleRemovePlayer(this);

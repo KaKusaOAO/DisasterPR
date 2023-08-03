@@ -1,4 +1,5 @@
-﻿using DisasterPR.Cards;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Cards;
 using DisasterPR.Extensions;
 using DisasterPR.Sessions;
 using Mochi.IO;
@@ -21,11 +22,23 @@ public class ClientboundUpdatePlayerStatePacket : IPacket<IClientPlayPacketHandl
         Id = stream.ReadGuid();
         State = (PlayerState)stream.ReadVarInt();
     }
+
+    public ClientboundUpdatePlayerStatePacket(JsonObject payload)
+    {
+        Id = Guid.Parse(payload["id"]!.GetValue<string>());
+        State = (PlayerState) payload["state"]!.GetValue<int>();
+    }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteGuid(Id);
         stream.WriteVarInt((int) State);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["id"] = Id.ToString();
+        obj["state"] = (int) State;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdatePlayerState(this);

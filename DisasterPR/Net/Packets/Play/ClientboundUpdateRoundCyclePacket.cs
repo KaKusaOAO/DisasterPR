@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -16,10 +17,20 @@ public class ClientboundUpdateRoundCyclePacket : IPacket<IClientPlayPacketHandle
     {
         Count = stream.ReadVarInt();
     }
+
+    public ClientboundUpdateRoundCyclePacket(JsonObject payload)
+    {
+        Count = payload["count"]!.GetValue<int>();
+    }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Count);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["count"] = Count;
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdateRoundCycle(this);

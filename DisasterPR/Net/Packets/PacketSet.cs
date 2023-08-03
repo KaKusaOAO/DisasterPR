@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Mochi.IO;
 
 namespace DisasterPR.Net.Packets;
@@ -6,7 +7,7 @@ public class PacketSet
 {
     private Dictionary<int, Type> _packetMap = new();
     private Dictionary<Type, int> _packetIdMap = new();
-    private Dictionary<int, Func<BufferReader, IPacket>> _deserializers = new();
+    private Dictionary<int, Func<PacketContent, IPacket>> _deserializers = new();
 
     /// <summary>
     /// Adds a packet to the set. <br/>
@@ -24,13 +25,33 @@ public class PacketSet
     /// <param name="deserializer">The deserializer of the packet type.</param>
     /// <typeparam name="T">The packet type.</typeparam>
     /// <returns>This packet set for chain call.</returns>
-    public PacketSet AddPacket<T>(Func<BufferReader, T> deserializer) where T : IPacket
+    public PacketSet AddPacket<T>(Func<PacketContent, T> deserializer) where T : IPacket
     {
         AddPacket<T>();
         _deserializers.Add(_packetIdMap[typeof(T)], s => deserializer(s));
         return this;
     }
-    
+
+    public PacketSet AddPacket<T>(Func<BufferReader, T> binary, Func<JsonObject, T> json) where T : IPacket =>
+        AddPacket<T>(content =>
+        {
+            switch (content.Type)
+            {
+                case PacketContentType.Binary:
+                {
+                    var stream = content.GetAsBufferReader();
+                    return binary(stream);
+                }
+                case PacketContentType.Json:
+                {
+                    var payload = content.GetAsJsonObject();
+                    return json(payload);
+                }
+                default:
+                    throw new Exception("Unknown content type");
+            }
+        });
+
     /// <summary>
     /// Adds a packet to the set. <br/>
     /// The packet type must have a constructor that takes a <see cref="MemoryStream"/> as its only parameter. <br/>
@@ -60,7 +81,7 @@ public class PacketSet
         return _packetMap[id];
     }
     
-    public Func<BufferReader, IPacket> GetDeserializerById(int id)
+    public Func<PacketContent, IPacket> GetDeserializerById(int id)
     {
         if (_deserializers.ContainsKey(id))
         {
@@ -88,8 +109,15 @@ public class PacketSet
         return _packetIdMap[type];
     }
 
-    public IPacket CreatePacket(int id, BufferReader stream) => GetDeserializerById(id)(stream);
+    public IPacket CreatePacket(int id, BufferReader stream) => 
+        GetDeserializerById(id)(new PacketContent(stream));
+    
+    public IPacket CreatePacket(int id, JsonObject obj) => 
+        GetDeserializerById(id)(new PacketContent(obj));
 
     public T CreatePacket<T>(int id, BufferReader stream) where T : IPacket =>
+        (T) CreatePacket(id, stream);
+    
+    public T CreatePacket<T>(int id, JsonObject stream) where T : IPacket =>
         (T) CreatePacket(id, stream);
 }

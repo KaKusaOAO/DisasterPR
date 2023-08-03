@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -20,6 +21,11 @@ public class ServerboundJoinRoomPacket : IPacket<IServerPlayPacketHandler>
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(RoomId);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["roomId"] = RoomId;
     }
 
     public void Handle(IServerPlayPacketHandler handler) => handler.HandleJoinRoom(this);

@@ -1,5 +1,8 @@
 using System.Diagnostics;
 using System.Net.WebSockets;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using DisasterPR.Events;
 using DisasterPR.Net.Packets;
 using DisasterPR.Net.Packets.Play;
@@ -16,6 +19,7 @@ public abstract class AbstractPlayerConnection
     public bool IsConnected { get; set; }
     public RawPacketIO RawPacketIO { get; }
     public PacketFlow ReceivingFlow { get; }
+    public PacketContentType ContentType { get; }
     protected Dictionary<PacketState, IPacketHandler> Handlers { get; } = new();
 
     public PacketState CurrentState
@@ -49,10 +53,12 @@ public abstract class AbstractPlayerConnection
     private Stopwatch _stopwatch = new();
     private PacketState _currentState;
 
-    protected AbstractPlayerConnection(WebSocket webSocket, PacketFlow receivingFlow)
+    protected AbstractPlayerConnection(WebSocket webSocket, PacketFlow receivingFlow, 
+        PacketContentType contentType = PacketContentType.Binary)
     {
+        ContentType = contentType;
         WebSocket = webSocket;
-        RawPacketIO = new RawPacketIO(webSocket);
+        RawPacketIO = new RawPacketIO(webSocket, contentType);
         ReceivingFlow = receivingFlow;
         PacketStream = new PacketStream(this);
 
@@ -107,10 +113,25 @@ public abstract class AbstractPlayerConnection
                 
                 foreach (var stream in packets)
                 {
-                    var id = stream.ReadVarInt();
                     var protocol = ConnectionProtocol.OfState(CurrentState);
-                    var packet = protocol.CreatePacket(ReceivingFlow, id, stream);
-                    
+
+                    IPacket packet;
+                    if (ContentType == PacketContentType.Binary)
+                    {
+                        var id = stream.ReadVarInt();
+                        packet = protocol.CreatePacket(ReceivingFlow, id, stream);
+                    } else if (ContentType == PacketContentType.Json)
+                    {
+                        var payload = JsonSerializer.Deserialize<JsonObject>(stream.Stream)!;
+                        var id = payload["op"]!.GetValue<int>();
+                        var data = payload["d"]!.AsObject();
+                        packet = protocol.CreatePacket(ReceivingFlow, id, data);
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown content type!");
+                    }
+
                     Logger.Verbose(TranslateText.Of("Received packet: %s")
                         .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
 

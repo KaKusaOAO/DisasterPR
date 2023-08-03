@@ -1,4 +1,5 @@
-﻿using DisasterPR.Extensions;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Extensions;
 using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
@@ -16,10 +17,20 @@ public class ClientboundSetWinnerPlayerPacket : IPacket<IClientPlayPacketHandler
     {
         PlayerId = stream.ReadGuid();
     }
+
+    public ClientboundSetWinnerPlayerPacket(JsonObject payload)
+    {
+        PlayerId = Guid.Parse(payload["id"]!.GetValue<string>());
+    }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteGuid(PlayerId);
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["id"] = PlayerId.ToString();
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleSetWinnerPlayer(this);

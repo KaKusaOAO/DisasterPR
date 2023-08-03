@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using DisasterPR.Extensions;
 using Mochi.IO;
 
@@ -20,6 +21,11 @@ public class ServerboundRequestKickPlayerPacket : IPacket<IServerPlayPacketHandl
     public void Write(BufferWriter stream)
     {
         stream.WriteGuid(PlayerId);    
+    }
+
+    public void Write(JsonObject obj)
+    {
+        obj["id"] = PlayerId.ToString();
     }
 
     public void Handle(IServerPlayPacketHandler handler) => handler.HandleRequestKickPlayer(this);

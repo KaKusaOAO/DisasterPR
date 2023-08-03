@@ -12,7 +12,7 @@ public interface IPackProvider
     public static IPackProvider Custom => new LambdaPackProvider(async () =>
     {
         var http = new HttpClient();
-        var request = await http.GetStreamAsync(new Uri($"http://{Constants.ServerHost}/disasterpr/packs/customs.php"));
+        var request = await http.GetStreamAsync(new Uri($"http://{Constants.ServerHost}/u_game/packs/customs.php"));
         var data = (await JsonSerializer.DeserializeAsync<JsonObject>(request))!;
 
         var category = new CardCategory(Guid.NewGuid(), "投稿內容！");

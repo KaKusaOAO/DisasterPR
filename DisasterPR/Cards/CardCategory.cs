@@ -1,4 +1,5 @@
-﻿using DisasterPR.Extensions;
+﻿using System.Text.Json.Nodes;
+using DisasterPR.Extensions;
 using Mochi.IO;
 
 namespace DisasterPR.Cards;
@@ -56,6 +57,20 @@ public class CardCategory
         var label = reader.ReadUtf8String();
         return new CardCategory(guid, label);
     }
+
+    public static CardCategory Deserialize(JsonNode? node)
+    {
+        var obj = (node as JsonObject)!;
+        if (obj.TryGetPropertyValue("builtin", out var value))
+        {
+            var id = value!.GetValue<int>();
+            return _map[id];
+        }
+        
+        var guid = Guid.Parse(obj["id"]!.GetValue<string>());
+        var label = obj["label"]!.GetValue<string>();
+        return new CardCategory(guid, label);
+    }
     
     public static CardCategory DeserializeNoLabel(BufferReader reader, CardPack pack) => 
         DeserializeNoLabel(reader, pack.Categories.ToList());
@@ -73,6 +88,19 @@ public class CardCategory
         return categories.First(c => c.Guid == guid);
     }
 
+    public static CardCategory DeserializeNoLabel(JsonNode? node, List<CardCategory> categories)
+    {
+        var obj = (node as JsonObject)!;
+        if (obj.TryGetPropertyValue("builtin", out var value))
+        {
+            var id = value!.GetValue<int>();
+            return _map[id];
+        }
+        
+        var guid = Guid.Parse(obj["id"]!.GetValue<string>());
+        return categories.First(c => c.Guid == guid);
+    }
+
     public void Serialize(BufferWriter writer, bool writeLabel = true)
     {
         writer.WriteBool(IsBuiltin);
@@ -86,5 +114,19 @@ public class CardCategory
         
         if (!writeLabel) return;
         writer.WriteUtf8String(Label);
+    }
+
+    public JsonObject SerializeToJson(bool writeLabel = true)
+    {
+        var obj = new JsonObject();
+        if (IsBuiltin)
+        {
+            obj["builtin"] = Id;
+            return obj;
+        }
+
+        obj["guid"] = Guid.ToString();
+        if (writeLabel) obj["label"] = Label;
+        return obj;
     }
 }
