@@ -23,7 +23,7 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
         get => _platformData;
         set
         {
-            _platformData.Updated -= PlatformDataOnUpdated;
+            if (_platformData != null!) _platformData.Updated -= PlatformDataOnUpdated;
             _platformData = value;
             if (value != null!) value.Updated += PlatformDataOnUpdated;
         }
