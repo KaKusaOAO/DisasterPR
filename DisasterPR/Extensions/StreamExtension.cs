@@ -6,7 +6,7 @@ namespace DisasterPR.Extensions;
 
 public static class StreamExtension
 {
-    public static AddPlayerEntry ReadAddPlayerEntry(this BufferReader reader) =>
+    public static PlayerDataModel ReadPlayerModel(this BufferReader reader) =>
         new()
         {
             Guid = reader.ReadGuid(),
@@ -15,14 +15,14 @@ public static class StreamExtension
             AvatarData = reader.ReadOptional(r => r.ReadByteArray()).OrElse((byte[]?) null)
         };
 
-    public static void WriteAddPlayerEntry(this BufferWriter writer, AddPlayerEntry entry)
+    public static void WritePlayerModel(this BufferWriter writer, PlayerDataModel model)
     {
-        writer.WriteGuid(entry.Guid);
-        writer.WriteUtf8String(entry.Name);
-        writer.WriteUtf8String(entry.Identifier);
+        writer.WriteGuid(model.Guid);
+        writer.WriteUtf8String(model.Name);
+        writer.WriteUtf8String(model.Identifier);
 
-        var hasAvatar = entry.AvatarData != null;
+        var hasAvatar = model.AvatarData != null;
         writer.WriteBool(hasAvatar);
-        if (hasAvatar) writer.WriteByteArray(entry.AvatarData!);
+        if (hasAvatar) writer.WriteByteArray(model.AvatarData!);
     }
 }

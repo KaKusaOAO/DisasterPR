@@ -15,8 +15,32 @@ namespace DisasterPR.Server;
 
 public class ServerPlayer : ISessionPlayer, ICommandSender
 {
+    private IPlatformData _platformData;
     public PlayerPlatform LoginType { get; set; }
-    public IPlatformData PlatformData { get; set; }
+
+    public IPlatformData PlatformData
+    {
+        get => _platformData;
+        set
+        {
+            _platformData.Updated -= PlatformDataOnUpdated;
+            _platformData = value;
+            if (value != null!) value.Updated += PlatformDataOnUpdated;
+        }
+    }
+
+    private void PlatformDataOnUpdated()
+    {
+        var players = new List<ServerPlayer>();
+        if (Session == null) players.Add(this);
+        else players.AddRange(Session.Players.OfType<ServerPlayer>());
+
+        foreach (var player in players)
+        {
+            _ = player.Connection.SendPacketAsync(new ClientboundUpdatePlayerDataPacket(this));
+        }
+    }
+
     public string Identifier => PlatformData.Identifier;
     public byte[]? AvatarData => PlatformData.AvatarData;
     public Guid Id { get; set; }
@@ -139,11 +163,4 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
 
     public Task SendToastAsync(string message, LogLevel level = LogLevel.Info) =>
         Connection.SendPacketAsync(new ClientboundSystemChatPacket(message, level));
-
-    public async Task UpdateNameAsync(string name)
-    {
-        name = PlayerName.ProcessName(name);
-        Name = name;
-        await Connection.SendPacketAsync(new ClientboundUpdatePlayerNamePacket(name));
-    }
 }

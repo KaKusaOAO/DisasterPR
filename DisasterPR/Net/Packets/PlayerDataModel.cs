@@ -3,14 +3,14 @@ using System.Text.Json.Nodes;
 
 namespace DisasterPR.Net.Packets;
 
-public class AddPlayerEntry
+public class PlayerDataModel
 {
     public Guid Guid { get; set; }
     public string Name { get; set; }
     public byte[]? AvatarData { get; set; }
     public string Identifier { get; set; }
 
-    public static AddPlayerEntry Deserialize(JsonNode? node)
+    public static PlayerDataModel Deserialize(JsonNode? node)
     {
         var obj = (node as JsonObject)!;
         byte[]? avatar = null;
@@ -19,7 +19,7 @@ public class AddPlayerEntry
             avatar = Convert.FromBase64String(avatarNode!.GetValue<string>());
         }
 
-        return new AddPlayerEntry
+        return new PlayerDataModel
         {
             Guid = Guid.Parse(obj["guid"]!.GetValue<string>()),
             Name = obj["name"]!.GetValue<string>(),
@@ -38,4 +38,13 @@ public class AddPlayerEntry
             ["identifier"] = Identifier
         };
     }
+
+    public static PlayerDataModel FromPlayer(IPlayer player) =>
+        new()
+        {
+            Guid = player.Id,
+            Name = player.Name,
+            Identifier = player.Identifier,
+            AvatarData = player.AvatarData
+        };
 }

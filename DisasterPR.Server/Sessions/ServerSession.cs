@@ -96,8 +96,9 @@ public class ServerSession : Session<ISessionPlayer>
             }
 
             // Replace the AI player with the new player.
+            var oldId = player.Id;
             player.Id = ai.Id;
-            await player.Connection.SendPacketAsync(new ClientboundUpdatePlayerGuidPacket(ai.Id));
+            await player.Connection.SendPacketAsync(new ClientboundUpdatePlayerGuidPacket(oldId, ai.Id));
             
             var index = Players.FindIndex(a => a == ai);
             Players.Remove(ai);

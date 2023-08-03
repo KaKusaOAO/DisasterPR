@@ -12,24 +12,20 @@ public class ClientboundJoinedRoomPacket : IPacket<IClientPlayPacketHandler>
     public int? SelfIndex { get; set; }
     
     // All players without the receiver
-    public List<AddPlayerEntry> Players { get; set; }
+    public List<PlayerDataModel> Players { get; set; }
     
     public ClientboundJoinedRoomPacket(ISession session, int? selfIndex = null)
     {
         RoomId = session.RoomId;
         SelfIndex = selfIndex;
-        Players = session.Players.Select(p => new AddPlayerEntry
-        {
-            Guid = p.Id,
-            Name = p.Name
-        }).ToList();
+        Players = session.Players.Select(PlayerDataModel.FromPlayer).ToList();
     }
 
     public ClientboundJoinedRoomPacket(BufferReader stream)
     {
         RoomId = stream.ReadVarInt();
         SelfIndex = stream.ReadNullable(s => s.ReadVarInt());
-        Players = stream.ReadList(s => s.ReadAddPlayerEntry());
+        Players = stream.ReadList(s => s.ReadPlayerModel());
     }
     
     public ClientboundJoinedRoomPacket(JsonObject payload)
@@ -37,14 +33,14 @@ public class ClientboundJoinedRoomPacket : IPacket<IClientPlayPacketHandler>
         RoomId = payload["roomId"]!.GetValue<int>();
         if (payload.TryGetPropertyValue("selfIndex", out var index)) 
             SelfIndex = index!.GetValue<int>();
-        Players = payload["players"]!.AsArray(AddPlayerEntry.Deserialize).ToList();
+        Players = payload["players"]!.AsArray(PlayerDataModel.Deserialize).ToList();
     }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(RoomId);
         stream.WriteOptional(SelfIndex, (s, v) => s.WriteVarInt(v));
-        stream.WriteList(Players, (s, p) => s.WriteAddPlayerEntry(p));
+        stream.WriteList(Players, (s, p) => s.WritePlayerModel(p));
     }
 
     public void Write(JsonObject obj)

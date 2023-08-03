@@ -24,6 +24,12 @@ public interface ISessionPlayer : IPlayer
     public Task UpdateSessionOptions(ServerSession session);
 
     public Task SendJoinRoomSequenceAsync(ServerSession session, int? selfIndex = null);
+    
+    /// <summary>
+    /// Invoked when the session this player in has a newly joined player.
+    /// </summary>
+    /// <param name="player">The newly joined player.</param>
+    /// <returns>The running task to complete.</returns>
     public Task OnNewPlayerJoinedSessionAsync(ISessionPlayer player);
     public Task OnPlayerLeftSessionAsync(ISessionPlayer player);
     public Task OnOtherPlayerUpdateStateAsync(ISessionPlayer player);

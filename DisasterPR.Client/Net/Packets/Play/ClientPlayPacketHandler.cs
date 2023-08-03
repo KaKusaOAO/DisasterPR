@@ -24,7 +24,7 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
             var session = Player.Session;
             if (session == null) return;
 
-            var player = new RemotePlayer(packet.PlayerId, packet.PlayerName);
+            var player = new RemotePlayer(packet.Player);
             await session.PlayerJoinAsync(player);
         }).Wait();
     }
@@ -240,14 +240,21 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
             var session = Player.Session;
             if (session == null) return;
 
-            var player = new RemotePlayer(packet.PlayerId, packet.PlayerName);
+            var player = new RemotePlayer(packet.Player);
             await session.PlayerReplaceAsync(packet.Index, player);
         }).Wait();
     }
 
+    private IEnumerable<AbstractClientPlayer> GetApplicablePlayers() => Player.Session == null
+        ? new List<AbstractClientPlayer> {Player}
+        : Player.Session.Players;
+
     public void HandleUpdatePlayerGuid(ClientboundUpdatePlayerGuidPacket packet)
     {
-        Player.Id = packet.Guid;
+        foreach (var player in GetApplicablePlayers().Where(p => p.Id == packet.OldGuid))
+        {
+            player.Id = packet.NewGuid;
+        }
     }
 
     public void HandleSystemChat(ClientboundSystemChatPacket packet)
@@ -260,8 +267,14 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
         Player.HoldingCards[packet.Index].IsLocked = packet.IsLocked;
     }
 
-    public void HandleUpdatePlayerName(ClientboundUpdatePlayerNamePacket packet)
+    public void HandleUpdatePlayerData(ClientboundUpdatePlayerDataPacket packet)
     {
-        Player.Name = packet.Name;
+        var model = packet.Player;
+        foreach (var player in GetApplicablePlayers().Where(p => p.Id == model.Guid))
+        {
+            player.Name = model.Name;
+            player.Identifier = model.Identifier;
+            player.AvatarData = model.AvatarData;
+        }
     }
 }

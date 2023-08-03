@@ -6,31 +6,37 @@ namespace DisasterPR.Net.Packets.Play;
 
 public class ClientboundUpdatePlayerGuidPacket : IPacket<IClientPlayPacketHandler>
 {
-    public Guid Guid { get; set; }
+    public Guid OldGuid { get; set; }
+    public Guid NewGuid { get; set; }
 
-    public ClientboundUpdatePlayerGuidPacket(Guid guid)
+    public ClientboundUpdatePlayerGuidPacket(Guid old, Guid current)
     {
-        Guid = guid;
+        OldGuid = old;
+        NewGuid = current;
     }
 
     public ClientboundUpdatePlayerGuidPacket(BufferReader stream)
     {
-        Guid = stream.ReadGuid();
+        OldGuid = stream.ReadGuid();
+        NewGuid = stream.ReadGuid();
     }
 
     public ClientboundUpdatePlayerGuidPacket(JsonObject payload)
     {
-        Guid = Guid.Parse(payload["id"]!.GetValue<string>());
+        OldGuid = Guid.Parse(payload["old"]!.GetValue<string>());
+        NewGuid = Guid.Parse(payload["current"]!.GetValue<string>());
     }
     
     public void Write(BufferWriter stream)
     {
-        stream.WriteGuid(Guid);
+        stream.WriteGuid(OldGuid);
+        stream.WriteGuid(NewGuid);
     }
 
     public void Write(JsonObject obj)
     {
-        obj["id"] = Guid.ToString();
+        obj["old"] = OldGuid.ToString();
+        obj["current"] = OldGuid.ToString();
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdatePlayerGuid(this);

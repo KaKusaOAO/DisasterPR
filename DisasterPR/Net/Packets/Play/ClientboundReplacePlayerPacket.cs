@@ -7,42 +7,36 @@ namespace DisasterPR.Net.Packets.Play;
 public class ClientboundReplacePlayerPacket : IPacket<IClientPlayPacketHandler>
 {
     public int Index { get; set; }
-    public Guid PlayerId { get; set; }
-    public string PlayerName { get; set; }
+    public PlayerDataModel Player { get; set; }
 
     public ClientboundReplacePlayerPacket(int index, IPlayer player)
     {
         Index = index;
-        PlayerId = player.Id;
-        PlayerName = player.Name;
+        Player = PlayerDataModel.FromPlayer(player);
     }
 
     public ClientboundReplacePlayerPacket(BufferReader stream)
     {
         Index = stream.ReadVarInt();
-        PlayerId = stream.ReadGuid();
-        PlayerName = stream.ReadUtf8String();
+        Player = stream.ReadPlayerModel();
     }
     
     public ClientboundReplacePlayerPacket(JsonObject payload)
     {
         Index = payload["index"]!.GetValue<int>();
-        PlayerId = Guid.Parse(payload["id"]!.GetValue<string>());
-        PlayerName = payload["name"]!.GetValue<string>();
+        Player = PlayerDataModel.Deserialize(payload["player"]!.AsObject());
     }
     
     public void Write(BufferWriter stream)
     {
         stream.WriteVarInt(Index);
-        stream.WriteGuid(PlayerId);
-        stream.WriteUtf8String(PlayerName);
+        stream.WritePlayerModel(Player);
     }
 
     public void Write(JsonObject obj)
     {
         obj["index"] = Index;
-        obj["id"] = PlayerId.ToString();
-        obj["name"] = PlayerName;
+        obj["player"] = Player.SerializeToJson();
     }
 
     public void Handle(IClientPlayPacketHandler handler) => handler.HandleReplacePlayer(this);

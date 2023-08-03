@@ -1,5 +1,6 @@
 using DisasterPR.Cards;
 using DisasterPR.Client.Sessions;
+using DisasterPR.Net.Packets;
 using DisasterPR.Sessions;
 
 namespace DisasterPR.Client;
@@ -20,5 +21,14 @@ public abstract class AbstractClientPlayer : IPlayer
     protected AbstractClientPlayer(string name)
     {
         Name = name;
+        Identifier = "<unknown>";
+    }
+    
+    protected AbstractClientPlayer(PlayerDataModel model)
+    {
+        Id = model.Guid;
+        Name = model.Name;
+        Identifier = model.Identifier;
+        AvatarData = model.AvatarData;
     }
 }

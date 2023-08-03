@@ -4,21 +4,21 @@ using Mochi.IO;
 
 namespace DisasterPR.Net.Packets.Play;
 
-public class ClientboundAddPlayerPacket : IPacket<IClientPlayPacketHandler>
+public class ClientboundUpdatePlayerDataPacket : IPacket<IClientPlayPacketHandler>
 {
     public PlayerDataModel Player { get; set; }
 
-    public ClientboundAddPlayerPacket(IPlayer player)
+    public ClientboundUpdatePlayerDataPacket(IPlayer player)
     {
         Player = PlayerDataModel.FromPlayer(player);
     }
 
-    public ClientboundAddPlayerPacket(BufferReader stream)
+    public ClientboundUpdatePlayerDataPacket(BufferReader stream)
     {
         Player = stream.ReadPlayerModel();
     }
-    
-    public ClientboundAddPlayerPacket(JsonObject payload)
+
+    public ClientboundUpdatePlayerDataPacket(JsonObject payload)
     {
         Player = PlayerDataModel.Deserialize(payload["player"]!.AsObject());
     }
@@ -33,5 +33,5 @@ public class ClientboundAddPlayerPacket : IPacket<IClientPlayPacketHandler>
         obj["player"] = Player.SerializeToJson();
     }
 
-    public void Handle(IClientPlayPacketHandler handler) => handler.HandleAddPlayer(this);
+    public void Handle(IClientPlayPacketHandler handler) => handler.HandleUpdatePlayerData(this);
 }
