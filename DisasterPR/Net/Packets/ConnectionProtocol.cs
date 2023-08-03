@@ -53,6 +53,7 @@ public class ConnectionProtocol
             .AddPacket(s => new ClientboundUpdatePlayerStatePacket(s), s => new ClientboundUpdatePlayerStatePacket(s))
             .AddPacket(s => new ClientboundReplacePlayerPacket(s), s => new ClientboundReplacePlayerPacket(s))
             .AddPacket(s => new ClientboundUpdatePlayerGuidPacket(s), s => new ClientboundUpdatePlayerGuidPacket(s))
+            .AddPacket(s => new ClientboundUpdatePlayerDataPacket(s), s => new ClientboundUpdatePlayerDataPacket(s))
             .AddPacket(s => new ClientboundSystemChatPacket(s), s => new ClientboundSystemChatPacket(s))
             .AddPacket(s => new ClientboundUpdateLockedWordPacket(s), s => new ClientboundUpdateLockedWordPacket(s))
         )

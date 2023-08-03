@@ -115,7 +115,17 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             Player.PlatformData = new PlainPlatformData(Player);
         } else if (packet.Type == PlayerPlatform.Discord)
         {
-            var code = packet.GetContent<DiscordLoginContent>()!.AccessToken;
+            var codeContext = Uri.UnescapeDataString(packet.GetContent<DiscordLoginContent>()!.AccessToken);
+            var noPopup = codeContext.StartsWith("1:");
+            if (!noPopup && !codeContext.StartsWith("0:"))
+            {
+                await Player.SendToastAsync("無效的 Discord 登入資訊，請重新嘗試登入。", LogLevel.Error);
+                await Connection.SendPacketAsync(new ClientboundDisconnectPacket("驗證失敗！"));
+                await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                return;
+            }
+            
+            var code = codeContext[2..];
             var client = new HttpClient();
             
             Logger.Log("Exchanging Discord access token with OAuth code...");
@@ -126,7 +136,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
                     ClientSecret = DiscordApiConstants.ClientSecret,
                     GrantType = "authorization_code",
                     Code = code,
-                    RedirectUri = DiscordApiConstants.RedirectUri
+                    RedirectUri = DiscordApiConstants.RedirectUri + (noPopup ? "?nopopup" : "")
                 }))!;
             var codePayload = new FormUrlEncodedContent(content);
         
@@ -134,6 +144,8 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             if (!result.IsSuccessStatusCode)
             {
                 Logger.Warn("Invalid Discord OAuth code! Maybe it is expired or malformed?");
+                Logger.Warn(await result.Content.ReadAsStringAsync());
+
                 await Player.SendToastAsync("Discord 登入資訊驗證失敗！請重新嘗試登入。", LogLevel.Error);
                 await Connection.SendPacketAsync(new ClientboundDisconnectPacket("驗證失敗！"));
                 await Connection.WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
@@ -179,6 +191,8 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             var arr = new byte[16];
             Array.Copy(a, 0, arr, 8, 8);
             Player.Id = new Guid(arr);
+
+            name = PlayerName.ProcessDiscordName(name);
         }
         else
         {

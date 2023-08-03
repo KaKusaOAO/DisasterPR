@@ -95,4 +95,22 @@ public static class PlayerName
         var noun = _nouns.Random();
         return $"{adjective}{color}{noun}";
     }
+
+    public static string ProcessDiscordName(string name)
+    {
+        const string normalText =
+            "A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z";
+        const string fancyText1 =
+            "𝔸,𝔹,ℂ,𝔻,𝔼,𝔽,𝔾,ℍ,𝕀,𝕁,𝕂,𝕃,𝕄,ℕ,𝕆,ℙ,ℚ,ℝ,𝕊,𝕋,𝕌,𝕍,𝕎,𝕏,𝕐,ℤ,𝕒,𝕓,𝕔,𝕕,𝕖,𝕗,𝕘,𝕙,𝕚,𝕛,𝕜,𝕝,𝕞,𝕟,𝕠,𝕡,𝕢,𝕣,𝕤,𝕥,𝕦,𝕧,𝕨,𝕩,𝕪,𝕫";
+
+        var normal = normalText.Split(',');
+        var fancy1 = fancyText1.Split(',');
+
+        for (var i = 0; i < normal.Length; i++)
+        {
+            name = name.Replace(fancy1[i], normal[i]);
+        }
+
+        return name;
+    }
 }

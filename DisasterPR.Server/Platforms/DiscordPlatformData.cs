@@ -1,4 +1,5 @@
 ﻿using DisasterPR.Server.Platforms.Discord;
+using Mochi.Utils;
 
 namespace DisasterPR.Server.Platforms;
 
@@ -18,6 +19,8 @@ public class DiscordPlatformData : IPlatformData
 
         var buffer = new MemoryStream();
         await stream.CopyToAsync(buffer);
+        
+        Logger.Info($"Downloaded avatar from {User.GetAvatarUrl()}");
         AvatarData = buffer.GetBuffer();
         Updated?.Invoke();
     }

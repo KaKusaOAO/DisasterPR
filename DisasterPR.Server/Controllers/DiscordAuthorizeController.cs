@@ -8,16 +8,18 @@ namespace DisasterPR.Server.Controllers;
 public class DiscordAuthorizeController : ControllerBase
 {
     [Route("/discord/authorize")]
-    public async Task Get(string code)
+    public async Task Get()
     {
+        var noPopup = Request.Query.ContainsKey("nopopup");
+        var code = Request.Query["code"].ToString();
+        
         // Store the code to the cookie.
         // We will use it to exchange the token later.
-        Response.Cookies.Append("access_token", code, new CookieOptions
+        var num = noPopup ? 1 : 0;
+        Response.Cookies.Append("access_token", $"{num}:" + code, new CookieOptions
         {
-            MaxAge = TimeSpan.FromSeconds(5) // response.ExpiresIn)
+            MaxAge = TimeSpan.FromSeconds(noPopup ? 30 : 5) // response.ExpiresIn)
         });
-
-        var noPopup = Request.Query.ContainsKey("nopopup");
 
         var body = Response.Body;
         var writer = new StreamWriter(body);

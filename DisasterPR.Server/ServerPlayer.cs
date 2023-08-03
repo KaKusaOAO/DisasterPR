@@ -8,6 +8,7 @@ using DisasterPR.Server.Commands.Senders;
 using DisasterPR.Server.Platforms;
 using DisasterPR.Server.Sessions;
 using DisasterPR.Sessions;
+using Mochi.Utils;
 using ISession = DisasterPR.Sessions.ISession;
 using LogLevel = Mochi.Utils.LogLevel;
 
@@ -34,6 +35,7 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
         var players = new List<ServerPlayer>();
         if (Session == null) players.Add(this);
         else players.AddRange(Session.Players.OfType<ServerPlayer>());
+        Logger.Info($"Platform data updated for {Name}. Sending updates for {players.Count} players");
 
         foreach (var player in players)
         {
