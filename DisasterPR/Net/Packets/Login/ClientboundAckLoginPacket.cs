@@ -6,13 +6,11 @@ namespace DisasterPR.Net.Packets.Login;
 
 public class ClientboundAckLoginPacket : IPacket<IClientLoginPacketHandler>
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; }
+    public PlayerDataModel Player { get; set; }
     
-    public ClientboundAckLoginPacket(Guid id, string name)
+    public ClientboundAckLoginPacket(IPlayer player)
     {
-        Id = id;
-        Name = name;
+        Player = PlayerDataModel.FromPlayer(player);
     }
     
     public ClientboundAckLoginPacket(PacketContent content)
@@ -20,27 +18,23 @@ public class ClientboundAckLoginPacket : IPacket<IClientLoginPacketHandler>
         if (content.Type == PacketContentType.Binary)
         {
             var stream = content.GetAsBufferReader();
-            Id = stream.ReadGuid();
-            Name = stream.ReadUtf8String();
+            Player = stream.ReadPlayerModel();
         }
         else // if (content.Type == PacketContentType.Json)
         {
             var obj = content.GetAsJsonObject();
-            Id = Guid.Parse(obj["id"]!.GetValue<string>());
-            Name = obj["name"]!.GetValue<string>();
+            Player = PlayerDataModel.Deserialize(obj["player"]!.AsObject());
         }
     }
     
     public void Write(BufferWriter stream)
     {
-        stream.WriteGuid(Id);
-        stream.WriteUtf8String(Name);
+        stream.WritePlayerModel(Player);
     }
 
     public void Write(JsonObject obj)
     {
-        obj["id"] = Id.ToString();
-        obj["name"] = Name;
+        obj["player"] = Player.SerializeToJson();
     }
 
     public void Handle(IClientLoginPacketHandler handler) => handler.HandleAckLogin(this);

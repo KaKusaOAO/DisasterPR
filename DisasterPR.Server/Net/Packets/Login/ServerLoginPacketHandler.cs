@@ -191,7 +191,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
             .AddWith(LiteralText.Of(name).SetColor(TextColor.Gold))
             .AddWith(LiteralText.Of(Player.Id.ToString()).SetColor(TextColor.Green))
         );
-        await Connection.SendPacketAsync(new ClientboundAckLoginPacket(Player.Id, name));
+        await Connection.SendPacketAsync(new ClientboundAckLoginPacket(Player));
         Connection.CurrentState = PacketState.Play;
         
         await Player.SendToastAsync($"歡迎，{name}！");
