@@ -57,7 +57,7 @@ public class UpstreamPackProvider : UpstreamFormatPackProvider
     private async Task<Stream> GetStreamFromFallbackAsync()
     {
         var http = new HttpClient();;
-        return await http.GetStreamAsync($"http://{Constants.ServerHost}/disasterpr/packs/upstream.json");
+        return await http.GetStreamAsync($"http://{Constants.ServerHost}/u_game/packs/upstream.json");
     }
 
     public override CardPackBuilder MakeBuilder()

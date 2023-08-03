@@ -5,4 +5,5 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;
   &lt;Assembly Path="/Applications/Unity/Hub/Editor/2021.3.21f1/Unity.app/Contents/Managed/UnityEngine.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=1e20a522_002Df57f_002D4b8c_002Da760_002D5e64946f6f37_0023DisasterPR_002EProxy/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=1e20a522_002Df57f_002D4b8c_002Da760_002D5e64946f6f37_0023DisasterPR_002EProxy/@EntryIndexedValue">True</s:Boolean>
+	</wpf:ResourceDictionary>
