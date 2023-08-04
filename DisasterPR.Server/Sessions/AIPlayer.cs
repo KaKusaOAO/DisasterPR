@@ -10,7 +10,7 @@ public class AIPlayer : ISessionPlayer
 {
     public Guid Id { get; }
     public string Name { get; }
-    public byte[]? AvatarData => null;
+    public byte[]? AvatarData { get; set; }
     public string Identifier => $"#ai:{Id}";
     public string OriginalName { get; }
     public ServerSession? Session { get; set; }
@@ -20,8 +20,8 @@ public class AIPlayer : ISessionPlayer
     public AIPlayer(ISessionPlayer player)
     {
         Id = player.Id;
-
         Name = player.Name;
+        AvatarData = player.AvatarData;
         OriginalName = player is AIPlayer ai ? ai.OriginalName : Name;
         
         if (player is ServerPlayer)
