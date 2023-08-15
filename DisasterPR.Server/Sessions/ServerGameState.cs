@@ -209,6 +209,12 @@ public class ServerGameState : IGameState
         var right = pack.GetTopicIndex(topics.Right);
         CandidateTopics = topics;
 
+        Session.RandomSeed = Random.Shared.Next();
+        foreach (var player in Session.Players.OfType<ServerPlayer>())
+        {
+            await player.Connection.SendPacketAsync(new ClientboundUpdateSessionSeedPacket(Session));
+        }
+
         await CurrentPlayer.UpdateCandidateTopicsAsync(left, right);
         await ChangeStateAndUpdateAsync(StateOfGame.ChoosingTopic);
         HasChosenFinal = false;

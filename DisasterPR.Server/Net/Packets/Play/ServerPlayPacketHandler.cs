@@ -3,6 +3,7 @@ using DisasterPR.Server.Commands;
 using DisasterPR.Server.Sessions;
 using DisasterPR.Sessions;
 using Mochi.Utils;
+using LogLevel = Mochi.Utils.LogLevel;
 
 namespace DisasterPR.Server.Net.Packets.Play;
 
@@ -51,50 +52,27 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
         {
             try
             {
-                var roomId = ServerSession.CreateNewRoomId();
-                
-                try
+                if (GameServer.Instance.TryCreateSession(out var session))
                 {
-                    var session = CreateSessionWithId(roomId);
                     await JoinSessionAsync(session);
                 }
-                catch (AggregateException ex)
+                else
                 {
-                    var inner = ex.InnerExceptions.First();
-                    var message = inner.Message;
-                    if (inner is HttpRequestException hex)
-                    {
-                        message = $"無法從伺服器取得卡包資料！ ({(int?) hex.StatusCode})";
-                    }
-                
-                    await Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(message));
-                    ServerSession.RevertRoomId();
+                    await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.NoRoomLeft);
                 }
             }
-            catch (IndexOutOfRangeException ex)
+            catch (AggregateException ex)
             {
-                Logger.Warn(ex.ToString());
-                await Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.NoRoomLeft);
+                var inner = ex.InnerExceptions.First();
+                var message = inner.Message;
+                if (inner is HttpRequestException hex)
+                {
+                    message = $"無法從伺服器取得卡包資料！ ({(int?) hex.StatusCode})";
+                }
+            
+                await Connection.SendPacketAsync(new ClientboundRoomDisconnectedPacket(message));
             }
         }).Wait();
-    }
-
-    private ServerSession CreateSessionWithId(int roomId)
-    {
-        var server = GameServer.Instance;
-        var sessions = server.Sessions;
-        Logger.Verbose($"Created room #{roomId}");
-
-        var session = new ServerSession(roomId);
-        session.Emptied += () =>
-        {
-            session.Invalidate();
-            sessions.Remove(roomId);
-            Logger.Verbose($"Removed room #{roomId}");
-        };
-            
-        sessions.Add(roomId, session);
-        return session;
     }
 
     private async Task JoinSessionAsync(ServerSession session)
@@ -123,7 +101,7 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             {
                 if (!sessions.ContainsKey(id))
                 {
-                    CreateSessionWithId(id);
+                    GameServer.Instance.GetOrCreateSession(id);
                 }
             }
             
@@ -368,6 +346,46 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
             await Player.UpdateHoldingWordsAsync(Player.HoldingCards);
             await Player.SendToastAsync("已完成洗牌！");
             Player.IsManuallyShuffled = true;
+        }).Wait();
+    }
+
+    public void HandleRequestRandomName(ServerboundRequestRandomNamePacket packet)
+    {
+        Task.Run(async () =>
+        {
+            await Player.Connection.SendPacketAsync(
+                new ClientboundRandomNameResponsePacket(packet.Nonce, PlayerName.GenerateRandomName()));
+        }).Wait();
+    }
+
+    public void HandleRequestUpdateName(ServerboundRequestUpdateNamePacket packet)
+    {
+        Task.Run(async () =>
+        {
+            var name = packet.Name;
+            if (name != null)
+            {
+                if (!PlayerName.IsValid(name))
+                {
+                    await Player.SendToastAsync("無效的名稱！", LogLevel.Error);
+                    return;
+                }
+
+                name = PlayerName.ProcessName(name);
+            }
+            else
+            {
+                name = Player.DefaultName;
+            }
+            
+            Player.Name = name;
+            await Player.Connection.SendPacketAsync(new ClientboundDismissNameChangeModalPacket());
+            await Player.SendToastAsync($"您已將名稱更改為「{name}」。");
+
+            foreach (var p in Player.GetVisiblePlayers())
+            {
+                _ = p.Connection.SendPacketAsync(new ClientboundUpdatePlayerDataPacket(Player));
+            }
         }).Wait();
     }
 }

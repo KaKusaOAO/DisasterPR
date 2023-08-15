@@ -25,32 +25,7 @@ public class ServerSession : Session<ISessionPlayer>
         set => ServerGameState = (ServerGameState) value;
     }
 
-    private static int[] _roomIds = Enumerable.Range(1000, 9000).ToArray();
-    private static int _occupiedRooms;
-    private static SemaphoreSlim _lock = new(1, 1);
-
     public event Action Emptied;
-
-    static ServerSession()
-    {
-        Logger.Info("Generating and shuffling room IDs...");
-        _roomIds.Shuffle();
-    }
-
-    public static int CreateNewRoomId()
-    {
-        _lock.Wait();
-        try
-        {
-            var room = _roomIds[_occupiedRooms];
-            _occupiedRooms++;
-            return room;
-        }
-        finally
-        {
-            _lock.Release();
-        }
-    }
 
     public ServerSession(int roomId)
     {
@@ -117,6 +92,7 @@ public class ServerSession : Session<ISessionPlayer>
             await Task.WhenAll(Players.Select(async p =>
             {
                 await p.UpdatePlayerScoreAsync(player, player.Score);
+                await player.UpdatePlayerScoreAsync(p, p.Score);
             }));
 
             player.Session = this;
@@ -272,9 +248,8 @@ public class ServerSession : Session<ISessionPlayer>
         player.Session = null;
         Players.Remove(player);
         
-        if (!Players.Any())
+        if (!Players.Any(p => p is ServerPlayer))
         {
-            Common.AcquireSemaphore(_lock, () => _occupiedRooms--);
             Emptied?.Invoke();
             return;
         }
@@ -285,11 +260,6 @@ public class ServerSession : Session<ISessionPlayer>
     public void Invalidate()
     {
         IsValid = false;
-    }
-
-    public static void RevertRoomId()
-    {
-        _occupiedRooms--;
     }
 
     public NbtCompound CreateSnapshot()

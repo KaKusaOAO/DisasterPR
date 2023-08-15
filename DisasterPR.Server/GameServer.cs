@@ -1,3 +1,4 @@
+using DisasterPR.Extensions;
 using DisasterPR.Server.Commands;
 using DisasterPR.Server.Commands.Senders;
 using DisasterPR.Server.Sessions;
@@ -79,5 +80,45 @@ public class GameServer
 
     public List<ServerPlayer> Players { get; } = new();
 
+    private static int[] _sessionIds = Enumerable.Range(1000, 9000).ToArray();
+    
     public Dictionary<int, ServerSession> Sessions { get; } = new();
+    private SemaphoreSlim _sessionLock = new(1, 1);
+    
+    public bool TryCreateSession(out ServerSession? session)
+    {
+        _sessionLock.Wait();
+        try
+        {
+            var availableIds = _sessionIds.Where(i => !Sessions.ContainsKey(i)).ToList();
+            if (!availableIds.Any())
+            {
+                session = null;
+                return false;
+            }
+
+            var id = availableIds.Shuffled().First();
+            var result = GetOrCreateSession(id);
+            Sessions[id] = result;
+            session = result;
+            return true;
+        }
+        finally
+        {
+            _sessionLock.Release();
+        }
+    }
+    
+    public ServerSession GetOrCreateSession(int roomId)
+    {
+        if (Sessions.TryGetValue(roomId, out var session)) return session;
+        var result = new ServerSession(roomId);
+        result.Emptied += () =>
+        {
+            result.Invalidate();
+            Sessions.Remove(result.RoomId);
+            Logger.Verbose($"Removed room #{result.RoomId}");
+        };
+        return result;
+    }
 }

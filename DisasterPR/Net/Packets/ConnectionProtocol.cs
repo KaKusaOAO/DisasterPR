@@ -56,6 +56,9 @@ public class ConnectionProtocol
             .AddPacket(s => new ClientboundUpdatePlayerDataPacket(s), s => new ClientboundUpdatePlayerDataPacket(s))
             .AddPacket(s => new ClientboundSystemChatPacket(s), s => new ClientboundSystemChatPacket(s))
             .AddPacket(s => new ClientboundUpdateLockedWordPacket(s), s => new ClientboundUpdateLockedWordPacket(s))
+            .AddPacket(s => new ClientboundRandomNameResponsePacket(s), s => new ClientboundRandomNameResponsePacket(s))
+            .AddPacket(_ => new ClientboundDismissNameChangeModalPacket())
+            .AddPacket(s => new ClientboundUpdateSessionSeedPacket(s), s => new ClientboundUpdateSessionSeedPacket(s))
         )
         .AddFlow(PacketFlow.Serverbound, new PacketSet()
             .AddPacket(s => new ServerboundHeartbeatPacket(s))
@@ -69,10 +72,12 @@ public class ConnectionProtocol
             .AddPacket(s => new ServerboundChooseFinalPacket(s))
             .AddPacket(s => new ServerboundRevealChosenWordEntryPacket(s))
             .AddPacket(s => new ServerboundUpdateSessionOptionsPacket(s))
-            .AddPacket(s => new ServerboundRequestKickPlayerPacket(s))
+            .AddPacket(s => new ServerboundRequestKickPlayerPacket(s), s => new ServerboundRequestKickPlayerPacket(s))
             .AddPacket(s => new ServerboundUpdatePlayerStatePacket(s))
             .AddPacket(s => new ServerboundUpdateLockedWordPacket(s))
             .AddPacket(s => new ServerboundRequestShuffleWordsPacket(s))
+            .AddPacket(s => new ServerboundRequestRandomNamePacket(s), s => new ServerboundRequestRandomNamePacket(s))
+            .AddPacket(s => new ServerboundRequestUpdateNamePacket(s), s => new ServerboundRequestUpdateNamePacket(s))
         )
     );
     

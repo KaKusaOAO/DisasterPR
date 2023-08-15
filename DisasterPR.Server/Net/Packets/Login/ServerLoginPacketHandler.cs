@@ -117,7 +117,8 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
         {
             var codeContext = Uri.UnescapeDataString(packet.GetContent<DiscordLoginContent>()!.AccessToken);
             var noPopup = codeContext.StartsWith("1:");
-            if (!noPopup && !codeContext.StartsWith("0:"))
+            var isStandalone = codeContext.StartsWith("2:");
+            if (!noPopup && !isStandalone && !codeContext.StartsWith("0:"))
             {
                 await Player.SendToastAsync("無效的 Discord 登入資訊，請重新嘗試登入。", LogLevel.Error);
                 await Connection.SendPacketAsync(new ClientboundDisconnectPacket("驗證失敗！"));
@@ -136,7 +137,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
                     ClientSecret = DiscordApiConstants.ClientSecret,
                     GrantType = "authorization_code",
                     Code = code,
-                    RedirectUri = DiscordApiConstants.RedirectUri + (noPopup ? "?nopopup" : "")
+                    RedirectUri = isStandalone ? "http://localhost:61357/" : DiscordApiConstants.RedirectUri + (noPopup ? "?nopopup" : "")
                 }))!;
             var codePayload = new FormUrlEncodedContent(content);
         
@@ -201,6 +202,7 @@ public class ServerLoginPacketHandler : IServerLoginPacketHandler
 
         Player.LoginType = packet.Type;
         Player.Name = name;
+        Player.DefaultName = name;
         Logger.Verbose(TranslateText.Of("Player %s ID is %s")
             .AddWith(LiteralText.Of(name).SetColor(TextColor.Gold))
             .AddWith(LiteralText.Of(Player.Id.ToString()).SetColor(TextColor.Green))

@@ -17,4 +17,6 @@ public interface IServerPlayPacketHandler : IServerPacketHandler
     public void HandleUpdatePlayerState(ServerboundUpdatePlayerStatePacket packet);
     public void HandleUpdateLockedWord(ServerboundUpdateLockedWordPacket packet);
     public void HandleRequestShuffleWords(ServerboundRequestShuffleWordsPacket packet);
+    public void HandleRequestRandomName(ServerboundRequestRandomNamePacket packet);
+    public void HandleRequestUpdateName(ServerboundRequestUpdateNamePacket packet);
 }

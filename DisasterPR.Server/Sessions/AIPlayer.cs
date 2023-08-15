@@ -105,13 +105,14 @@ public class AIPlayer : ISessionPlayer
             if (context.CurrentChosenWords.All(c => c.Player != this))
             {
                 var count = context.CurrentTopic.AnswerCount;
-                var list = HoldingCards.Shuffled().Take(count).ToList();
+                var list = HoldingCards.Where(h => !h.IsLocked).Shuffled().Take(count).ToList();
                 await context.ChooseWordAsync(this, list);
             }
         }
 
         if (state == StateOfGame.ChoosingFinal && context.CurrentPlayer == this)
         {
+            if (timer % 5 != 0) return;
             if (Session.ServerGameState.HasChosenFinal) return;
             
             var unrevealed = context.CurrentChosenWords.Find(w => !w.IsRevealed);

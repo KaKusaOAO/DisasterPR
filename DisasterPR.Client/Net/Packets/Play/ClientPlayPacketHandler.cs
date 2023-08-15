@@ -277,4 +277,20 @@ public class ClientPlayPacketHandler : IClientPlayPacketHandler
             player.AvatarData = model.AvatarData;
         }
     }
+
+    public void HandleRandomNameResponse(ClientboundRandomNameResponsePacket packet)
+    {
+        
+    }
+
+    public void HandleDismissNameChangeModal(ClientboundDismissNameChangeModalPacket packet)
+    {
+        
+    }
+
+    public void HandleUpdateSessionSeed(ClientboundUpdateSessionSeedPacket packet)
+    {
+        if (Player.Session == null) return;
+        Player.Session.RandomSeed = packet.Seed;
+    }
 }

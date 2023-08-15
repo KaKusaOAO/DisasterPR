@@ -9,6 +9,7 @@ public interface ISession
     public int RoomId { get; set; }
     public List<IPlayer> Players { get; set; }
     public IGameState GameState { get; set; }
+    public int RandomSeed { get; set; }
 }
 
 public interface ISession<T> : ISession where T : IPlayer

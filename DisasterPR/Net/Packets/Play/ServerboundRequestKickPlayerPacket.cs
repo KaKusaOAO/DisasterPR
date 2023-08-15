@@ -17,6 +17,11 @@ public class ServerboundRequestKickPlayerPacket : IPacket<IServerPlayPacketHandl
     {
         PlayerId = stream.ReadGuid();
     }
+
+    public ServerboundRequestKickPlayerPacket(JsonObject payload)
+    {
+        PlayerId = Guid.Parse(payload["id"]!.GetValue<string>());
+    }
     
     public void Write(BufferWriter stream)
     {

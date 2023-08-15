@@ -32,15 +32,21 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
 
     private void PlatformDataOnUpdated()
     {
-        var players = new List<ServerPlayer>();
-        if (Session == null) players.Add(this);
-        else players.AddRange(Session.Players.OfType<ServerPlayer>());
+        var players = GetVisiblePlayers();
         Logger.Info($"Platform data updated for {Name}. Sending updates for {players.Count} players");
 
         foreach (var player in players)
         {
             _ = player.Connection.SendPacketAsync(new ClientboundUpdatePlayerDataPacket(this));
         }
+    }
+
+    public List<ServerPlayer> GetVisiblePlayers()
+    {
+        var players = new List<ServerPlayer>();
+        if (Session == null) players.Add(this);
+        else players.AddRange(Session.Players.OfType<ServerPlayer>());
+        return players;
     }
 
     public string Identifier => PlatformData.Identifier;
@@ -85,6 +91,7 @@ public class ServerPlayer : ISessionPlayer, ICommandSender
     }
     
     public bool IsConnected => Connection.IsConnected;
+    public string DefaultName { get; set; }
 
     public Task SetCardPackAsync(CardPack pack) => Connection.SendPacketAsync(new ClientboundSetCardPackPacket(pack));
     public Task UpdateSessionOptions(ServerSession session) => 
