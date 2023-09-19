@@ -63,7 +63,7 @@ public class ServerSession : Session<ISessionPlayer>
             // Check if there is an existing AI player with the same name,
             // if so, replace it with the new player.
             var aiPlayers = Players.OfType<AIPlayer>().ToList();
-            var ai = aiPlayers.Find(a => a.OriginalName == player.Name);
+            var ai = aiPlayers.Find(a => a.OriginalName == player.Name || a.Id == player.Id);
             if (ai == null)
             {
                 await player.Connection.SendPacketAsync(ClientboundRoomDisconnectedPacket.RoomPlaying);

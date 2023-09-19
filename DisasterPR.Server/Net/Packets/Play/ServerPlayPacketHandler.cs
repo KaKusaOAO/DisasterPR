@@ -324,6 +324,24 @@ public class ServerPlayPacketHandler : IServerPlayPacketHandler
 
         if (Player.Session.GameState.CurrentState != StateOfGame.ChoosingWord)
         {
+            if (Player.Session.GameState.CurrentState == StateOfGame.ChoosingTopic)
+            {
+                Task.Run(async () =>
+                {
+                    if (Player.IsManuallyShuffled)
+                    {
+                        await Player.SendErrorMessageAsync("你已經刷新過題目了。");
+                        return;
+                    }
+            
+                    ((ISessionPlayer) Player).ShuffleHoldingCards();
+                    await Player.UpdateHoldingWordsAsync(Player.HoldingCards);
+                    await Player.SendToastAsync("題目已刷新！");
+                    Player.IsManuallyShuffled = true;
+                }).Wait();
+                return;
+            }
+            
             Logger.Warn("Attempt to shuffle words at the wrong time");
             return;
         }

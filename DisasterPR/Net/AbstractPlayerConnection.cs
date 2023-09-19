@@ -132,8 +132,8 @@ public abstract class AbstractPlayerConnection
                         throw new Exception("Unknown content type!");
                     }
 
-                    Logger.Verbose(TranslateText.Of("Received packet: %s")
-                        .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
+                    // Logger.Verbose(TranslateText.Of("Received packet: %s")
+                    //     .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
 
                     try
                     {
@@ -160,7 +160,7 @@ public abstract class AbstractPlayerConnection
             }
         }
 
-        Logger.Info("Disposing WebSocket");
+        // Logger.Info("Disposing WebSocket");
         WebSocket.Dispose();
         await _disconnectedEvent.InvokeAsync(async e =>
         {
@@ -184,8 +184,8 @@ public abstract class AbstractPlayerConnection
         var protocol = ConnectionProtocol.OfState(CurrentState);
         await RawPacketIO.SendPacketAsync(protocol, ReceivingFlow.Opposite(), packet, token);
         
-        Logger.Verbose(TranslateText.Of("Sent packet: %s")
-            .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
+        // Logger.Verbose(TranslateText.Of("Sent packet: %s")
+        //     .AddWith(Text.RepresentType(packet.GetType(), TextColor.Gold)));
     }
 
     public async Task SendPacketAsync(IPacket packet) => await SendPacketAsync(packet, CancellationToken.None);
